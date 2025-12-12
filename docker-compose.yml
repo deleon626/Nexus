@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL
+  postgres:
+    image: supabase/postgres:15.1.0.117
+    container_name: nexus-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./shared/database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for session cache
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Supabase Studio (optional GUI)
+  studio:
+    image: supabase/studio:20231123-64ab854
+    container_name: nexus-studio
+    ports:
+      - "3000:3000"
+    environment:
+      SUPABASE_URL: http://localhost:54321
+      POSTGRES_CONNECTION_STRING: postgresql://postgres:postgres@postgres:5432/postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:

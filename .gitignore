@@ -1,0 +1,43 @@
+# Environment variables
+.env
+.env.local
+backend/.env
+web/.env
+
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/dist/
+backend/build/
+
+# Node
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+postgres-data/
+storage-data/
+redis-data/
+
+# Misc
+.claude/

@@ -26,9 +26,14 @@ mobile/.flutter-plugins-dependencies
 # IDE
 .vscode/
 .idea/
+.cursor/
+.windsurfrules
 *.swp
 *.swo
 *.swn
+
+# Design tools
+.superdesign/
 
 # OS
 .DS_Store

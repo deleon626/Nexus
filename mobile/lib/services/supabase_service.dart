@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/constants.dart';
 
@@ -21,7 +22,7 @@ class SupabaseService {
     final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
     await client.storage
         .from('report-images')
-        .uploadBinary(fileName, bytes);
+        .uploadBinary(fileName, Uint8List.fromList(bytes));
 
     return client.storage.from('report-images').getPublicUrl(fileName);
   }

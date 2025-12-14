@@ -46,3 +46,4 @@ redis-data/
 
 # Misc
 .claude/
+.specify/

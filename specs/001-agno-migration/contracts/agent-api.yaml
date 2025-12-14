@@ -1,0 +1,290 @@
+openapi: 3.1.0
+info:
+  title: Nexus Agent API
+  description: AI Agent endpoints for QC data processing
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+
+paths:
+  /sessions/{session_id}/messages:
+    post:
+      operationId: sendMessage
+      summary: Send a message to the AI agent
+      description: |
+        Sends a message (with optional images) to the AI agent for processing.
+        The agent may extract QC data from images and trigger confirmation modals.
+      tags:
+        - Agent
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentMessageRequest'
+      responses:
+        '200':
+          description: Agent response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMessageResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Session not found
+        '502':
+          description: AI model unavailable
+
+  /sessions/{session_id}/messages/stream:
+    post:
+      operationId: sendMessageStream
+      summary: Send a message with streaming response
+      description: |
+        Same as sendMessage but returns a Server-Sent Events stream.
+        Use this for real-time response display.
+      tags:
+        - Agent
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentMessageRequest'
+      responses:
+        '200':
+          description: Streaming response
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE stream of agent response chunks
+
+  /sessions/{session_id}/modal:
+    get:
+      operationId: getConfirmationModal
+      summary: Get pending confirmation modal
+      description: |
+        Poll for pending confirmation data. Returns the extracted QC data
+        that requires user confirmation before commit.
+      tags:
+        - Confirmation
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Confirmation modal data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationModalData'
+        '204':
+          description: No pending confirmation
+        '404':
+          description: Session not found
+
+    post:
+      operationId: submitConfirmation
+      summary: Submit confirmation response
+      description: |
+        Submit user's confirmation or rejection of extracted data.
+        If confirmed, triggers data commit. If rejected, discards data.
+      tags:
+        - Confirmation
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmationRequest'
+      responses:
+        '200':
+          description: Confirmation processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationResult'
+        '400':
+          description: Invalid request or no pending confirmation
+        '404':
+          description: Session not found
+
+components:
+  schemas:
+    AgentMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          description: User message text
+          example: "Here's the scale reading for batch B-2024-001"
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageInput'
+          description: Attached images for vision processing
+
+    ImageInput:
+      type: object
+      description: Image input (provide either url or base64)
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Public URL to image
+          example: "https://storage.example.com/scale-image.jpg"
+        base64:
+          type: string
+          description: Base64-encoded image data
+          example: "data:image/jpeg;base64,/9j/4AAQ..."
+
+    AgentMessageResponse:
+      type: object
+      required:
+        - session_id
+        - content
+        - role
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+          description: Agent response text
+        role:
+          type: string
+          enum: [assistant]
+        tool_calls:
+          type: array
+          items:
+            type: object
+          description: Tools called during processing
+        has_pending_confirmation:
+          type: boolean
+          description: True if confirmation modal was triggered
+
+    ConfirmationModalData:
+      type: object
+      required:
+        - confirmation_id
+        - session_id
+        - schema_id
+        - extracted_data
+        - created_at
+        - expires_at
+        - status
+      properties:
+        confirmation_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        schema_id:
+          type: string
+          format: uuid
+        extracted_data:
+          type: object
+          additionalProperties: true
+          description: Data extracted by agent
+          example:
+            weight: 1250
+            unit: "kg"
+            batch_id: "B-2024-001"
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, confirmed, rejected]
+
+    ConfirmationRequest:
+      type: object
+      required:
+        - confirmed
+      properties:
+        confirmed:
+          type: boolean
+          description: True to confirm, false to reject
+        modifications:
+          type: object
+          additionalProperties: true
+          description: User corrections to extracted data
+          example:
+            weight: 1255  # Corrected value
+
+    ConfirmationResult:
+      type: object
+      required:
+        - success
+        - action
+      properties:
+        success:
+          type: boolean
+        action:
+          type: string
+          enum: [committed, rejected]
+        report_id:
+          type: string
+          format: uuid
+          description: Created report ID (if committed)
+        audit_event_id:
+          type: string
+          format: uuid
+          description: Audit trail event ID
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

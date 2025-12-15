@@ -5,7 +5,9 @@ from contextlib import asynccontextmanager
 from app.config import settings
 from app.db.supabase_client import init_supabase
 from app.db.redis_client import init_redis, close_redis
+from app.db.sqlite import init_db, close_db
 from app.api.sessions import router as sessions_router
+from app.api.stt import router as stt_router
 
 
 @asynccontextmanager
@@ -13,10 +15,12 @@ async def lifespan(app: FastAPI):
     # Startup
     init_supabase()
     await init_redis()
+    await init_db()  # Initialize SQLite database
     print("✓ Application startup complete")
     yield
     # Shutdown
     await close_redis()
+    await close_db()  # Close SQLite connections
     print("✓ Application shutdown complete")
 
 
@@ -44,6 +48,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(sessions_router)
+app.include_router(stt_router)
 
 
 @app.get("/")

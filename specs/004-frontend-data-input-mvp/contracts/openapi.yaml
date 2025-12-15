@@ -1,0 +1,371 @@
+openapi: 3.1.0
+info:
+  title: Nexus QC Data Input MVP API
+  description: API for QC data input via text/voice with AI agent processing
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /api/sessions:
+    post:
+      summary: Create a new session
+      description: Creates a new agent conversation session
+      operationId: createSession
+      tags:
+        - Sessions
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionCreatedResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/sessions/{session_id}:
+    delete:
+      summary: Delete a session
+      description: Deletes an existing session and its associated data
+      operationId: deleteSession
+      tags:
+        - Sessions
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/sessions/{session_id}/messages:
+    post:
+      summary: Send a message to the agent
+      description: Sends a text message to the AI agent for processing
+      operationId: sendMessage
+      tags:
+        - Messages
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentMessageRequest'
+      responses:
+        '200':
+          description: Message processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMessageResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Model provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/sessions/{session_id}/modal:
+    get:
+      summary: Get pending confirmation modal
+      description: Retrieves the pending confirmation modal data for a session
+      operationId: getModal
+      tags:
+        - Confirmation
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Confirmation modal data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationModalData'
+        '404':
+          description: No pending confirmation found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/sessions/{session_id}/modal/confirm:
+    post:
+      summary: Submit confirmation response
+      description: Confirms or rejects the extracted data
+      operationId: confirmModal
+      tags:
+        - Confirmation
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmationRequest'
+      responses:
+        '200':
+          description: Confirmation processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No pending confirmation found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/stt/transcribe:
+    post:
+      summary: Transcribe audio to text
+      description: Transcribes audio file using OpenAI Whisper API
+      operationId: transcribeAudio
+      tags:
+        - Speech-to-Text
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Audio file (webm, mp3, wav, m4a)
+      responses:
+        '200':
+          description: Audio transcribed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionResponse'
+        '400':
+          description: Invalid audio file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Whisper API unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    SessionId:
+      name: session_id
+      in: path
+      required: true
+      description: Unique session identifier
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    SessionCreatedResponse:
+      type: object
+      required:
+        - session_id
+        - message
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the created session
+        message:
+          type: string
+          description: Confirmation message
+
+    AgentMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          description: Message content to send to the agent
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageInput'
+          description: Optional images to include (not used in MVP)
+
+    ImageInput:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL of the image
+        base64:
+          type: string
+          description: Base64-encoded image data
+      description: Image input (either url or base64 required)
+
+    AgentMessageResponse:
+      type: object
+      required:
+        - session_id
+        - content
+        - role
+        - has_pending_confirmation
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+          description: Agent response text
+        role:
+          type: string
+          enum: [assistant]
+        tool_calls:
+          type: array
+          items:
+            type: object
+          default: []
+        has_pending_confirmation:
+          type: boolean
+          description: Whether a confirmation modal is pending
+
+    ConfirmationModalData:
+      type: object
+      required:
+        - confirmation_id
+        - session_id
+        - extracted_data
+        - status
+        - created_at
+        - expires_at
+      properties:
+        confirmation_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        schema_id:
+          type: string
+          format: uuid
+          nullable: true
+        extracted_data:
+          type: object
+          additionalProperties: true
+          description: AI-extracted QC data values
+        status:
+          type: string
+          enum: [pending, confirmed, rejected, expired]
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+
+    ConfirmationRequest:
+      type: object
+      required:
+        - confirmed
+      properties:
+        confirmed:
+          type: boolean
+          description: Whether to confirm (true) or reject (false) the data
+        modifications:
+          type: object
+          additionalProperties: true
+          description: Optional modified values to override extracted data
+
+    ConfirmationResponse:
+      type: object
+      required:
+        - message
+        - status
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+          enum: [confirmed, rejected]
+        report_id:
+          type: string
+          format: uuid
+          description: Created report ID (only if confirmed)
+
+    TranscriptionResponse:
+      type: object
+      required:
+        - transcript
+      properties:
+        transcript:
+          type: string
+          description: Transcribed text from audio
+
+    MessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+
+tags:
+  - name: Sessions
+    description: Session lifecycle management
+  - name: Messages
+    description: Agent message handling
+  - name: Confirmation
+    description: Human-in-the-loop confirmation flow
+  - name: Speech-to-Text
+    description: Voice transcription service

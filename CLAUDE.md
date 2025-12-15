@@ -331,6 +331,8 @@ See `docs/NEXT_STEPS.md` for implementation priority and detailed task breakdown
 - Supabase (PostgreSQL) for persistent data and authentication
 - TypeScript 5.2.2, React 18.2.0 + shadcn/ui (CLI), Radix UI primitives, clsx, tailwind-merge (003-shadcn-setup)
 - N/A (UI library setup) (003-shadcn-setup)
+- Python 3.11+ (Backend), TypeScript 5.2+ (Frontend) (004-frontend-data-input-mvp)
+- SQLite (local file `backend/data/nexus.db`) - MVP simplification from Supabase (004-frontend-data-input-mvp)
 
 ## Recent Changes
 - 001-agno-migration: Migrated from Anthropic SDK to Agno framework with OpenRouter

@@ -1,6 +1,8 @@
 import './App.css'
 import React from 'react'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import ApprovalQueue from './pages/ApprovalQueue'
+import { DataEntry } from './pages/DataEntry'
 import { ThemeToggle } from './components/ThemeToggle'
 
 function App() {
@@ -17,12 +19,37 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
+    <BrowserRouter>
+      <div className="min-h-screen bg-background text-foreground">
+        <header className="border-b border-border bg-card">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <nav className="flex items-center gap-6">
+              <Link to="/" className="text-lg font-semibold">Nexus QC</Link>
+              <Link
+                to="/data-entry"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Data Entry
+              </Link>
+              <Link
+                to="/approval-queue"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Approval Queue
+              </Link>
+            </nav>
+            <ThemeToggle />
+          </div>
+        </header>
+        <main>
+          <Routes>
+            <Route path="/" element={<DataEntry />} />
+            <Route path="/data-entry" element={<DataEntry />} />
+            <Route path="/approval-queue" element={<ApprovalQueue />} />
+          </Routes>
+        </main>
       </div>
-      <ApprovalQueue />
-    </div>
+    </BrowserRouter>
   )
 }
 

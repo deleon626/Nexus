@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Nexus** is an AI-powered Quality Control (QC) & Traceability System. Field operators capture QC data via voice and images using a mobile app or web interface, while an AI agent (Claude SDK) assists with data extraction and validation. Supervisors review and approve submissions through a web dashboard. The system maintains complete audit trails for compliance.
+**Nexus** is an AI-powered Quality Control (QC) & Traceability System. Field operators capture QC data via voice and images using a mobile app or web interface, while an AI agent (Agno framework via OpenRouter) assists with data extraction and validation. Supervisors review and approve submissions through a web dashboard. The system maintains complete audit trails for compliance.
 
-**Architecture**: Full-stack with Flutter (mobile), React+TypeScript (web dashboard), Python FastAPI (backend), Supabase (PostgreSQL + Auth + Storage), Redis (session cache), and Claude SDK (agent orchestration).
+**Architecture**: Full-stack with Flutter (mobile), React+TypeScript (web dashboard), Python FastAPI (backend), Supabase (PostgreSQL + Auth + Storage), Redis (session cache), and Agno framework with OpenRouter (agent orchestration).
 
 ## Bash Commands
 
@@ -100,10 +100,10 @@ nexus/
 **Layered Structure**:
 - **API Layer** (`app/api/`): HTTP endpoints. Keep routes thin; delegate to services
 - **Service Layer** (`app/services/`): Business logic and orchestration
-  - `agent_service.py`: Claude SDK client, system prompt, tool calls
+  - `agent_service.py`: Agno Agent with OpenRouter model, system prompt, tool registration
   - `session_service.py`: Session lifecycle, Redis context storage
   - `stt_service.py`: Speech-to-text via Whisper API
-- **Tool Layer** (`app/tools/`): Agent tool implementations (validation, data commit)
+- **Tool Layer** (`app/tools/`): Agno `@tool` decorated functions (confirmation, commit)
 - **DB Layer** (`app/db/`): Supabase and Redis clients (initialized at app startup)
 - **Models** (`app/models/`): Pydantic schemas for validation and serialization
 
@@ -112,7 +112,7 @@ nexus/
 - Dependency injection via FastAPI's `Depends()`
 - Pydantic for validation and API contracts
 - Redis for transient session state; Supabase for persistent data
-- Tools called by Claude agent; results update Redis and trigger client fetches
+- Agno tools called by agent; `stop_after_tool_call=True` for Human-in-the-Loop confirmation
 
 ### Frontend Architecture
 
@@ -129,19 +129,46 @@ nexus/
 
 **State Management**: Supabase Realtime subscriptions for live approval queue; React hooks for local UI state.
 
-### Agent Service Flow
+### Agent Service Flow (Agno Framework)
 
 ```
 1. Client sends message + image to POST /api/sessions/{id}/messages
 2. Session Service fetches session context from Redis
-3. Agent Service builds prompt from schema + context
-4. Claude SDK (with vision) processes message + images
+3. AgentService builds Agno Agent with OpenRouter model + tools
+4. Agno Agent (with vision via agno.media.Image) processes message + images
 5. Agent may call tools:
-   - show_confirmation_modal: stores data in Redis
+   - show_confirmation_modal: stores data in Redis, stop_after_tool_call=True pauses agent
    - commit_qc_data: inserts into Supabase + creates audit event
 6. Client polls GET /api/sessions/{id}/modal for confirmation data
-7. Client submits confirmation → Agent continues or ends session
+7. Client submits confirmation → handle_confirmation() invokes commit_qc_data
 8. Session state persisted in Redis throughout
+```
+
+### Agno Tool Pattern
+
+Tools use the `@tool` decorator from `agno.tools`:
+
+```python
+from agno.tools import tool
+
+@tool(
+    name="show_confirmation_modal",
+    description="Show confirmation modal to user",
+    stop_after_tool_call=True,  # Pauses agent for Human-in-the-Loop
+)
+def show_confirmation_modal(session_id: str, schema_id: str, extracted_data: dict) -> str:
+    # Implementation stores in Redis, returns confirmation ID
+    ...
+```
+
+Tool invocation pattern (when calling directly, not via agent):
+```python
+# Agno wraps tools in Function objects
+result = show_confirmation_modal.entrypoint(
+    session_id=session_id,
+    schema_id=schema_id,
+    extracted_data=data
+)
 ```
 
 ## Code Style & Conventions
@@ -216,12 +243,12 @@ nexus/
 4. Use hooks for Realtime subscriptions if needed
 5. Style with Tailwind classes
 
-### Extending the Agent
-1. Add system prompt context in `agent_service.py` (schema definitions)
-2. Define tool in `app/tools/` with Pydantic input schema
-3. Register tool in agent's `tools` parameter
-4. Implement handler logic (validation, commit to DB)
-5. Test with agent test cases
+### Extending the Agent (Agno Framework)
+1. Define tool in `app/tools/` using `@tool` decorator from `agno.tools`
+2. Use type hints and docstrings for automatic schema generation
+3. Set `stop_after_tool_call=True` for tools requiring user confirmation
+4. Register tool in `AgentService.__init__()` `tools` list
+5. Test with `pytest` - call via `.entrypoint()` when testing directly
 
 ## Testing
 
@@ -236,7 +263,11 @@ nexus/
 ## Environment Variables
 
 See `.env` files (excluded from git):
-- `backend/.env`: `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`, `REDIS_URL`
+- `backend/.env`:
+  - `OPENROUTER_API_KEY`: OpenRouter API key for model access
+  - `OPENROUTER_MODEL_ID`: Model identifier (default: `anthropic/claude-3.5-sonnet`)
+  - `SUPABASE_URL`, `SUPABASE_KEY`: Supabase connection
+  - `REDIS_URL`: Redis connection string
 - `web/.env`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 
 Load via pydantic-settings (backend) and Vite's `import.meta.env` (frontend).
@@ -244,7 +275,7 @@ Load via pydantic-settings (backend) and Vite's `import.meta.env` (frontend).
 ## Key Dependencies
 
 **Backend**:
-- `anthropic>=0.75.0`: Claude SDK for agent + vision
+- `agno>=1.4.5`: AI agent framework with tool support
 - `fastapi>=0.124.2`: Web framework
 - `pydantic>=2.12.5`: Data validation
 - `supabase>=2.25.1`: Database client
@@ -259,12 +290,14 @@ Load via pydantic-settings (backend) and Vite's `import.meta.env` (frontend).
 
 ## Common Gotchas
 
-1. **Agent tool names**: Tool functions must match names in tool schemas; Claude SDK calls them by name
+1. **Agno tool invocation**: Tools are wrapped in Function objects; call via `.entrypoint()` when invoking directly
 2. **Session context**: Always fetch from Redis before agent processing; save after tool execution
 3. **CORS**: Backend CORS middleware whitelists localhost:5173 (Vite). Update for production URLs
 4. **Async/await**: Don't forget `await` on async functions; check all service calls
 5. **Supabase RLS**: If queries return no data, check RLS policies match authenticated user's role/facility
-6. **Image handling**: Vision API expects base64 or URLs; format correctly in agent_service._build_user_content()
+6. **Image handling**: Use `agno.media.Image(url=...)` or `Image(content=base64_data)` for vision
+7. **OpenRouter model ID**: Format must be `provider/model-name` (e.g., `anthropic/claude-3.5-sonnet`)
+8. **Human-in-the-Loop**: `stop_after_tool_call=True` on confirmation tool ensures agent pauses for user approval
 
 ## Git Workflow
 
@@ -291,8 +324,15 @@ Focus on single schema, scale reading, voice input, and approval queue:
 See `docs/NEXT_STEPS.md` for implementation priority and detailed task breakdown.
 
 ## Active Technologies
-- Python 3.11+ + Agno framework, FastAPI 0.124+, Pydantic v2, Redis 7.x (001-agno-migration)
-- Supabase (PostgreSQL) for persistent data, Redis for session state (001-agno-migration)
+- Python 3.11+ with Agno framework 1.4.5+ for AI agent orchestration
+- OpenRouter as model gateway (supports Claude, GPT-4, etc.)
+- FastAPI 0.124+ with Pydantic v2 for API layer
+- Redis 7.x for session state and confirmation modal storage
+- Supabase (PostgreSQL) for persistent data and authentication
 
 ## Recent Changes
-- 001-agno-migration: Added Python 3.11+ + Agno framework, FastAPI 0.124+, Pydantic v2, Redis 7.x
+- 001-agno-migration: Migrated from Anthropic SDK to Agno framework with OpenRouter
+  - Added `agno>=1.4.5` for agent framework
+  - Implemented tools with `@tool` decorator and `stop_after_tool_call` support
+  - Added model validation for OpenRouter model ID format
+  - Full test coverage for agent service, tools, and confirmation flow

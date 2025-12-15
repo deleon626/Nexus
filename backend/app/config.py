@@ -3,9 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False
     )
 
     # API Configuration
@@ -21,9 +19,9 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     redis_session_ttl: int = 3600
 
-    # Claude API
-    anthropic_api_key: str
-    claude_model: str = "claude-3-5-sonnet-20241022"
+    # OpenRouter Configuration (Agno framework)
+    openrouter_api_key: str
+    openrouter_model_id: str = "anthropic/claude-3.5-sonnet"
     claude_max_tokens: int = 4096
 
     # Whisper API

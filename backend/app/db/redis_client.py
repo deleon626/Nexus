@@ -1,20 +1,22 @@
+from typing import Optional
+
 import redis.asyncio as redis
 from app.config import settings
 
-redis_client: redis.Redis = None
+redis_client: Optional[redis.Redis] = None
 
 
-async def init_redis():
+async def init_redis() -> redis.Redis:
+    """Initialize and return the Redis client."""
     global redis_client
     redis_client = await redis.from_url(
-        settings.redis_url,
-        encoding="utf-8",
-        decode_responses=True
+        settings.redis_url, encoding="utf-8", decode_responses=True
     )
     return redis_client
 
 
-async def close_redis():
+async def close_redis() -> None:
+    """Close the Redis connection."""
     if redis_client:
         await redis_client.close()
 

@@ -329,6 +329,8 @@ See `docs/NEXT_STEPS.md` for implementation priority and detailed task breakdown
 - FastAPI 0.124+ with Pydantic v2 for API layer
 - Redis 7.x for session state and confirmation modal storage
 - Supabase (PostgreSQL) for persistent data and authentication
+- TypeScript 5.2.2, React 18.2.0 + shadcn/ui (CLI), Radix UI primitives, clsx, tailwind-merge (003-shadcn-setup)
+- N/A (UI library setup) (003-shadcn-setup)
 
 ## Recent Changes
 - 001-agno-migration: Migrated from Anthropic SDK to Agno framework with OpenRouter

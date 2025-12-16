@@ -2,14 +2,16 @@
 Sessions API
 
 Handles agent conversation sessions, message processing, and confirmation modals.
+Uses SQLite for persistent storage and in-memory store for session context.
 """
 
-import json
 import logging
+from datetime import datetime
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.agent import (
     AgentMessageRequest,
@@ -19,19 +21,87 @@ from app.models.agent import (
     MessageRole,
 )
 from app.services.agent_service import AgentService, AgentError, ModelError
-from app.db.redis_client import get_redis
-import redis.asyncio as redis
+from app.services.session_service import SessionService
+from app.db.sqlite import get_db
+from app.db.memory_store import memory_store
 
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 
-async def get_agent_service(
-    redis_client: redis.Redis = Depends(get_redis),
-) -> AgentService:
-    """Dependency to provide initialized AgentService."""
-    return AgentService(redis_client)
+def get_session_service(db: AsyncSession = Depends(get_db)) -> SessionService:
+    """Dependency to provide SessionService with database session."""
+    return SessionService(db)
+
+
+def get_agent_service() -> AgentService:
+    """Dependency to provide initialized AgentService with memory store."""
+    return AgentService(memory_store)
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+async def create_session(
+    session_service: SessionService = Depends(get_session_service),
+):
+    """
+    Create a new agent session.
+
+    Returns:
+        New session ID and metadata
+    """
+    try:
+        session_id = await session_service.create_session()
+
+        # Initialize session context in memory store
+        memory_store.set_session_context(session_id, {
+            "session_id": session_id,
+            "messages": [],
+            "schema_id": None,
+            "created_at": datetime.utcnow().isoformat(),
+        })
+
+        return {
+            "session_id": session_id,
+            "message": "Session created successfully",
+        }
+    except Exception as e:
+        logger.error(f"Failed to create session: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create session",
+        )
+
+
+@router.delete("/{session_id}")
+async def delete_session(
+    session_id: UUID,
+    session_service: SessionService = Depends(get_session_service),
+):
+    """
+    Delete an agent session.
+
+    Args:
+        session_id: Session identifier
+
+    Returns:
+        Success message
+    """
+    session_id_str = str(session_id)
+
+    # Delete from SQLite
+    deleted = await session_service.delete_session(session_id_str)
+
+    # Also delete from memory store
+    memory_store.delete_session_context(session_id_str)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found",
+        )
+
+    return {"message": "Session deleted successfully"}
 
 
 @router.post("/{session_id}/messages", response_model=AgentMessageResponse)
@@ -60,10 +130,14 @@ async def send_message(
             images=request.images,
         )
 
+        # Check if there's a pending confirmation for this session
+        has_pending = memory_store.get_session_confirmation(str(session_id)) is not None
+
         return AgentMessageResponse(
             session_id=session_id,
             content=response_content,
             role=MessageRole.ASSISTANT,
+            has_pending_confirmation=has_pending,
         )
 
     except ModelError as e:
@@ -119,16 +193,12 @@ async def send_message_stream(
 
 
 @router.get("/{session_id}/modal", response_model=ConfirmationModalData)
-async def get_confirmation_modal(
-    session_id: UUID,
-    redis_client: redis.Redis = Depends(get_redis),
-):
+async def get_confirmation_modal(session_id: UUID):
     """
     Retrieve pending confirmation modal data for a session.
 
     Args:
         session_id: Session identifier
-        redis_client: Redis client dependency
 
     Returns:
         Confirmation modal data if available
@@ -136,18 +206,24 @@ async def get_confirmation_modal(
     Raises:
         HTTPException: 404 if no pending confirmation found
     """
-    redis_key = f"modal:{session_id}"
-    modal_json = await redis_client.get(redis_key)
+    modal_data = memory_store.get_session_confirmation(str(session_id))
 
-    if not modal_json:
+    if not modal_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No pending confirmation found",
         )
 
     try:
-        modal_data = ConfirmationModalData.model_validate_json(modal_json)
-        return modal_data
+        return ConfirmationModalData(
+            confirmation_id=modal_data["confirmation_id"],
+            session_id=modal_data["session_id"],
+            schema_id=modal_data.get("schema_id"),
+            extracted_data=modal_data["extracted_data"],
+            status="pending",
+            created_at=modal_data["created_at"],
+            expires_at=modal_data["expires_at"],
+        )
     except Exception as e:
         logger.error(f"Failed to parse modal data: {e}")
         raise HTTPException(
@@ -160,7 +236,7 @@ async def get_confirmation_modal(
 async def confirm_modal(
     session_id: UUID,
     request: ConfirmationRequest,
-    redis_client: redis.Redis = Depends(get_redis),
+    session_service: SessionService = Depends(get_session_service),
 ):
     """
     User confirms or rejects the confirmation modal.
@@ -168,46 +244,54 @@ async def confirm_modal(
     Args:
         session_id: Session identifier
         request: Confirmation request with user's decision
-        redis_client: Redis client dependency
 
     Returns:
-        Success message
+        Success message with status and optional report_id
 
     Raises:
         HTTPException: 404 if no pending confirmation found
     """
-    redis_key = f"modal:{session_id}"
-    modal_json = await redis_client.get(redis_key)
+    session_id_str = str(session_id)
+    modal_data = memory_store.get_session_confirmation(session_id_str)
 
-    if not modal_json:
+    if not modal_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No pending confirmation found",
         )
 
     try:
-        modal_data = ConfirmationModalData.model_validate_json(modal_json)
+        confirmation_id = modal_data["confirmation_id"]
 
-        # Update status based on user confirmation
         if request.confirmed:
-            modal_data.status = "confirmed"
             # Apply modifications if provided
+            final_data = modal_data["extracted_data"].copy()
             if request.modifications:
-                modal_data.extracted_data.update(request.modifications)
+                final_data.update(request.modifications)
+
+            # Create report in database
+            report_id = await session_service.create_report(
+                session_id=session_id_str,
+                confirmation_id=confirmation_id,
+                data=final_data,
+            )
+
+            # Delete the confirmation
+            memory_store.delete_confirmation(confirmation_id)
+
+            return {
+                "message": "Data confirmed and saved",
+                "status": "confirmed",
+                "report_id": report_id,
+            }
         else:
-            modal_data.status = "rejected"
+            # User rejected - just delete the confirmation
+            memory_store.delete_confirmation(confirmation_id)
 
-        # Update Redis with new status
-        await redis_client.setex(
-            redis_key,
-            900,  # Keep for 15 minutes
-            modal_data.model_dump_json(),
-        )
-
-        return {
-            "message": "Confirmation processed successfully",
-            "status": modal_data.status,
-        }
+            return {
+                "message": "Confirmation rejected",
+                "status": "rejected",
+            }
 
     except Exception as e:
         logger.error(f"Failed to process confirmation: {e}")
@@ -215,62 +299,3 @@ async def confirm_modal(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Confirmation processing failed",
         )
-
-
-@router.post("", status_code=status.HTTP_201_CREATED)
-async def create_session(redis_client: redis.Redis = Depends(get_redis)):
-    """
-    Create a new agent session.
-
-    Args:
-        redis_client: Redis client dependency
-
-    Returns:
-        New session ID and metadata
-    """
-    session_id = uuid4()
-    session_context = {
-        "session_id": str(session_id),
-        "messages": [],
-        "schema_id": None,
-        "created_at": None,
-    }
-
-    redis_key = f"session:{session_id}"
-    await redis_client.setex(
-        redis_key,
-        3600,  # 1 hour TTL
-        json.dumps(session_context),
-    )
-
-    return {
-        "session_id": session_id,
-        "message": "Session created successfully",
-    }
-
-
-@router.delete("/{session_id}")
-async def delete_session(
-    session_id: UUID,
-    redis_client: redis.Redis = Depends(get_redis),
-):
-    """
-    Delete an agent session.
-
-    Args:
-        session_id: Session identifier
-        redis_client: Redis client dependency
-
-    Returns:
-        Success message
-    """
-    redis_key = f"session:{session_id}"
-    deleted = await redis_client.delete(redis_key)
-
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found",
-        )
-
-    return {"message": "Session deleted successfully"}

@@ -77,9 +77,16 @@ export function useModalPolling({
       setError(null);
     } catch (err) {
       // 404 is expected when no modal exists yet, don't treat as error
-      if (err instanceof Error && !err.message.includes('404')) {
-        console.error('Modal polling error:', err);
-        setError(err.message);
+      // Backend returns "No pending confirmation found" or "Not Found" for 404
+      if (err instanceof Error) {
+        const msg = err.message.toLowerCase();
+        const isExpected404 = msg.includes('404') ||
+                              msg.includes('not found') ||
+                              msg.includes('no pending');
+        if (!isExpected404) {
+          console.error('Modal polling error:', err);
+          setError(err.message);
+        }
       }
     }
   }, [sessionId, stopPolling, onModalReady]);

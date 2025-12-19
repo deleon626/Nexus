@@ -13,12 +13,12 @@ from agno.agent import Agent
 from agno.models.openrouter import OpenRouter
 from agno.media import Image
 from agno.exceptions import ModelProviderError
-import redis.asyncio as redis
 
 from app.config import settings
 from app.models.agent import ImageInput, ConfirmationRequest
 from app.tools.confirmation import show_confirmation_modal
 from app.tools.commit import commit_qc_data
+from app.db.memory_store import MemoryStore
 
 
 logger = logging.getLogger(__name__)
@@ -79,17 +79,17 @@ class AgentService:
                 "Both provider and model name must be non-empty"
             )
 
-    def __init__(self, redis_client: redis.Redis) -> None:
+    def __init__(self, memory_store: MemoryStore) -> None:
         """
         Initialize agent service.
 
         Args:
-            redis_client: Redis client for session state management
+            memory_store: Memory store for session state management
 
         Raises:
             ModelError: If agent initialization fails
         """
-        self.redis = redis_client
+        self.memory_store = memory_store
 
         # Validate model ID format before initialization
         self._validate_model_id(settings.openrouter_model_id)
@@ -151,7 +151,7 @@ When you extract data from images or voice:
 
     async def _load_session_context(self, session_id: str) -> dict:
         """
-        Load session context from Redis.
+        Load session context from memory store.
 
         Args:
             session_id: Session identifier
@@ -159,11 +159,10 @@ When you extract data from images or voice:
         Returns:
             Session context dictionary
         """
-        redis_key = f"session:{session_id}"
-        context_json = await self.redis.get(redis_key)
+        context = self.memory_store.get_session_context(session_id)
 
-        if context_json:
-            return json.loads(context_json)
+        if context:
+            return context
         else:
             # Initialize new session context
             return {
@@ -175,18 +174,13 @@ When you extract data from images or voice:
 
     async def _save_session_context(self, session_id: str, context: dict) -> None:
         """
-        Save session context to Redis.
+        Save session context to memory store.
 
         Args:
             session_id: Session identifier
             context: Session context dictionary
         """
-        redis_key = f"session:{session_id}"
-        await self.redis.setex(
-            redis_key,
-            settings.redis_session_ttl,
-            json.dumps(context, default=str),
-        )
+        self.memory_store.set_session_context(session_id, context)
 
     async def process_message(
         self,
@@ -351,18 +345,16 @@ When you extract data from images or voice:
             context = await self._load_session_context(session_id)
 
             if confirmation_request.confirmed:
-                # User confirmed - retrieve confirmation ID from Redis modal data
-                modal_key = f"modal:{session_id}"
-                confirmation_json = await self.redis.get(modal_key)
+                # User confirmed - retrieve confirmation ID from memory store
+                confirmation_data = self.memory_store.get_session_confirmation(session_id)
 
-                if not confirmation_json:
+                if not confirmation_data:
                     raise AgentError(
                         f"No pending confirmation found for session {session_id}. "
                         "Confirmation may have expired."
                     )
 
-                # Parse confirmation data to get confirmation_id
-                confirmation_data = json.loads(confirmation_json)
+                # Get confirmation_id from confirmation data
                 confirmation_id = confirmation_data.get("confirmation_id")
 
                 if not confirmation_id:
@@ -405,9 +397,10 @@ When you extract data from images or voice:
                 )
                 await self._save_session_context(session_id, context)
 
-                # Clear the modal from Redis
-                modal_key = f"modal:{session_id}"
-                await self.redis.delete(modal_key)
+                # Clear the modal from memory store
+                confirmation_data = self.memory_store.get_session_confirmation(session_id)
+                if confirmation_data:
+                    self.memory_store.delete_confirmation(confirmation_data["confirmation_id"])
 
                 return rejection_message
 

@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Nexus** is an AI-powered Quality Control (QC) & Traceability System. Field operators capture QC data via voice and images using the web interface, while an AI agent (Agno framework via OpenRouter) assists with data extraction and validation. Supervisors review and approve submissions through a web dashboard. The system maintains complete audit trails for compliance.
+**Nexus** is an AI-powered Quality Control (QC) & Traceability System. Field operators capture QC data via voice and images using a mobile app or web interface, while an AI agent (Agno framework via OpenRouter) assists with data extraction and validation. Supervisors review and approve submissions through a web dashboard. The system maintains complete audit trails for compliance.
 
-**Architecture**: Full-stack with React+TypeScript (web dashboard), Python FastAPI (backend), Supabase (PostgreSQL + Auth + Storage), Redis (session cache), and Agno framework with OpenRouter (agent orchestration).
+**Architecture**: Full-stack with Flutter (mobile), React+TypeScript (web dashboard), Python FastAPI (backend), Supabase (PostgreSQL + Auth + Storage), Redis (session cache), and Agno framework with OpenRouter (agent orchestration).
 
 ## Bash Commands
 
@@ -32,6 +32,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `docker-compose up`: Start all services (PostgreSQL, Redis, Supabase Studio)
 - `docker-compose down -v`: Stop services and remove volumes (WARNING: deletes data)
 - `psql -h localhost -U postgres -d postgres`: Connect to PostgreSQL
+
+### Mobile (Flutter)
+- `cd mobile && flutter run`: Run on connected device/simulator
+- `flutter doctor`: Check Flutter environment
 
 ## Project Structure
 
@@ -64,6 +68,15 @@ nexus/
 │   ├── tsconfig.json                # TypeScript config
 │   ├── vite.config.ts               # Vite bundler config
 │   └── tailwind.config.js           # Tailwind CSS config
+│
+├── mobile/                           # Flutter mobile app
+│   ├── lib/
+│   │   ├── main.dart                # Entry point
+│   │   ├── screens/                 # UI screens
+│   │   ├── services/                # API/agent services
+│   │   └── models/                  # Data models
+│   ├── pubspec.yaml                 # Flutter deps
+│   └── pubspec.lock                 # Dependency lock
 │
 ├── shared/                           # Shared resources
 │   └── database/

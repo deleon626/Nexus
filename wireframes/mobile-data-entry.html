@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=375, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Data Entry - Mobile Wireframe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        success: '#22C55E',
+                        warning: '#EAB308',
+                        error: '#EF4444',
+                        neutral: '#9CA3AF'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Mobile frame styling */
+        .mobile-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        .state-btn.active {
+            background-color: #3B82F6;
+            color: white;
+        }
+        /* Recording animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .recording .pulse-ring {
+            animation: pulse-ring 1.5s ease-out infinite;
+        }
+        /* Typing indicator */
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        .typing-dot {
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen p-4 md:p-8">
+    <!-- State Selector -->
+    <div class="max-w-4xl mx-auto mb-6">
+        <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <h1 class="font-semibold text-gray-900">Data Entry Screen</h1>
+                <a href="index.html" class="text-primary hover:underline text-sm">Back to Index</a>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Select a state to preview the screen in different scenarios</p>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="showState('empty')" class="state-btn active px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Empty State</button>
+                <button onclick="showState('image-uploaded')" class="state-btn px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Image Uploaded</button>
+                <button onclick="showState('recording')" class="state-btn px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Recording Voice</button>
+                <button onclick="showState('processing')" class="state-btn px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Agent Processing</button>
+                <button onclick="showState('response')" class="state-btn px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Agent Response</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Frame Container -->
+    <div class="flex justify-center">
+        <div class="mobile-frame bg-white border-8 border-gray-900 relative">
+            <!-- Status Bar -->
+            <div class="bg-gray-900 text-white px-6 py-2 flex justify-between items-center text-xs">
+                <span>9:41</span>
+                <div class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 18c3.31 0 6-2.69 6-6V6c0-3.31-2.69-6-6-6S6 2.69 6 6v6c0 3.31 2.69 6 6 6z"/></svg>
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+
+            <!-- App Header -->
+            <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+                <button class="p-1 -ml-1">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <div class="flex-1">
+                    <h1 class="font-semibold text-gray-900">New QC Report</h1>
+                    <p class="text-xs text-gray-500">Shrimp Harvest - Batch Entry</p>
+                </div>
+                <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="h-[580px] overflow-y-auto bg-gray-50 flex flex-col">
+                <!-- Image Upload Section -->
+                <div class="p-4 bg-white border-b border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-gray-700">Scale Image</span>
+                        <span id="image-badge" class="text-xs text-gray-500 hidden">1 of 2</span>
+                    </div>
+
+                    <!-- Image Slots -->
+                    <div class="flex gap-3">
+                        <!-- Slot 1 -->
+                        <div id="image-slot-1" class="flex-1 aspect-square rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                            <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-xs text-gray-500">Tap to capture</span>
+                        </div>
+                        <!-- Slot 2 -->
+                        <div id="image-slot-2" class="flex-1 aspect-square rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 flex flex-col items-center justify-center cursor-pointer hover:border-gray-300 transition-colors opacity-50">
+                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span class="text-xs text-gray-400">Optional</span>
+                        </div>
+                    </div>
+
+                    <!-- Image Type Selector -->
+                    <div class="mt-3">
+                        <label class="text-xs text-gray-500 mb-1 block">Image Type</label>
+                        <div class="relative">
+                            <select class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                <option selected>Scale Reading</option>
+                                <option disabled>Form (OCR Parse) - Phase 2</option>
+                                <option disabled>Label/Barcode - Phase 2</option>
+                                <option disabled>Custom - Phase 2</option>
+                            </select>
+                            <svg class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Description Field -->
+                    <div class="mt-3">
+                        <label class="text-xs text-gray-500 mb-1 block">Description (optional)</label>
+                        <input type="text" placeholder="Add context for the AI agent..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                    </div>
+                </div>
+
+                <!-- Chat Window -->
+                <div id="chat-window" class="flex-1 p-4 space-y-3">
+                    <!-- System Message -->
+                    <div class="flex justify-center">
+                        <span class="px-3 py-1 bg-gray-200 rounded-full text-xs text-gray-600">Session started</span>
+                    </div>
+
+                    <!-- Agent Welcome -->
+                    <div class="flex items-start gap-2">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <p class="text-sm text-gray-800">Hello! I'm ready to help you record QC data. Please capture a photo of the scale, then tell me what you'd like to record.</p>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Chat Content -->
+                    <div id="chat-content"></div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="text-input" placeholder="Type a message..." class="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20">
+
+                    <!-- Voice Button -->
+                    <button id="voice-btn" class="relative w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
+                        <div class="pulse-ring absolute inset-0 bg-primary rounded-full opacity-0"></div>
+                        <svg id="mic-icon" class="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                        <svg id="stop-icon" class="w-6 h-6 text-white relative z-10 hidden" fill="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                        </svg>
+                    </button>
+                </div>
+                <p id="voice-hint" class="text-center text-xs text-gray-400 mt-2">Hold to speak</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- State Annotations -->
+    <div class="max-w-4xl mx-auto mt-6">
+        <div id="annotation" class="bg-white rounded-lg p-4 shadow-sm">
+            <h3 class="font-semibold text-gray-900 mb-2">State: Empty</h3>
+            <p class="text-sm text-gray-600">Initial state when the operator opens a new data entry session. The agent has sent a welcome message and is waiting for the user to capture a scale image and provide voice/text input.</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">No images uploaded</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">Agent idle</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">Voice ready</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State configurations
+        const states = {
+            'empty': {
+                title: 'State: Empty',
+                description: 'Initial state when the operator opens a new data entry session. The agent has sent a welcome message and is waiting for the user to capture a scale image and provide voice/text input.',
+                tags: ['No images uploaded', 'Agent idle', 'Voice ready'],
+                imageSlot1: 'empty',
+                chatContent: '',
+                recording: false,
+                voiceHint: 'Hold to speak'
+            },
+            'image-uploaded': {
+                title: 'State: Image Uploaded',
+                description: 'The operator has captured a photo of the weighing scale. The image is displayed in the first slot. The operator can now provide voice/text instructions to the agent.',
+                tags: ['Scale image captured', 'Ready for input', 'OCR pending'],
+                imageSlot1: 'filled',
+                chatContent: `
+                    <div class="flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <div class="w-full aspect-video bg-gray-900/20 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-white/90">1,250</div>
+                                    <div class="text-xs text-white/70">kg</div>
+                                </div>
+                            </div>
+                            <p class="text-sm">Scale photo uploaded</p>
+                        </div>
+                    </div>
+                `,
+                recording: false,
+                voiceHint: 'Hold to speak'
+            },
+            'recording': {
+                title: 'State: Recording Voice',
+                description: 'The operator is holding the voice button and speaking their command. Visual feedback shows the recording is active with a pulsing animation.',
+                tags: ['Recording active', 'Voice capturing', 'Real-time feedback'],
+                imageSlot1: 'filled',
+                chatContent: `
+                    <div class="flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <div class="w-full aspect-video bg-gray-900/20 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-white/90">1,250</div>
+                                    <div class="text-xs text-white/70">kg</div>
+                                </div>
+                            </div>
+                            <p class="text-sm">Scale photo uploaded</p>
+                        </div>
+                    </div>
+                `,
+                recording: true,
+                voiceHint: 'Recording... Release to send'
+            },
+            'processing': {
+                title: 'State: Agent Processing',
+                description: 'The operator has sent their voice command. The speech has been transcribed and sent to the agent. The agent is now processing the image and extracting data.',
+                tags: ['Voice transcribed', 'AI processing', 'Data extraction'],
+                imageSlot1: 'filled',
+                chatContent: `
+                    <div class="flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <div class="w-full aspect-video bg-gray-900/20 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-white/90">1,250</div>
+                                    <div class="text-xs text-white/70">kg</div>
+                                </div>
+                            </div>
+                            <p class="text-sm">Scale photo uploaded</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-3">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <p class="text-sm">"Record this weight for Pond 3, batch SHP-2024-0892"</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2 mt-3">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                            <div class="flex gap-1">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                recording: false,
+                voiceHint: 'Hold to speak'
+            },
+            'response': {
+                title: 'State: Agent Response',
+                description: 'The agent has extracted data from the scale image and voice command. It presents the extracted data summary and prompts the user to confirm before proceeding to the confirmation modal.',
+                tags: ['Data extracted', 'Ready for confirmation', 'Modal trigger'],
+                imageSlot1: 'filled',
+                chatContent: `
+                    <div class="flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <div class="w-full aspect-video bg-gray-900/20 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-white/90">1,250</div>
+                                    <div class="text-xs text-white/70">kg</div>
+                                </div>
+                            </div>
+                            <p class="text-sm">Scale photo uploaded</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-3">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2 shadow-sm max-w-[80%]">
+                            <p class="text-sm">"Record this weight for Pond 3, batch SHP-2024-0892"</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2 mt-3">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[80%]">
+                            <p class="text-sm text-gray-800 mb-3">I've extracted the following data from your scale image and voice input:</p>
+                            <div class="bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Weight</span>
+                                    <span class="font-medium text-gray-900">1,250 kg</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Pond ID</span>
+                                    <span class="font-medium text-gray-900">Pond-03</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Batch Number</span>
+                                    <span class="font-medium text-gray-900">SHP-2024-0892</span>
+                                </div>
+                            </div>
+                            <button onclick="window.location.href='confirmation-modal.html'" class="mt-3 w-full bg-primary text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                                Review & Confirm
+                            </button>
+                        </div>
+                    </div>
+                `,
+                recording: false,
+                voiceHint: 'Hold to speak'
+            }
+        };
+
+        function showState(stateName) {
+            const state = states[stateName];
+
+            // Update buttons
+            document.querySelectorAll('.state-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(stateName.split('-')[0])) {
+                    btn.classList.add('active');
+                }
+            });
+            document.querySelectorAll('.state-btn').forEach((btn, i) => {
+                const stateKeys = Object.keys(states);
+                if (stateKeys[i] === stateName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update image slot
+            const slot1 = document.getElementById('image-slot-1');
+            const badge = document.getElementById('image-badge');
+            if (state.imageSlot1 === 'filled') {
+                slot1.innerHTML = `
+                    <div class="w-full h-full bg-gray-900 rounded-xl flex items-center justify-center relative">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-white">1,250</div>
+                            <div class="text-sm text-white/70">kg</div>
+                        </div>
+                        <div class="absolute top-2 right-2 w-6 h-6 bg-success rounded-full flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+                slot1.classList.remove('border-dashed', 'border-gray-300', 'hover:border-primary', 'hover:bg-primary/5');
+                slot1.classList.add('border-solid', 'border-transparent');
+                badge.classList.remove('hidden');
+            } else {
+                slot1.innerHTML = `
+                    <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-xs text-gray-500">Tap to capture</span>
+                `;
+                slot1.classList.add('border-dashed', 'border-gray-300', 'hover:border-primary', 'hover:bg-primary/5');
+                slot1.classList.remove('border-solid', 'border-transparent');
+                badge.classList.add('hidden');
+            }
+
+            // Update chat content
+            document.getElementById('chat-content').innerHTML = state.chatContent;
+
+            // Update voice button
+            const voiceBtn = document.getElementById('voice-btn');
+            const micIcon = document.getElementById('mic-icon');
+            const stopIcon = document.getElementById('stop-icon');
+            const voiceHint = document.getElementById('voice-hint');
+
+            if (state.recording) {
+                voiceBtn.classList.add('recording', 'bg-error');
+                voiceBtn.classList.remove('bg-primary');
+                micIcon.classList.add('hidden');
+                stopIcon.classList.remove('hidden');
+            } else {
+                voiceBtn.classList.remove('recording', 'bg-error');
+                voiceBtn.classList.add('bg-primary');
+                micIcon.classList.remove('hidden');
+                stopIcon.classList.add('hidden');
+            }
+            voiceHint.textContent = state.voiceHint;
+
+            // Update annotation
+            document.getElementById('annotation').innerHTML = `
+                <h3 class="font-semibold text-gray-900 mb-2">${state.title}</h3>
+                <p class="text-sm text-gray-600">${state.description}</p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                    ${state.tags.map(tag => `<span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">${tag}</span>`).join('')}
+                </div>
+            `;
+
+            // Scroll chat to bottom
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Initialize
+        showState('empty');
+    </script>
+</body>
+</html>

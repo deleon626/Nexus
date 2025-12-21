@@ -500,7 +500,7 @@ All actions are captured as immutable events:
 
 | Layer | Technology | Rationale |
 |-------|------------|-----------|
-| Web Client | React + TypeScript | Responsive web interface for data entry |
+| Mobile Client | React Native / Flutter | Cross-platform, offline capable |
 | Web Dashboard | React + TypeScript | Supervisor approval interface |
 | API Layer | Node.js (Express) or Python (FastAPI) | Agent orchestration, tool execution |
 | AI Agent | Claude SDK (Anthropic) | Native vision + tool-use support |
@@ -614,7 +614,7 @@ POST   /api/schemas/:id/activate        # Set schema to active
 - All image types (forms, labels, custom)
 - External OCR API integration
 - Revision workflow
-- Progressive Web App (PWA) support
+- Mobile app (iOS + Android)
 - Offline draft support
 
 ### Phase 3: Scale (Weeks 15-20)

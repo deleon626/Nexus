@@ -25,6 +25,16 @@ npm run dev
 ```
 **Opens**: http://localhost:5173 automatically
 
+### Terminal 4: Mobile (Flutter) - Optional
+```bash
+# First, ensure Flutter is installed
+flutter doctor
+
+# Then run
+cd ~/Documents/Cursor\ Workspaces/Nexus/mobile
+flutter run
+```
+
 ## Service URLs
 
 | Service | URL | Purpose |
@@ -113,6 +123,11 @@ psql -h localhost -U postgres -d postgres -c "SELECT 1"
 2. Verify backend is running: `curl http://localhost:8000/health`
 3. Check for CORS errors and verify backend CORS config
 
+### Mobile Can't Connect to Backend
+- **Android Emulator**: Ensure code uses `10.0.2.2` (not `localhost`)
+- **iOS Simulator**: Use `localhost` or computer's IP
+- **Physical Device**: Use computer's local network IP (e.g., `192.168.1.x`)
+
 ## Git Commands
 
 ```bash
@@ -136,6 +151,7 @@ git checkout -b feature/feature-name
 |-----------|-----------|--------|------|
 | Backend | `backend/app/main.py` | `backend/.env` | 8000 |
 | Web | `web/src/App.tsx` | `web/.env` | 5173 |
+| Mobile | `mobile/lib/main.dart` | `mobile/lib/utils/constants.dart` | - |
 | Database | `shared/database/migrations/` | Docker Compose | 5432 |
 
 ## Development Tips
@@ -143,10 +159,12 @@ git checkout -b feature/feature-name
 ### Hot Reload
 - **Backend**: Automatic with `--reload` flag
 - **Web**: Automatic in Vite dev mode
+- **Mobile**: Press `r` in terminal for hot reload
 
 ### Debugging
 - **Backend**: Add `import pdb; pdb.set_trace()` in Python
 - **Web**: Use React DevTools browser extension
+- **Mobile**: Use `flutter attach` or Android Studio debugger
 
 ### Code Quality
 ```bash
@@ -200,7 +218,8 @@ psql -h localhost -U postgres -d postgres -c "SELECT pid, query, state FROM pg_s
 
 1. **Implement Phase 1 Features**:
    - Backend: Agent service with Claude SDK
-   - Web: Approval workflow and data input
+   - Web: Approval workflow
+   - Mobile: Camera and voice input
 
 2. **Add API Endpoints**:
    - Session management

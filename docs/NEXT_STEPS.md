@@ -107,65 +107,6 @@ The environment is fully set up. Time to implement Phase 1 features.
 - needs_revision (orange)
 ```
 
-### Mobile App (Priority: MEDIUM)
-
-#### 1. Camera Service (`mobile/lib/services/camera_service.dart`)
-```dart
-// Implement:
-- Initialize camera
-- Capture image
-- Save to gallery
-- Error handling
-```
-
-#### 2. Image Upload Service (`mobile/lib/services/image_upload_service.dart`)
-```dart
-// Implement:
-- Upload to Supabase Storage
-- Generate public URL
-- Handle errors
-- Progress tracking
-```
-
-#### 3. Session Service (`mobile/lib/services/session_service.dart`)
-```dart
-// Key methods:
-- createSession(schemaId) → sessionId
-- sendMessage(sessionId, message, images) → agentResponse
-- pollForModal(sessionId) → modalData
-- submitReport(sessionId, confirmData) → reportId
-- sendVoiceMessage(sessionId, audioFile) → agentResponse
-```
-
-#### 4. Data Entry Screen Enhancements (`mobile/lib/screens/data_entry_screen.dart`)
-```dart
-// Implement:
-- Camera integration
-- Image upload
-- Voice recording button
-- Real message sending to backend
-- Modal display + user interaction
-```
-
-#### 5. Confirmation Modal Widget (`mobile/lib/widgets/confirmation_modal.dart`)
-```dart
-// Display:
-- Extracted field values
-- Validation status icons
-- Confidence scores
-- Correction input
-- Confirm/Modify buttons
-```
-
-#### 6. Voice Recording Widget (`mobile/lib/widgets/voice_input_button.dart`)
-```dart
-// Implement:
-- Record audio
-- Show recording indicator
-- Upload to Supabase
-- Handle permissions
-```
-
 ## Implementation Priority
 
 ### Week 1: Backend + Basic Web Integration
@@ -178,17 +119,7 @@ The environment is fully set up. Time to implement Phase 1 features.
 6. Connect Web Dashboard
 ```
 
-### Week 2: Mobile + Polish
-```
-1. Image Upload Service
-2. Session Service
-3. Camera Integration
-4. Voice Recording
-5. Data Entry Screen
-6. End-to-end testing
-```
-
-### Week 3: Refinement + Testing
+### Week 2: Refinement + Testing
 ```
 1. Error handling
 2. Edge cases
@@ -291,20 +222,10 @@ cd backend && uv run pytest
 cd web && npm run test
 ```
 
-### Mobile Tests
-```bash
-# Widget tests for confirmation modal
-# Service tests for session management
-# Integration tests for camera
-
-# Run with:
-cd mobile && flutter test
-```
-
 ### Integration Tests
 ```
 End-to-end flow:
-1. Mobile captures image
+1. User captures/uploads image via web
 2. Uploads to backend
 3. Agent extracts data
 4. Modal shown to user
@@ -402,7 +323,6 @@ DELETE /api/sessions/{session_id}
 - **Claude SDK**: https://github.com/anthropics/anthropic-sdk-python
 - **Supabase Docs**: https://supabase.com/docs
 - **React Hooks**: https://react.dev/reference/react
-- **Flutter Docs**: https://flutter.dev/docs
 
 ---
 

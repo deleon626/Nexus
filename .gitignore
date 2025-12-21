@@ -21,12 +21,6 @@ web/node_modules/
 web/dist/
 web/.vite/
 
-# Flutter
-mobile/.dart_tool/
-mobile/build/
-mobile/.flutter-plugins
-mobile/.flutter-plugins-dependencies
-
 # IDE
 .vscode/
 .idea/

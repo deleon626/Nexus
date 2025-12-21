@@ -6,7 +6,6 @@ A comprehensive, modern design system for the Nexus QC & Traceability platform. 
 
 The design system defines the visual foundation for all Nexus applications including:
 - **Web Dashboard** (React + TypeScript)
-- **Mobile App** (Flutter)
 - **Backend Services** (visual consistency in reports/exports)
 
 This document serves as the reference guide. The actual CSS design tokens are defined in `web/src/styles/design-tokens.css`.

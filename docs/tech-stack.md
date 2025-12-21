@@ -9,15 +9,15 @@ With Supabase self-hosted as the data platform, here's the consolidated architec
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        CLIENT LAYER                             │
-│  ┌────────────────────┐       ┌────────────────────┐           │
-│  │   Mobile App       │       │   Web Dashboard    │           │
-│  │   (Flutter)        │       │   (React + TS)     │           │
-│  │   • Camera/Voice   │       │   • Approval Queue │           │
-│  │   • Offline SQLite │       │   • Schema Designer│           │
-│  └─────────┬──────────┘       └─────────┬──────────┘           │
-└────────────┼────────────────────────────┼───────────────────────┘
-             │                            │
-             ▼                            ▼
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │                  Web Dashboard                             │ │
+│  │                  (React + TS)                              │ │
+│  │   • Data Entry  • Approval Queue  • Schema Designer       │ │
+│  │   • Responsive design for mobile access                   │ │
+│  └────────────────────────────────────┬───────────────────────┘ │
+└─────────────────────────────────────────┼───────────────────────┘
+                                          │
+                                          ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      API LAYER                                  │
 │  ┌─────────────────────────────────────────────────────────┐   │
@@ -62,8 +62,7 @@ With Supabase self-hosted as the data platform, here's the consolidated architec
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Mobile Client** | Flutter | Cross-platform app for field operators (camera, voice, offline) |
-| **Web Dashboard** | React + TypeScript | Supervisor approval queue, schema designer, analytics |
+| **Web Dashboard** | React + TypeScript | Data entry, supervisor approval queue, schema designer, analytics (responsive for mobile) |
 | **API Layer** | Python + FastAPI | Agent orchestration, tool execution, business logic |
 | **AI Agent** | Claude SDK (Anthropic) | Conversational agent with vision + tool-use |
 | **Speech-to-Text** | OpenAI Whisper API | Voice input transcription |
@@ -143,25 +142,7 @@ reports = supabase.table("reports").select("*").eq("status", "pending").execute(
 supabase.realtime.channel("reports").on("INSERT", handle_new_report).subscribe()
 ```
 
-### 2. Flutter ↔ Supabase
-
-```dart
-// Direct client connection with user auth
-final supabase = Supabase.instance.client;
-
-// Auth
-await supabase.auth.signInWithPassword(email: email, password: password);
-
-// Real-time (approval status updates)
-supabase.from('reports').stream(primaryKey: ['id']).listen((data) {
-  // Update UI when report status changes
-});
-
-// Storage upload
-await supabase.storage.from('report-images').upload(path, file);
-```
-
-### 3. React Dashboard ↔ Supabase
+### 2. React Dashboard ↔ Supabase
 
 ```typescript
 // Real-time approval queue
@@ -218,7 +199,7 @@ supabase
 
 | Phase | Stack Components Active |
 |-------|------------------------|
-| **Phase 1 (MVP)** | Flutter + FastAPI + Supabase (core) + Claude + Whisper |
+| **Phase 1 (MVP)** | React Web + FastAPI + Supabase (core) + Claude + Whisper |
 | **Phase 2 (Enhanced)** | + TimescaleDB extension + External OCR + Schema Designer |
 | **Phase 3 (Scale)** | + Multi-facility RLS policies + Analytics dashboards + Anomaly detection |
 

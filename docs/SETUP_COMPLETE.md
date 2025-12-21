@@ -2,7 +2,7 @@
 
 ## Setup Summary
 
-Your complete local development environment has been successfully initialized! All three components (Backend, Web Dashboard, Mobile App) are ready for development.
+Your complete local development environment has been successfully initialized! Both components (Backend and Web Dashboard) are ready for development.
 
 ## What Was Created
 
@@ -43,18 +43,6 @@ nexus/
 │   ├── postcss.config.js      # PostCSS config
 │   ├── .env                   # Environment variables
 │   └── node_modules/          # Dependencies installed ✓
-│
-├── mobile/                     # Flutter
-│   ├── lib/
-│   │   ├── main.dart          # App entry + data entry screen (READY)
-│   │   ├── services/
-│   │   │   └── supabase_service.dart  # Database operations (READY)
-│   │   ├── screens/           # UI screens (structure ready)
-│   │   ├── widgets/           # Reusable widgets (structure ready)
-│   │   ├── models/            # Data models (structure ready)
-│   │   └── utils/
-│   │       └── constants.dart # App constants (READY)
-│   └── pubspec.yaml           # Flutter dependencies
 │
 ├── shared/
 │   └── database/
@@ -155,39 +143,7 @@ npm run dev
 - Approve/Reject functionality
 - Report detail view
 - Status indicators
-
-## Mobile App (Flutter)
-
-**Status**: ✓ Project structure ready
-
-**Core Files Ready**:
-- ✓ `lib/main.dart` - App entry + basic data entry screen
-- ✓ `lib/services/supabase_service.dart` - Database operations
-- ✓ `lib/utils/constants.dart` - Configuration
-- ✓ `pubspec.yaml` - Dependencies configured
-
-**To Initialize Flutter** (if not already installed):
-```bash
-# Install Flutter
-brew install --cask flutter
-
-# Verify installation
-flutter doctor
-
-# Cd to mobile directory
-cd mobile
-
-# Get dependencies
-flutter pub get
-
-# Run on iOS Simulator
-flutter run
-
-# Run on Android Emulator
-flutter run
-```
-
-**Note**: Flutter dependencies in `pubspec.yaml` are configured but not yet downloaded. Run `flutter pub get` when Flutter is installed.
+- Responsive design for mobile browser access
 
 ## Database (PostgreSQL + Supabase)
 
@@ -247,9 +203,6 @@ cd backend && uv run uvicorn app.main:app --reload
 
 # Terminal 3 - Web Dashboard
 cd web && npm run dev
-
-# Terminal 4 - Mobile (when Flutter is installed)
-cd mobile && flutter run
 ```
 
 ### Verify All Services
@@ -283,9 +236,7 @@ psql -h localhost -U postgres -d postgres -c "SELECT count(*) FROM pg_tables WHE
   - [ ] Real-time approval queue updates
   - [ ] Approve/reject report actions
   - [ ] Report detail view
-
-- [ ] **Mobile**:
-  - [ ] Camera integration
+  - [ ] Data entry interface with camera and voice
   - [ ] Image upload to Supabase Storage
   - [ ] Voice recording and transcription
   - [ ] Chat interface for agent interaction
@@ -330,20 +281,15 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Mobile (Android Emulator)
-- Use `10.0.2.2` instead of `localhost` for backend
-- Already configured in `constants.dart`
-
 ## Project Statistics
 
 | Component    | Files Created | Status        |
 |--------------|---------------|---------------|
 | Backend      | 7 core files  | ✓ Ready       |
 | Web          | 10+ files     | ✓ Ready       |
-| Mobile       | 4 core files  | ✓ Ready       |
 | Docker       | 1 file        | ✓ Running     |
 | Database     | 1 migration   | ✓ Applied     |
-| **Total**    | **23+ files** | **✓ Complete**|
+| **Total**    | **19+ files** | **✓ Complete**|
 
 ## Time Invested
 - Directory structure: 5 min
@@ -351,14 +297,12 @@ npm install
 - Database schema: 5 min
 - Backend (FastAPI, UV, config, clients): 20 min
 - Web (Vite, React, TypeScript, config): 25 min
-- Mobile (Flutter structure, services): 15 min
-- **Total: ~80 minutes of setup**
+- **Total: ~65 minutes of setup**
 
 ## What's Working Now
 
 ✓ Backend API server (ready to start)
-✓ Web dashboard (ready to start)
-✓ Mobile app structure (ready to configure Flutter)
+✓ Web dashboard with responsive mobile support (ready to start)
 ✓ Database schema (ready to use)
 ✓ Docker services (running/ready)
 ✓ All dependencies installed
@@ -395,11 +339,9 @@ To start building Phase 1 features:
    - Authentication flow
    - Real-time report updates
    - Report detail expansion
-
-4. **Mobile Features**:
-   - Camera integration
-   - Voice recording
-   - API communication
+   - Camera integration for mobile browsers
+   - Voice recording via Web APIs
+   - Responsive data entry interface
 
 ## Documentation Files
 
@@ -412,6 +354,6 @@ To start building Phase 1 features:
 
 **Setup completed successfully!** ✨
 
-All components are initialized and ready for development. Start the services in separate terminals and begin building Phase 1 features.
+All components are initialized and ready for development. The web dashboard is built with responsive design to support mobile browser access for field operators. Start the services in separate terminals and begin building Phase 1 features.
 
 For questions or issues, refer to the implementation plan or troubleshooting section above.

@@ -113,16 +113,58 @@ export function useModalPolling({
 
   // Auto-start polling when enabled
   useEffect(() => {
-    if (enabled && sessionId && !modalData) {
-      startPolling();
-    } else if (!enabled) {
-      stopPolling();
+    if (!enabled || !sessionId || modalData) {
+      // Stop polling if disabled or no session or modal already received
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setIsPolling(false);
+      return;
     }
 
-    return () => {
-      stopPolling();
+    // Start polling
+    setIsPolling(true);
+    setError(null);
+
+    // Check immediately
+    const doCheck = async () => {
+      if (!sessionId || !pollingEnabledRef.current) return;
+
+      try {
+        const modal = await getConfirmationModal(sessionId);
+        if (modal) {
+          const expiresAt = new Date(modal.expires_at).getTime();
+          if (Date.now() > expiresAt) {
+            setError('Confirmation modal has expired. Please try again.');
+            return;
+          }
+          setModalData(modal);
+          onModalReady?.(modal);
+        }
+        setError(null);
+      } catch (err) {
+        if (err instanceof Error) {
+          const msg = err.message.toLowerCase();
+          const isExpected404 = msg.includes('404') || msg.includes('not found') || msg.includes('no pending');
+          if (!isExpected404) {
+            console.error('Modal polling error:', err);
+            setError(err.message);
+          }
+        }
+      }
     };
-  }, [enabled, sessionId, modalData, startPolling, stopPolling]);
+
+    doCheck();
+    intervalRef.current = setInterval(doCheck, pollInterval);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [enabled, sessionId, modalData, pollInterval, onModalReady]);
 
   return {
     modalData,

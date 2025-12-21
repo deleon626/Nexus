@@ -175,15 +175,7 @@ export function DataEntry() {
           </>
         )}
 
-        {/* Polling Indicator */}
-        {isPolling && !modalData && (
-          <div className="absolute bottom-24 right-6 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 shadow-lg">
-            <div className="flex items-center gap-2 text-sm text-blue-700">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <span>Checking for confirmation...</span>
-            </div>
-          </div>
-        )}
+{/* Polling happens silently in the background - no indicator needed */}
       </div>
 
       {/* Confirmation Modal */}

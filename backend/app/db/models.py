@@ -12,7 +12,6 @@ from sqlalchemy import (
     Text,
     Integer,
     Numeric,
-    ARRAY,
     CheckConstraint,
     UniqueConstraint,
     Index,
@@ -286,7 +285,7 @@ class FormSubmission(Base):
     corrective_action: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Attachments
-    attachment_urls: Mapped[Optional[list]] = mapped_column(ARRAY(Text), nullable=True)
+    attachment_urls: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
 
     # Audit
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -475,7 +474,7 @@ class FormSubmissionHistory(Base):
 
     # Context
     reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    event_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     # Relationships
     submission: Mapped["FormSubmission"] = relationship("FormSubmission", back_populates="history")
@@ -487,4 +486,66 @@ class FormSubmissionHistory(Base):
             name="ck_history_event_type"
         ),
         Index("idx_form_submission_history_submission", "submission_id", "event_timestamp"),
+    )
+
+
+# ============================================================================
+# ID GENERATION MODELS
+# ============================================================================
+
+class IDGenerationRule(Base):
+    """
+    ID generation rule for automatic ID creation.
+
+    Stores parsed ID patterns for batches, samples, reports, and schemas.
+
+    Attributes:
+        id: Unique rule identifier (UUID)
+        entity_type: Type of entity ('batch', 'sample', 'report', 'schema')
+        facility_id: Optional facility scope (NULL for global rules)
+        rule_name: Human-readable rule name
+        pattern: ID pattern template (e.g., "NAB-{YYYY}-{MM}-{SEQ:4}")
+        components: JSON structured rule components
+        natural_language_source: Original natural language description
+        last_sequence: Last used sequence number for this rule
+        sequence_reset_period: When to reset sequence ('never', 'monthly', 'yearly')
+        active: Whether rule is active
+        created_at: Creation timestamp
+        updated_at: Last update timestamp
+    """
+    __tablename__ = "id_generation_rules"
+
+    # Primary Key
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+
+    # Rule Scope
+    entity_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    facility_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+
+    # Rule Definition
+    rule_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    pattern: Mapped[str] = mapped_column(String(255), nullable=False)
+    components: Mapped[dict] = mapped_column(JSON, nullable=False)
+    natural_language_source: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Sequence Tracking
+    last_sequence: Mapped[int] = mapped_column(Integer, default=0)
+    sequence_reset_period: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+
+    # Status
+    active: Mapped[bool] = mapped_column(default=True)
+
+    # Audit
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint("entity_type", "facility_id", name="uq_id_rule_entity_facility"),
+        CheckConstraint(
+            "entity_type IN ('batch', 'sample', 'report', 'schema')",
+            name="ck_id_rule_entity_type"
+        ),
+        Index("idx_id_rules_entity_facility", "entity_type", "facility_id"),
+        Index("idx_id_rules_active", "active"),
     )

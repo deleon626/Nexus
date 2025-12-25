@@ -8,6 +8,8 @@ from app.db.redis_client import init_redis, close_redis
 from app.db.sqlite import init_db, close_db
 from app.api.sessions import router as sessions_router
 from app.api.stt import router as stt_router
+from app.api.schemas import router as schemas_router
+from app.api.id_generation import router as id_generation_router, ids_router
 
 
 @asynccontextmanager
@@ -53,6 +55,9 @@ app.add_middleware(
 # Include routers
 app.include_router(sessions_router)
 app.include_router(stt_router)
+app.include_router(schemas_router)
+app.include_router(id_generation_router, prefix="/api/id-rules")
+app.include_router(ids_router, prefix="/api/ids")
 
 
 @app.get("/")

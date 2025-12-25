@@ -28,5 +28,23 @@ class Settings(BaseSettings):
     openai_api_key: str
     whisper_model: str = "whisper-1"
 
+    # File Upload Configuration (Schema Generator)
+    max_upload_size_bytes: int = 10 * 1024 * 1024  # 10MB
+    allowed_upload_extensions: list[str] = [".pdf", ".png", ".jpg", ".jpeg"]
+    allowed_upload_mime_types: list[str] = [
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+    ]
+    upload_dir: str = "data/uploads"
+
+    # Schema Extraction Configuration
+    schema_extraction_model: str = "anthropic/claude-3.5-sonnet"  # Vision model for extraction
+    schema_extraction_timeout: int = 60  # seconds
+    schema_confidence_threshold: float = 0.5  # Minimum confidence for auto-accept
+
+    # ID Generation Configuration
+    id_parsing_model: str = "anthropic/claude-3-haiku-20240307"  # Cheaper model for ID parsing
+
 
 settings = Settings()

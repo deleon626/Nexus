@@ -33,6 +33,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `docker-compose down -v`: Stop services and remove volumes (WARNING: deletes data)
 - `psql -h localhost -U postgres -d postgres`: Connect to PostgreSQL
 
+### Development (Makefile)
+- `make dev`: Start all services (Docker + Backend + Frontend) with merged logs
+- `make dev-no-docker`: Start Backend + Frontend only (assumes Docker running)
+- `make install`: Install all dependencies (npm + web + backend)
+- `make test`: Run backend tests
+- `make lint`: Run all linters
+- `make format`: Format backend code
+- `make clean`: Full cleanup (Docker volumes + dependencies)
+- `make help`: Show all available commands
+
 ## Project Structure
 
 ```

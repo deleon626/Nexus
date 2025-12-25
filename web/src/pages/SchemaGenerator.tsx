@@ -7,9 +7,15 @@ import { useState } from 'react';
 import { SchemaUploader } from '@/components/SchemaUploader';
 import { SchemaPreview } from '@/components/SchemaPreview';
 import { SchemaEditor } from '@/components/SchemaEditor';
+import { ExampleSchemaPanel } from '@/components/ExampleSchemaPanel';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { extractSchema, createSchema } from '@/services/schemaService';
+import {
+  EXAMPLE_SCHEMA,
+  EXAMPLE_METADATA,
+  EXAMPLE_SCHEMA_NAME,
+} from '@/data/exampleSchemas';
 import type { ExtractedSchemaStructure, ExtractionMetadata } from '@/types/schema';
 
 type ViewMode = 'upload' | 'preview' | 'edit';
@@ -79,6 +85,14 @@ export function SchemaGenerator() {
     setSaveSuccess(false);
   };
 
+  const handleUseExample = () => {
+    setExtractedSchema(EXAMPLE_SCHEMA);
+    setExtractionMetadata(EXAMPLE_METADATA);
+    setConfidenceScore(EXAMPLE_METADATA.confidence_score);
+    setSchemaName(EXAMPLE_SCHEMA_NAME);
+    setViewMode('preview');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -103,15 +117,29 @@ export function SchemaGenerator() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {viewMode === 'upload' ? (
-          <div className="flex justify-center">
-            <SchemaUploader
-              onUpload={handleUpload}
-              isLoading={isExtracting}
-              error={error}
-            />
+          /* UPLOAD VIEW: Split screen 50/50 on desktop, stack on mobile */
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Left: Upload Form */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Upload Your Form</h2>
+              <SchemaUploader
+                onUpload={handleUpload}
+                isLoading={isExtracting}
+                error={error}
+              />
+            </div>
+
+            {/* Right: Example Schema */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Example Schema</h2>
+              <ExampleSchemaPanel onUseExample={handleUseExample} />
+            </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          /* PREVIEW/EDIT VIEW: Main content + sidebar on desktop */
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Main content area (50%) */}
+            <div className="space-y-6">
             {/* Schema Name Header */}
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-semibold">{schemaName}</h2>
@@ -179,6 +207,26 @@ export function SchemaGenerator() {
                 )}
               </TabsContent>
             </Tabs>
+            </div>
+
+            {/* Sidebar: Example Schema (50%) - hidden on mobile */}
+            <aside className="hidden lg:block sticky top-4 h-fit max-h-[calc(100vh-2rem)] overflow-y-auto">
+              <ExampleSchemaPanel />
+            </aside>
+          </div>
+        )}
+
+        {/* Mobile: Collapsible Example (below main content in preview/edit views) */}
+        {viewMode !== 'upload' && (
+          <div className="lg:hidden mt-6">
+            <details className="border rounded-lg">
+              <summary className="p-4 cursor-pointer font-medium hover:bg-muted/50 transition-colors">
+                📚 View Example Schema
+              </summary>
+              <div className="p-4 pt-0">
+                <ExampleSchemaPanel />
+              </div>
+            </details>
           </div>
         )}
       </div>

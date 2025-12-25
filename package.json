@@ -1,0 +1,19 @@
+{
+  "name": "nexus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered Quality Control & Traceability System",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --prefix-colors \"blue,yellow,green\" --names \"docker,backend,web\" \"npm run docker:up\" \"npm run backend:wait\" \"npm run web\"",
+    "dev:no-docker": "concurrently --kill-others-on-fail --prefix-colors \"yellow,green\" --names \"backend,web\" \"npm run backend\" \"npm run web\"",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "backend": "cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "backend:wait": "npm run wait:db && npm run backend",
+    "web": "cd web && npm run dev",
+    "wait:db": "node scripts/wait-for-db.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

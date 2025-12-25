@@ -3,6 +3,8 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import ApprovalQueue from './pages/ApprovalQueue'
 import { DataEntry } from './pages/DataEntry'
+import { SchemaGenerator } from './pages/SchemaGenerator'
+import { IDRuleConfig } from './pages/IDRuleConfig'
 import { ThemeToggle } from './components/ThemeToggle'
 
 function App() {
@@ -37,6 +39,18 @@ function App() {
               >
                 Approval Queue
               </Link>
+              <Link
+                to="/schema-generator"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Schema Generator
+              </Link>
+              <Link
+                to="/id-rules"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ID Rules
+              </Link>
             </nav>
             <ThemeToggle />
           </div>
@@ -46,6 +60,8 @@ function App() {
             <Route path="/" element={<DataEntry />} />
             <Route path="/data-entry" element={<DataEntry />} />
             <Route path="/approval-queue" element={<ApprovalQueue />} />
+            <Route path="/schema-generator" element={<SchemaGenerator />} />
+            <Route path="/id-rules" element={<IDRuleConfig />} />
           </Routes>
         </main>
       </div>

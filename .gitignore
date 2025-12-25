@@ -25,6 +25,7 @@ web/.vite/
 .vscode/
 .idea/
 .cursor/
+.serena/
 .windsurfrules
 *.swp
 *.swo

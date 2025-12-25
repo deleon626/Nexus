@@ -1,0 +1,216 @@
+"""File processing service for PDF to image conversion."""
+
+import base64
+import io
+import os
+import uuid
+from pathlib import Path
+from typing import BinaryIO
+
+from PIL import Image
+
+from app.config import settings
+
+
+class FileProcessingError(Exception):
+    """Raised when file processing fails."""
+
+    def __init__(self, message: str, error_code: str = "PROCESSING_ERROR"):
+        self.message = message
+        self.error_code = error_code
+        super().__init__(self.message)
+
+
+def get_upload_dir() -> Path:
+    """Get upload directory path, creating if needed."""
+    upload_path = Path(settings.upload_dir)
+    if not upload_path.is_absolute():
+        # Make relative to backend directory
+        upload_path = Path(__file__).parent.parent.parent / upload_path
+    upload_path.mkdir(parents=True, exist_ok=True)
+    return upload_path
+
+
+def generate_unique_filename(original_filename: str) -> str:
+    """Generate unique filename preserving extension."""
+    ext = Path(original_filename).suffix.lower()
+    return f"{uuid.uuid4().hex}{ext}"
+
+
+async def save_upload_file(file_content: bytes, original_filename: str) -> Path:
+    """
+    Save uploaded file to temporary storage.
+
+    Args:
+        file_content: Raw file bytes
+        original_filename: Original filename
+
+    Returns:
+        Path to saved file
+    """
+    upload_dir = get_upload_dir()
+    unique_name = generate_unique_filename(original_filename)
+    file_path = upload_dir / unique_name
+
+    file_path.write_bytes(file_content)
+    return file_path
+
+
+async def cleanup_file(file_path: Path) -> None:
+    """Remove temporary file."""
+    try:
+        if file_path.exists():
+            file_path.unlink()
+    except OSError:
+        pass  # Ignore cleanup errors
+
+
+def convert_pdf_to_images(pdf_content: bytes, dpi: int = 200) -> list[bytes]:
+    """
+    Convert PDF to list of images (one per page).
+
+    Args:
+        pdf_content: Raw PDF bytes
+        dpi: Resolution for conversion (default 200)
+
+    Returns:
+        List of PNG image bytes, one per page
+
+    Raises:
+        FileProcessingError: If conversion fails
+    """
+    try:
+        from pdf2image import convert_from_bytes
+
+        # Convert PDF to PIL images
+        images = convert_from_bytes(pdf_content, dpi=dpi)
+
+        # Convert each page to PNG bytes
+        result = []
+        for img in images:
+            buffer = io.BytesIO()
+            img.save(buffer, format="PNG")
+            result.append(buffer.getvalue())
+
+        return result
+
+    except ImportError:
+        raise FileProcessingError(
+            "pdf2image not installed. Install with: uv add pdf2image",
+            error_code="MISSING_DEPENDENCY",
+        )
+    except Exception as e:
+        raise FileProcessingError(
+            f"Failed to convert PDF: {str(e)}",
+            error_code="PDF_CONVERSION_ERROR",
+        )
+
+
+def convert_pdf_first_page_to_image(pdf_content: bytes, dpi: int = 200) -> bytes:
+    """
+    Convert first page of PDF to image.
+
+    Args:
+        pdf_content: Raw PDF bytes
+        dpi: Resolution for conversion
+
+    Returns:
+        PNG image bytes of first page
+
+    Raises:
+        FileProcessingError: If conversion fails
+    """
+    images = convert_pdf_to_images(pdf_content, dpi=dpi)
+    if not images:
+        raise FileProcessingError(
+            "PDF appears to be empty (no pages)",
+            error_code="EMPTY_PDF",
+        )
+    return images[0]
+
+
+def image_to_base64(image_bytes: bytes) -> str:
+    """
+    Convert image bytes to base64 string for LLM vision.
+
+    Args:
+        image_bytes: Raw image bytes
+
+    Returns:
+        Base64-encoded string with data URL prefix
+    """
+    # Detect image type
+    img = Image.open(io.BytesIO(image_bytes))
+    mime_type = f"image/{img.format.lower()}" if img.format else "image/png"
+
+    # Encode to base64
+    b64_data = base64.b64encode(image_bytes).decode("utf-8")
+    return f"data:{mime_type};base64,{b64_data}"
+
+
+def resize_image_if_needed(image_bytes: bytes, max_dimension: int = 2048) -> bytes:
+    """
+    Resize image if any dimension exceeds max_dimension.
+
+    Args:
+        image_bytes: Raw image bytes
+        max_dimension: Maximum width or height
+
+    Returns:
+        Resized image bytes (or original if no resize needed)
+    """
+    img = Image.open(io.BytesIO(image_bytes))
+
+    # Check if resize needed
+    if img.width <= max_dimension and img.height <= max_dimension:
+        return image_bytes
+
+    # Calculate new dimensions preserving aspect ratio
+    ratio = min(max_dimension / img.width, max_dimension / img.height)
+    new_width = int(img.width * ratio)
+    new_height = int(img.height * ratio)
+
+    # Resize
+    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+    # Convert back to bytes
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+async def prepare_image_for_extraction(
+    file_content: bytes,
+    content_type: str,
+    max_dimension: int = 2048,
+) -> tuple[str, int]:
+    """
+    Prepare file for LLM vision extraction.
+
+    Handles PDFs by converting to image, resizes if needed,
+    and returns base64-encoded image.
+
+    Args:
+        file_content: Raw file bytes
+        content_type: MIME type
+        max_dimension: Max image dimension
+
+    Returns:
+        Tuple of (base64_image_string, file_size_bytes)
+
+    Raises:
+        FileProcessingError: If processing fails
+    """
+    # Convert PDF to image if needed
+    if content_type == "application/pdf":
+        image_bytes = convert_pdf_first_page_to_image(file_content)
+    else:
+        image_bytes = file_content
+
+    # Resize if too large
+    image_bytes = resize_image_if_needed(image_bytes, max_dimension)
+
+    # Convert to base64
+    base64_image = image_to_base64(image_bytes)
+
+    return base64_image, len(file_content)

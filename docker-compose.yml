@@ -33,18 +33,19 @@ services:
       timeout: 5s
       retries: 5
 
-  # Supabase Studio (optional GUI)
-  studio:
-    image: supabase/studio:20231123-64ab854
-    container_name: nexus-studio
-    ports:
-      - "3000:3000"
-    environment:
-      SUPABASE_URL: http://localhost:54321
-      POSTGRES_CONNECTION_STRING: postgresql://postgres:postgres@postgres:5432/postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # Supabase Studio (optional GUI) - commented out due to image deprecation
+  # Uncomment to enable, or update image tag to latest version from Docker Hub
+  # studio:
+  #   image: supabase/studio:20231123-64ab854
+  #   container_name: nexus-studio
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     SUPABASE_URL: http://localhost:54321
+  #     POSTGRES_CONNECTION_STRING: postgresql://postgres:postgres@postgres:5432/postgres
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
 volumes:
   postgres-data:

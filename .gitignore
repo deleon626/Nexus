@@ -17,6 +17,7 @@ backend/data/
 backend/test_endpoints.sh
 
 # Node
+node_modules/
 web/node_modules/
 web/dist/
 web/.vite/

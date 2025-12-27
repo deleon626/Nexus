@@ -2,10 +2,8 @@
 
 import base64
 import io
-import os
 import uuid
 from pathlib import Path
-from typing import BinaryIO
 
 from fastapi import UploadFile
 from PIL import Image
@@ -248,14 +246,14 @@ def get_pdf_page_count(pdf_content: bytes) -> int:
             "pdf2image not installed. Install with: uv add pdf2image",
             error_code="MISSING_DEPENDENCY",
         )
-    except Exception as e:
+    except Exception:
         # Fallback: try to get page count from conversion
         try:
             images = convert_pdf_to_images(pdf_content, dpi=72)  # Low DPI for speed
             return len(images)
-        except:
+        except Exception as e2:
             raise FileProcessingError(
-                f"Failed to get PDF page count: {str(e)}",
+                f"Failed to get PDF page count: {str(e2)}",
                 error_code="PDF_INFO_ERROR",
             )
 

@@ -10,7 +10,6 @@ from typing import Optional
 from json_repair import repair_json
 
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db.sqlite import async_session_maker

@@ -1,6 +1,5 @@
 """SQLite database connection and initialization."""
 
-import os
 from pathlib import Path
 from typing import AsyncGenerator
 

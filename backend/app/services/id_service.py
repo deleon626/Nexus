@@ -7,9 +7,6 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-logger = logging.getLogger(__name__)
 
 from app.db.sqlite import async_session_maker
 from app.db.models import IDGenerationRule
@@ -22,14 +19,14 @@ from app.models.id_generation import (
     IDRuleParseRequest,
     IDRuleParseResponse,
     IDRuleCreateRequest,
-    IDRuleResponse,
     IDRuleListItem,
     IDRuleListResponse,
-    IDGenerateRequest,
     IDGenerateResponse,
     IDTestGenerateResponse,
 )
 from app.tools.id_tools import parse_id_rule_from_text
+
+logger = logging.getLogger(__name__)
 
 
 class IDRuleValidationError(Exception):
@@ -122,7 +119,7 @@ class IDService:
             query = select(IDGenerationRule).where(
                 IDGenerationRule.entity_type == request.entity_type.value,
                 IDGenerationRule.facility_id == request.facility_id,
-                IDGenerationRule.active == True,
+                IDGenerationRule.active,
             )
             result = await session.execute(query)
             existing = result.scalar_one_or_none()
@@ -187,7 +184,7 @@ class IDService:
 
             # Apply filters
             if not include_inactive:
-                query = query.where(IDGenerationRule.active == True)
+                query = query.where(IDGenerationRule.active)
 
             if entity_type:
                 query = query.where(
@@ -286,7 +283,7 @@ class IDService:
             query = select(IDGenerationRule).where(
                 IDGenerationRule.entity_type == entity_type.value,
                 IDGenerationRule.facility_id == facility_id,
-                IDGenerationRule.active == True,
+                IDGenerationRule.active,
             )
             result = await session.execute(query)
             rule = result.scalar_one_or_none()
@@ -453,11 +450,10 @@ class IDService:
         # In production, this would check the actual entity table
         # (e.g., batches table for batch entity type)
         # For MVP, we assume IDs are unique as they come from sequential generation
-        async with get_async_session() as session:
-            # Placeholder: In real implementation, query the entity table
-            # query = select(EntityTable).where(EntityTable.external_id == generated_id)
-            # For now, always return True (unique)
-            return True
+        # Placeholder: In real implementation, query the entity table
+        # query = select(EntityTable).where(EntityTable.external_id == generated_id)
+        # For now, always return True (unique)
+        return True
 
     async def test_generate_id(
         self,
@@ -487,7 +483,7 @@ class IDService:
             query = select(IDGenerationRule).where(
                 IDGenerationRule.entity_type == entity_type.value,
                 IDGenerationRule.facility_id == facility_id,
-                IDGenerationRule.active == True,
+                IDGenerationRule.active,
             )
             result = await session.execute(query)
             rule = result.scalar_one_or_none()

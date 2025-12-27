@@ -92,7 +92,7 @@ export function SchemaPicker({
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent position="item-aligned" className="max-h-[300px]">
         {/* Default schema option */}
         <SelectItem value="default-schema">
           [DEFAULT] Default Schema (v1.0.0)

@@ -4,8 +4,16 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+/** Pydantic validation error detail item */
+interface ValidationErrorDetail {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+}
+
+/** API error response - detail can be string or Pydantic validation errors */
 export interface ApiError {
-  detail: string;
+  detail: string | ValidationErrorDetail[];
 }
 
 export interface TranscriptionResponse {
@@ -100,6 +108,21 @@ async function fetchWithRetry(
 }
 
 /**
+ * Extract error message from API error response.
+ * Handles both string errors and Pydantic validation error arrays.
+ */
+function extractErrorMessage(error: ApiError): string {
+  if (typeof error.detail === 'string') {
+    return error.detail;
+  }
+  // Pydantic validation errors - extract messages from array
+  if (Array.isArray(error.detail) && error.detail.length > 0) {
+    return error.detail.map(e => e.msg).join(', ');
+  }
+  return 'API request failed';
+}
+
+/**
  * Handle API response errors
  */
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -107,7 +130,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const error: ApiError = await response.json().catch(() => ({
       detail: `HTTP ${response.status}: ${response.statusText}`,
     }));
-    throw new Error(error.detail || 'API request failed');
+    throw new Error(extractErrorMessage(error));
   }
   return response.json();
 }

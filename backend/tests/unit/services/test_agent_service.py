@@ -18,13 +18,12 @@ from app.models.agent import AgentMessageRequest, ImageInput
 
 @pytest.fixture
 def mock_redis():
-    """Mock Redis client."""
-    mock = AsyncMock(spec=redis.Redis)
-    # Set up async methods with AsyncMock to return appropriate awaitable values
-    mock.get = AsyncMock(return_value=None)
-    mock.setex = AsyncMock(return_value=True)
-    mock.delete = AsyncMock(return_value=1)
-    return mock
+    """Mock MemoryStore for agent service."""
+    from app.db.memory_store import MemoryStore
+
+    # Create a real MemoryStore instance for testing
+    # This is simpler than mocking all its methods
+    return MemoryStore()
 
 
 @pytest.fixture
@@ -57,7 +56,7 @@ class TestAgentServiceInitialization:
 
         # Assert
         assert service is not None
-        assert service.redis == mock_redis
+        assert service.memory_store == mock_redis
         mock_openrouter.assert_called_once()
         mock_agent.assert_called_once()
 
@@ -125,6 +124,16 @@ class TestAgentServiceMessageProcessing:
         mock_response.content = "Retrieved context from session"
         mock_agent.return_value.run.return_value = mock_response
 
+        # Set up session context in memory store
+        mock_redis.set_session_context(
+            session_id,
+            {
+                "session_id": session_id,
+                "messages": [],
+                "schema_id": None,
+            },
+        )
+
         service = AgentService(mock_redis)
 
         # Act
@@ -134,7 +143,12 @@ class TestAgentServiceMessageProcessing:
 
         # Assert
         assert response is not None
-        # TODO: Verify Redis context loading when implemented
+        assert response == "Retrieved context from session"
+
+        # Verify session context was loaded and updated
+        context = mock_redis.get_session_context(session_id)
+        assert context is not None
+        assert len(context["messages"]) == 2  # User message + assistant response
 
     @pytest.mark.asyncio
     async def test_process_message_raises_model_error_on_provider_failure(

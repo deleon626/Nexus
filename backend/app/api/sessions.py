@@ -20,6 +20,7 @@ from app.models.agent import (
     ConfirmationRequest,
     MessageRole,
 )
+from app.models.session import CreateSessionRequest
 from app.services.agent_service import AgentService, AgentError, ModelError
 from app.services.session_service import SessionService
 from app.db.sqlite import get_db
@@ -42,10 +43,14 @@ def get_agent_service() -> AgentService:
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_session(
+    request: CreateSessionRequest = CreateSessionRequest(),
     session_service: SessionService = Depends(get_session_service),
 ):
     """
     Create a new agent session.
+
+    Args:
+        request: Optional session creation request with schema_id and metadata
 
     Returns:
         New session ID and metadata
@@ -53,16 +58,21 @@ async def create_session(
     try:
         session_id = await session_service.create_session()
 
+        # Use provided schema_id or fallback to default
+        schema_id = request.schema_id if request.schema_id else "default-schema"
+
         # Initialize session context in memory store
         memory_store.set_session_context(session_id, {
             "session_id": session_id,
             "messages": [],
-            "schema_id": None,
+            "schema_id": schema_id,
+            "metadata": request.metadata or {},
             "created_at": datetime.utcnow().isoformat(),
         })
 
         return {
             "session_id": session_id,
+            "schema_id": schema_id,
             "message": "Session created successfully",
         }
     except Exception as e:

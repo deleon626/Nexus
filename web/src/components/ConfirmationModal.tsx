@@ -7,13 +7,18 @@
  * - Shows schema information
  * - Displays timestamp
  * - Form validation
+ * - Schema-aware field rendering with DynamicField
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type ConfirmationModal as ConfirmationData } from '../services/api';
+import type { SchemaListItem, SchemaResponse } from '../types/schema';
+import { getSchema } from '../services/schemaService';
+import { DynamicField } from './DynamicField';
 
 interface ConfirmationModalProps {
   data: ConfirmationData;
+  schema?: SchemaListItem | null;
   onConfirm: (modifications?: Record<string, unknown>) => void;
   onReject: () => void;
   isSubmitting?: boolean;
@@ -21,6 +26,7 @@ interface ConfirmationModalProps {
 
 export function ConfirmationModal({
   data,
+  schema,
   onConfirm,
   onReject,
   isSubmitting = false
@@ -30,8 +36,23 @@ export function ConfirmationModal({
     { ...data.extracted_data }
   );
   const [hasChanges, setHasChanges] = useState(false);
+  const [fullSchema, setFullSchema] = useState<SchemaResponse | null>(null);
+  const [isLoadingSchema, setIsLoadingSchema] = useState(false);
 
-  const handleValueChange = (key: string, value: string) => {
+  // Fetch full schema with schema_definition if schema is provided
+  useEffect(() => {
+    if (schema && schema.id !== 'default-schema') {
+      setIsLoadingSchema(true);
+      getSchema(schema.id)
+        .then(setFullSchema)
+        .catch(err => {
+          console.error('Failed to fetch schema:', err);
+        })
+        .finally(() => setIsLoadingSchema(false));
+    }
+  }, [schema]);
+
+  const handleValueChange = (key: string, value: unknown) => {
     setEditedData(prev => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
@@ -73,28 +94,57 @@ export function ConfirmationModal({
                 <span className="ml-2 text-xs text-blue-600">(Modified)</span>
               )}
             </div>
+
+            {isLoadingSchema && (
+              <div className="text-sm text-gray-500 text-center py-4">
+                Loading schema definition...
+              </div>
+            )}
+
             <div className="space-y-4">
-              {Object.entries(editedData).map(([key, value]) => (
-                <div key={key}>
-                  <label
-                    htmlFor={`field-${key}`}
-                    className="block text-xs font-medium text-gray-600 uppercase mb-1"
-                  >
-                    {key.replace(/_/g, ' ')}
-                  </label>
-                  <input
-                    id={`field-${key}`}
-                    type="text"
-                    value={
-                      typeof value === 'object'
-                        ? JSON.stringify(value)
-                        : String(value)
-                    }
-                    onChange={(e) => handleValueChange(key, e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              ))}
+              {Object.entries(editedData).map(([key, value]) => {
+                // Try to find field definition in schema
+                const fieldDef = fullSchema?.schema_definition.per_sample_fields.find(
+                  f => f.id === key
+                );
+
+                // If schema available and field found, use DynamicField
+                if (fieldDef) {
+                  return (
+                    <DynamicField
+                      key={key}
+                      field={fieldDef}
+                      value={value}
+                      onChange={(newValue) => handleValueChange(key, newValue)}
+                      disabled={isSubmitting}
+                    />
+                  );
+                }
+
+                // Fallback to generic input
+                return (
+                  <div key={key}>
+                    <label
+                      htmlFor={`field-${key}`}
+                      className="block text-xs font-medium text-gray-600 uppercase mb-1"
+                    >
+                      {key.replace(/_/g, ' ')}
+                    </label>
+                    <input
+                      id={`field-${key}`}
+                      type="text"
+                      value={
+                        typeof value === 'object'
+                          ? JSON.stringify(value)
+                          : String(value ?? '')
+                      }
+                      onChange={(e) => handleValueChange(key, e.target.value)}
+                      disabled={isSubmitting}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 

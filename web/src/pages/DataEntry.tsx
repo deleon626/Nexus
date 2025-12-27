@@ -40,6 +40,7 @@ export function DataEntry() {
   const [selectedSchema, setSelectedSchema] = useState<SchemaListItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showChangeSchemaDialog, setShowChangeSchemaDialog] = useState(false);
 
   // Poll for confirmation modal
   const {
@@ -116,6 +117,20 @@ export function DataEntry() {
     }
   };
 
+  const handleChangeSchema = () => {
+    setShowChangeSchemaDialog(true);
+  };
+
+  const handleConfirmChangeSchema = () => {
+    resetSession();
+    setSelectedSchema(null);
+    setShowChangeSchemaDialog(false);
+  };
+
+  const handleCancelChangeSchema = () => {
+    setShowChangeSchemaDialog(false);
+  };
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
@@ -177,10 +192,16 @@ export function DataEntry() {
           <>
             {/* Selected Schema Info */}
             {selectedSchema && (
-              <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
+              <div className="px-6 py-3 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
                 <div className="text-sm text-blue-800">
                   <span className="font-medium">Schema:</span> {selectedSchema.form_name} (v{selectedSchema.version})
                 </div>
+                <button
+                  onClick={handleChangeSchema}
+                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Change Schema
+                </button>
               </div>
             )}
 
@@ -239,6 +260,34 @@ export function DataEntry() {
             <div>
               <p className="text-sm font-medium text-green-900">Success!</p>
               <p className="text-xs text-green-700">QC data submitted successfully</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Schema Confirmation Dialog */}
+      {showChangeSchemaDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Change Schema?
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Changing the schema will end your current session. Any unsaved conversation data will be lost.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleCancelChangeSchema}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmChangeSchema}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Yes, Change Schema
+              </button>
             </div>
           </div>
         </div>

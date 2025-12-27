@@ -1,9 +1,9 @@
 import './App.css'
 import React from 'react'
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
 import ApprovalQueue from './pages/ApprovalQueue'
 import { DataEntry } from './pages/DataEntry'
-import { SchemaGenerator } from './pages/SchemaGenerator'
+import { ManageSchemas } from './pages/ManageSchemas'
 import { IDRuleConfig } from './pages/IDRuleConfig'
 import { ThemeToggle } from './components/ThemeToggle'
 
@@ -40,10 +40,10 @@ function App() {
                 Approval Queue
               </Link>
               <Link
-                to="/schema-generator"
+                to="/manage-schemas"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Schema Generator
+                Manage Schemas
               </Link>
               <Link
                 to="/id-rules"
@@ -60,7 +60,8 @@ function App() {
             <Route path="/" element={<DataEntry />} />
             <Route path="/data-entry" element={<DataEntry />} />
             <Route path="/approval-queue" element={<ApprovalQueue />} />
-            <Route path="/schema-generator" element={<SchemaGenerator />} />
+            <Route path="/manage-schemas" element={<ManageSchemas />} />
+            <Route path="/schema-generator" element={<Navigate to="/manage-schemas" replace />} />
             <Route path="/id-rules" element={<IDRuleConfig />} />
           </Routes>
         </main>

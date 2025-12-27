@@ -190,7 +190,7 @@ When you extract data from images or voice:
             if not fields:
                 return ""
 
-            return f"\n\nQC Schema Fields:\n" + "\n".join(fields)
+            return "\n\nQC Schema Fields:\n" + "\n".join(fields)
         except Exception as e:
             logger.warning(f"Failed to fetch schema context for {schema_id}: {e}")
             return ""

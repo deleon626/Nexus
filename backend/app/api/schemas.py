@@ -1,6 +1,5 @@
 """API routes for schema extraction and management."""
 
-from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
@@ -9,9 +8,6 @@ from app.models.schema import (
     SchemaExtractionResponse,
     SchemaCreateRequest,
     SchemaUpdateRequest,
-    SchemaResponse,
-    ExtractedSchemaStructure,
-    ExtractionMetadata,
     FilePreviewInfo,
 )
 from app.services.file_service import (

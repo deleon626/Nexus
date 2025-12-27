@@ -14,14 +14,16 @@
  * - Success feedback and reset
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAgentSession } from '../hooks/useAgentSession';
 import { useModalPolling } from '../hooks/useModalPolling';
 import { ChatContainer } from '../components/ChatContainer';
 import { ChatInput } from '../components/ChatInput';
 import { VoiceRecorder } from '../components/VoiceRecorder';
 import { ConfirmationModal } from '../components/ConfirmationModal';
+import { SchemaPicker } from '../components/SchemaPicker';
 import { submitConfirmation } from '../services/api';
+import type { SchemaListItem } from '../types/schema';
 
 export function DataEntry() {
   const {
@@ -35,6 +37,7 @@ export function DataEntry() {
     resetSession
   } = useAgentSession();
 
+  const [selectedSchema, setSelectedSchema] = useState<SchemaListItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
@@ -53,14 +56,7 @@ export function DataEntry() {
     }
   });
 
-  // Create session on mount
-  useEffect(() => {
-    if (!session) {
-      createNewSession('default-schema', { source: 'web' }).catch(err => {
-        console.error('Failed to create session:', err);
-      });
-    }
-  }, [session, createNewSession]);
+  // No longer auto-create session on mount - user must select schema first
 
   const handleSendMessage = async (content: string) => {
     clearError();
@@ -109,6 +105,17 @@ export function DataEntry() {
     alert('Data rejected. Please provide corrections in the chat.');
   };
 
+  const handleStartSession = async () => {
+    if (!selectedSchema) return;
+
+    clearError();
+    try {
+      await createNewSession(selectedSchema.id, { source: 'web' });
+    } catch (err) {
+      console.error('Failed to create session:', err);
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
@@ -139,12 +146,28 @@ export function DataEntry() {
           </div>
         )}
 
-        {/* Session Status */}
+        {/* Schema Selection - Before Session */}
         {!session && !sessionError && (
           <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Initializing session...</p>
+            <div className="w-full max-w-md space-y-4">
+              <div className="text-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Select QC Schema</h2>
+                <p className="text-sm text-gray-600">Choose the schema for this QC session</p>
+              </div>
+
+              <SchemaPicker
+                selectedId={selectedSchema?.id ?? null}
+                onSelect={(_id, schema) => setSelectedSchema(schema)}
+                disabled={isSessionLoading}
+              />
+
+              <button
+                onClick={handleStartSession}
+                disabled={!selectedSchema || isSessionLoading}
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isSessionLoading ? 'Starting Session...' : 'Start Session'}
+              </button>
             </div>
           </div>
         )}
@@ -152,6 +175,15 @@ export function DataEntry() {
         {/* Chat Interface */}
         {session && (
           <>
+            {/* Selected Schema Info */}
+            {selectedSchema && (
+              <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
+                <div className="text-sm text-blue-800">
+                  <span className="font-medium">Schema:</span> {selectedSchema.form_name} (v{selectedSchema.version})
+                </div>
+              </div>
+            )}
+
             <ChatContainer messages={messages} isLoading={isSessionLoading} />
             <div className="border-t border-gray-200 p-4 bg-white">
               <div className="flex gap-3 items-end">
@@ -190,6 +222,7 @@ export function DataEntry() {
       {modalData && (
         <ConfirmationModal
           data={modalData}
+          schema={selectedSchema}
           onConfirm={handleConfirm}
           onReject={handleReject}
           isSubmitting={isSubmitting}

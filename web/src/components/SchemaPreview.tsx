@@ -9,8 +9,12 @@ import type { ExtractedSchemaStructure, ExtractionMetadata, SchemaField, SchemaS
 
 interface SchemaPreviewProps {
   schema: ExtractedSchemaStructure;
-  metadata: ExtractionMetadata;
-  confidenceScore: number;
+  /** Optional extraction metadata - only present for AI-extracted schemas */
+  metadata?: ExtractionMetadata;
+  /** Optional confidence score - only present for AI-extracted schemas */
+  confidenceScore?: number;
+  /** Optional compact mode for smaller displays */
+  compact?: boolean;
 }
 
 function ConfidenceBadge({ score }: { score: number }) {
@@ -94,47 +98,52 @@ export function SchemaPreview({ schema, metadata, confidenceScore }: SchemaPrevi
   const hasPerSampleFields = schema.per_sample_fields.length > 0;
   const hasSections = schema.sections.length > 0;
   const hasBatchFields = schema.batch_metadata_fields.length > 0;
+  const hasMetadata = metadata !== undefined && confidenceScore !== undefined;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Extracted Schema</CardTitle>
-            <CardDescription>
-              From: {metadata.source_file}
-            </CardDescription>
+            <CardTitle>{hasMetadata ? 'Extracted Schema' : 'Schema Preview'}</CardTitle>
+            {metadata && (
+              <CardDescription>
+                From: {metadata.source_file}
+              </CardDescription>
+            )}
           </div>
-          <ConfidenceBadge score={confidenceScore} />
+          {confidenceScore !== undefined && <ConfidenceBadge score={confidenceScore} />}
         </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Extraction Metadata */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <div className="text-muted-foreground">Model</div>
-            <div className="font-medium">{metadata.model_used}</div>
-          </div>
-          <div>
-            <div className="text-muted-foreground">File Size</div>
-            <div className="font-medium">
-              {(metadata.source_file_size / 1024).toFixed(1)} KB
+        {/* Extraction Metadata - only shown when available */}
+        {metadata && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <div className="text-muted-foreground">Model</div>
+              <div className="font-medium">{metadata.model_used}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">File Size</div>
+              <div className="font-medium">
+                {(metadata.source_file_size / 1024).toFixed(1)} KB
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Processing Time</div>
+              <div className="font-medium">
+                {metadata.processing_time_ms ? `${metadata.processing_time_ms}ms` : 'N/A'}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Extracted</div>
+              <div className="font-medium">
+                {new Date(metadata.extraction_timestamp).toLocaleString()}
+              </div>
             </div>
           </div>
-          <div>
-            <div className="text-muted-foreground">Processing Time</div>
-            <div className="font-medium">
-              {metadata.processing_time_ms ? `${metadata.processing_time_ms}ms` : 'N/A'}
-            </div>
-          </div>
-          <div>
-            <div className="text-muted-foreground">Extracted</div>
-            <div className="font-medium">
-              {new Date(metadata.extraction_timestamp).toLocaleString()}
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Per-Sample Fields */}
         {hasPerSampleFields && (

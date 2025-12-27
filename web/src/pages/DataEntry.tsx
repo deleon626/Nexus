@@ -14,7 +14,7 @@
  * - Success feedback and reset
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAgentSession } from '../hooks/useAgentSession';
 import { useModalPolling } from '../hooks/useModalPolling';
 import { ChatContainer } from '../components/ChatContainer';
@@ -22,8 +22,10 @@ import { ChatInput } from '../components/ChatInput';
 import { VoiceRecorder } from '../components/VoiceRecorder';
 import { ConfirmationModal } from '../components/ConfirmationModal';
 import { SchemaPicker } from '../components/SchemaPicker';
+import { SchemaInfoCard } from '../components/SchemaInfoCard';
 import { submitConfirmation } from '../services/api';
-import type { SchemaListItem } from '../types/schema';
+import { getSchema } from '../services/schemaService';
+import type { SchemaListItem, SchemaResponse } from '../types/schema';
 
 export function DataEntry() {
   const {
@@ -38,9 +40,12 @@ export function DataEntry() {
   } = useAgentSession();
 
   const [selectedSchema, setSelectedSchema] = useState<SchemaListItem | null>(null);
+  const [fullSchemaData, setFullSchemaData] = useState<SchemaResponse | null>(null);
+  const [isLoadingSchema, setIsLoadingSchema] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showChangeSchemaDialog, setShowChangeSchemaDialog] = useState(false);
+  const [showSchemaPanel, setShowSchemaPanel] = useState(false);
 
   // Poll for confirmation modal
   const {
@@ -58,6 +63,35 @@ export function DataEntry() {
   });
 
   // No longer auto-create session on mount - user must select schema first
+
+  // Fetch full schema details when a schema is selected
+  useEffect(() => {
+    if (!selectedSchema) {
+      setFullSchemaData(null);
+      return;
+    }
+
+    // Skip fetching for default schema (it doesn't exist in DB)
+    if (selectedSchema.id === 'default-schema') {
+      setFullSchemaData(null);
+      return;
+    }
+
+    const fetchFullSchema = async () => {
+      setIsLoadingSchema(true);
+      try {
+        const data = await getSchema(selectedSchema.id);
+        setFullSchemaData(data);
+      } catch (err) {
+        console.error('Failed to fetch schema details:', err);
+        setFullSchemaData(null);
+      } finally {
+        setIsLoadingSchema(false);
+      }
+    };
+
+    fetchFullSchema();
+  }, [selectedSchema]);
 
   const handleSendMessage = async (content: string) => {
     clearError();
@@ -142,7 +176,7 @@ export function DataEntry() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         {/* Error Display */}
         {(sessionError || pollingError) && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mx-4 mt-4">
@@ -173,8 +207,32 @@ export function DataEntry() {
               <SchemaPicker
                 selectedId={selectedSchema?.id ?? null}
                 onSelect={(_id, schema) => setSelectedSchema(schema)}
-                disabled={isSessionLoading}
+                disabled={isSessionLoading || isLoadingSchema}
               />
+
+              {/* Schema Preview */}
+              {selectedSchema && (
+                <div className="mt-4">
+                  {isLoadingSchema ? (
+                    <div className="animate-pulse bg-gray-100 rounded-lg h-32 flex items-center justify-center">
+                      <span className="text-sm text-gray-500">Loading schema details...</span>
+                    </div>
+                  ) : fullSchemaData ? (
+                    <SchemaInfoCard
+                      formName={fullSchemaData.form_name}
+                      formCode={fullSchemaData.form_code}
+                      version={fullSchemaData.version}
+                      schema={fullSchemaData.schema_definition}
+                      defaultCollapsed={false}
+                    />
+                  ) : selectedSchema.id === 'default-schema' ? (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
+                      <p className="font-medium text-gray-700 mb-1">Default Schema</p>
+                      <p>Basic QC data entry without predefined fields. The AI will extract data based on your input.</p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
 
               <button
                 onClick={handleStartSession}
@@ -190,18 +248,47 @@ export function DataEntry() {
         {/* Chat Interface */}
         {session && (
           <>
-            {/* Selected Schema Info */}
+            {/* Selected Schema Info Bar + Collapsible Panel */}
             {selectedSchema && (
-              <div className="px-6 py-3 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
-                <div className="text-sm text-blue-800">
-                  <span className="font-medium">Schema:</span> {selectedSchema.form_name} (v{selectedSchema.version})
+              <div className="bg-blue-50 border-b border-blue-100">
+                {/* Info bar row */}
+                <div className="px-6 py-3 flex items-center justify-between">
+                  <div className="text-sm text-blue-800">
+                    <span className="font-medium">Schema:</span> {selectedSchema.form_name} (v{selectedSchema.version})
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {fullSchemaData && (
+                      <button
+                        onClick={() => setShowSchemaPanel(!showSchemaPanel)}
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        <span>{showSchemaPanel ? 'Hide Details' : 'View Details'}</span>
+                        <svg className={`w-4 h-4 transition-transform ${showSchemaPanel ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    )}
+                    <button
+                      onClick={handleChangeSchema}
+                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Change Schema
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={handleChangeSchema}
-                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  Change Schema
-                </button>
+
+                {/* Collapsible panel */}
+                {showSchemaPanel && fullSchemaData && (
+                  <div className="px-6 pb-4 border-t border-blue-100 bg-white max-h-64 overflow-y-auto">
+                    <SchemaInfoCard
+                      formName={fullSchemaData.form_name}
+                      formCode={fullSchemaData.form_code}
+                      version={fullSchemaData.version}
+                      schema={fullSchemaData.schema_definition}
+                      defaultCollapsed={true}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

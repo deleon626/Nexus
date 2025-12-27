@@ -19,6 +19,7 @@ from app.models.agent import ImageInput, ConfirmationRequest
 from app.tools.confirmation import show_confirmation_modal
 from app.tools.commit import commit_qc_data
 from app.db.memory_store import MemoryStore
+from app.services.schema_service import SchemaService
 
 
 logger = logging.getLogger(__name__)
@@ -149,6 +150,51 @@ When you extract data from images or voice:
                 agno_images.append(Image(content=img_input.base64))
         return agno_images
 
+    async def _get_schema_context(self, schema_id: str) -> str:
+        """
+        Fetch schema and format as context for agent.
+
+        Args:
+            schema_id: Schema identifier
+
+        Returns:
+            Formatted schema context string or empty string if unavailable
+        """
+        if not schema_id or schema_id == "default-schema":
+            return ""
+
+        try:
+            service = SchemaService()
+            schema = await service.get_schema_by_id(schema_id)
+            if not schema:
+                return ""
+
+            # Format fields for agent context
+            fields = []
+            schema_def = schema.schema_definition
+
+            # Per-sample fields
+            for field in schema_def.get("per_sample_fields", []):
+                field_info = f"- {field['label']} ({field['id']}): {field['field_type']}"
+                if field.get("required"):
+                    field_info += " [REQUIRED]"
+                if field.get("unit"):
+                    field_info += f" (unit: {field['unit']})"
+                fields.append(field_info)
+
+            # Batch metadata fields
+            for field in schema_def.get("batch_metadata_fields", []):
+                field_info = f"- {field['label']} ({field['id']}): {field['field_type']} [BATCH]"
+                fields.append(field_info)
+
+            if not fields:
+                return ""
+
+            return f"\n\nQC Schema Fields:\n" + "\n".join(fields)
+        except Exception as e:
+            logger.warning(f"Failed to fetch schema context for {schema_id}: {e}")
+            return ""
+
     async def _load_session_context(self, session_id: str) -> dict:
         """
         Load session context from memory store.
@@ -209,20 +255,29 @@ When you extract data from images or voice:
             if session_id:
                 context = await self._load_session_context(session_id)
 
+            # Get schema context to enhance agent's understanding
+            schema_id = context.get("schema_id")
+            schema_context = await self._get_schema_context(schema_id)
+
             # Convert images to Agno Image objects
             agno_images = []
             if images:
                 agno_images = self._convert_images(images)
 
+            # Build enhanced message with schema context
+            enhanced_message = message
+            if schema_context:
+                enhanced_message = f"{message}{schema_context}"
+
             # Build conversation history from context
             # For now, just pass the current message
             # Future: Include full message history from context["messages"]
 
-            # Run agent with message and images
+            # Run agent with enhanced message and images
             if agno_images:
-                response = self.agent.run(message, images=agno_images)
+                response = self.agent.run(enhanced_message, images=agno_images)
             else:
-                response = self.agent.run(message)
+                response = self.agent.run(enhanced_message)
 
             # Update context with new message and response
             if session_id:
@@ -281,19 +336,28 @@ When you extract data from images or voice:
             if session_id:
                 context = await self._load_session_context(session_id)
 
+            # Get schema context to enhance agent's understanding
+            schema_id = context.get("schema_id")
+            schema_context = await self._get_schema_context(schema_id)
+
             # Convert images to Agno Image objects
             agno_images = []
             if images:
                 agno_images = self._convert_images(images)
 
+            # Build enhanced message with schema context
+            enhanced_message = message
+            if schema_context:
+                enhanced_message = f"{message}{schema_context}"
+
             # Stream response from agent
             full_response = ""
             if agno_images:
-                for chunk in self.agent.run(message, images=agno_images, stream=True):
+                for chunk in self.agent.run(enhanced_message, images=agno_images, stream=True):
                     full_response += str(chunk)
                     yield str(chunk)
             else:
-                for chunk in self.agent.run(message, stream=True):
+                for chunk in self.agent.run(enhanced_message, stream=True):
                     full_response += str(chunk)
                     yield str(chunk)
 

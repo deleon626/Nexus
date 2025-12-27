@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 
 interface SchemaUploaderProps {
   onUpload: (file: File, schemaName: string) => void;
+  onFileSelect?: (file: File | null) => void;  // Called when file is selected/cleared
   isLoading?: boolean;
   error?: string | null;
 }
@@ -18,7 +19,7 @@ interface SchemaUploaderProps {
 const ACCEPTED_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-export function SchemaUploader({ onUpload, isLoading = false, error }: SchemaUploaderProps) {
+export function SchemaUploader({ onUpload, onFileSelect, isLoading = false, error }: SchemaUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [schemaName, setSchemaName] = useState('');
   const [dragActive, setDragActive] = useState(false);
@@ -40,10 +41,12 @@ export function SchemaUploader({ onUpload, isLoading = false, error }: SchemaUpl
     if (error) {
       setValidationError(error);
       setSelectedFile(null);
+      onFileSelect?.(null);
       return;
     }
     setValidationError(null);
     setSelectedFile(file);
+    onFileSelect?.(file);  // Notify parent of file selection
 
     // Auto-generate schema name from filename if not set
     if (!schemaName) {
@@ -89,6 +92,7 @@ export function SchemaUploader({ onUpload, isLoading = false, error }: SchemaUpl
     setSelectedFile(null);
     setSchemaName('');
     setValidationError(null);
+    onFileSelect?.(null);  // Notify parent file was cleared
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

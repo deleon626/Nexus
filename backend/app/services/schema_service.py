@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
+from json_repair import repair_json
+
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -185,14 +187,14 @@ Return ONLY valid JSON, no markdown or explanation."""
 
             agent = Agent(
                 model=model,
-                system_prompt=self.EXTRACTION_PROMPT,
+                instructions=self.EXTRACTION_PROMPT,
             )
 
             # Run extraction with image
             from agno.media import Image
 
             response = await agent.arun(
-                message="Extract the schema from this QC form image.",
+                input="Extract the schema from this QC form image.",
                 images=[Image(url=image_base64)],
             )
 
@@ -203,7 +205,13 @@ Return ONLY valid JSON, no markdown or explanation."""
 
             # Extract JSON from response (may have markdown code blocks)
             json_str = self._extract_json_from_response(str(response_text))
-            return json.loads(json_str)
+
+            # Use json_repair to handle malformed LLM output
+            # (handles trailing commas, unterminated strings, truncated JSON)
+            repaired = repair_json(json_str, return_objects=True)
+            if isinstance(repaired, dict):
+                return repaired
+            return json.loads(repaired)
 
         except json.JSONDecodeError as e:
             raise SchemaExtractionError(
@@ -297,16 +305,23 @@ Return ONLY valid JSON, no markdown or explanation."""
 
     def _parse_grade_options(
         self, options_data: list | None
-    ) -> list[GradeOption] | None:
+    ) -> list[GradeOption]:
         """Parse grade options from raw data."""
         if not options_data:
-            return None
+            return []
 
         result = []
         for opt in options_data:
+            # Handle empty or non-integer values gracefully
+            raw_value = opt.get("value", 0)
+            try:
+                value = int(raw_value) if raw_value != "" else 0
+            except (ValueError, TypeError):
+                value = 0
+
             result.append(
                 GradeOption(
-                    value=opt.get("value", 0),
+                    value=value,
                     label=opt.get("label", ""),
                     label_id=opt.get("label_id"),
                 )

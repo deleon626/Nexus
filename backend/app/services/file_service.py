@@ -7,6 +7,7 @@ import uuid
 from pathlib import Path
 from typing import BinaryIO
 
+from fastapi import UploadFile
 from PIL import Image
 
 from app.config import settings
@@ -29,6 +30,14 @@ def get_upload_dir() -> Path:
         upload_path = Path(__file__).parent.parent.parent / upload_path
     upload_path.mkdir(parents=True, exist_ok=True)
     return upload_path
+
+
+def get_temp_upload_dir() -> Path:
+    """Get temporary upload directory for preview files."""
+    upload_dir = get_upload_dir()
+    temp_dir = upload_dir / "temp"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    return temp_dir
 
 
 def generate_unique_filename(original_filename: str) -> str:
@@ -214,3 +223,95 @@ async def prepare_image_for_extraction(
     base64_image = image_to_base64(image_bytes)
 
     return base64_image, len(file_content)
+
+
+def get_pdf_page_count(pdf_content: bytes) -> int:
+    """
+    Get page count from PDF file.
+
+    Args:
+        pdf_content: Raw PDF bytes
+
+    Returns:
+        Number of pages in PDF
+
+    Raises:
+        FileProcessingError: If unable to read PDF
+    """
+    try:
+        from pdf2image import pdfinfo_from_bytes
+
+        info = pdfinfo_from_bytes(pdf_content)
+        return info.get("Pages", 0)
+    except ImportError:
+        raise FileProcessingError(
+            "pdf2image not installed. Install with: uv add pdf2image",
+            error_code="MISSING_DEPENDENCY",
+        )
+    except Exception as e:
+        # Fallback: try to get page count from conversion
+        try:
+            images = convert_pdf_to_images(pdf_content, dpi=72)  # Low DPI for speed
+            return len(images)
+        except:
+            raise FileProcessingError(
+                f"Failed to get PDF page count: {str(e)}",
+                error_code="PDF_INFO_ERROR",
+            )
+
+
+async def save_temp_file_for_preview(
+    file: UploadFile, session_id: str
+) -> dict:
+    """
+    Save uploaded file to temp directory for preview.
+
+    Args:
+        file: FastAPI UploadFile instance
+        session_id: Session identifier for unique filename prefix
+
+    Returns:
+        Dict with: url, filename, size, mime_type, page_count (for PDFs)
+
+    Raises:
+        FileProcessingError: If file save fails
+    """
+    try:
+        # Read file content
+        content = await file.read()
+        await file.seek(0)  # Reset for potential re-reading
+
+        # Generate unique filename
+        ext = Path(file.filename or "upload").suffix.lower()
+        unique_name = f"{session_id}_{uuid.uuid4().hex}{ext}"
+
+        # Save to temp directory
+        temp_dir = get_temp_upload_dir()
+        file_path = temp_dir / unique_name
+
+        file_path.write_bytes(content)
+
+        # Build response
+        result = {
+            "url": f"/uploads/temp/{unique_name}",
+            "filename": file.filename or "unknown",
+            "size": len(content),
+            "mime_type": file.content_type or "application/octet-stream",
+        }
+
+        # Get page count for PDFs
+        if file.content_type == "application/pdf":
+            try:
+                page_count = get_pdf_page_count(content)
+                result["page_count"] = page_count
+            except FileProcessingError:
+                # Not critical, can omit page count
+                result["page_count"] = None
+
+        return result
+
+    except Exception as e:
+        raise FileProcessingError(
+            f"Failed to save temp file: {str(e)}",
+            error_code="TEMP_SAVE_ERROR",
+        )

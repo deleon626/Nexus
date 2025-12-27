@@ -11,8 +11,13 @@ from app.models.schema import (
     SchemaResponse,
     ExtractedSchemaStructure,
     ExtractionMetadata,
+    FilePreviewInfo,
 )
-from app.services.file_service import prepare_image_for_extraction, FileProcessingError
+from app.services.file_service import (
+    prepare_image_for_extraction,
+    save_temp_file_for_preview,
+    FileProcessingError,
+)
 from app.services.schema_service import SchemaService, SchemaExtractionError, SchemaValidationError
 from app.utils.file_validation import validate_upload_file, FileValidationError
 
@@ -45,6 +50,19 @@ async def extract_schema(
     content = await file.read()
     await file.seek(0)
 
+    # Save file for preview (using schema_name as session identifier)
+    file_preview_info = None
+    try:
+        # Use a simplified session_id (first 8 chars of schema_name + timestamp)
+        import hashlib
+        session_id = hashlib.md5(schema_name.encode()).hexdigest()[:8]
+        file_preview_dict = await save_temp_file_for_preview(file, session_id)
+        file_preview_info = FilePreviewInfo(**file_preview_dict)
+        await file.seek(0)  # Reset after save
+    except FileProcessingError as e:
+        # Non-critical error: continue extraction without preview
+        print(f"Warning: Failed to save preview file: {e.message}")
+
     # Prepare image for extraction
     try:
         image_base64, _ = await prepare_image_for_extraction(
@@ -76,6 +94,7 @@ async def extract_schema(
         confidence_score=metadata.confidence_score,
         extraction_metadata=metadata,
         warnings=[],
+        file_preview=file_preview_info,
     )
 
 

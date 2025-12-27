@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 from app.config import settings
@@ -58,6 +61,15 @@ app.include_router(stt_router)
 app.include_router(schemas_router)
 app.include_router(id_generation_router, prefix="/api/id-rules")
 app.include_router(ids_router, prefix="/api/ids")
+
+# Mount static files for temp uploads (document preview)
+temp_upload_dir = Path(settings.upload_dir)
+if not temp_upload_dir.is_absolute():
+    temp_upload_dir = Path(__file__).parent.parent / temp_upload_dir
+temp_upload_dir = temp_upload_dir / "temp"
+temp_upload_dir.mkdir(parents=True, exist_ok=True)
+
+app.mount("/uploads/temp", StaticFiles(directory=str(temp_upload_dir)), name="temp_uploads")
 
 
 @app.get("/")

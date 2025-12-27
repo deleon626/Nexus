@@ -9,6 +9,7 @@ dependencies = [
     "aiosqlite>=0.20.0",
     "fastapi>=0.124.2",
     "httpx>=0.28.1",
+    "json-repair>=0.54.3",
     "openai>=2.11.0",
     "pdf2image>=1.17.0",
     "Pillow>=10.0.0",
@@ -33,3 +34,6 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "live: marks tests that make real API calls (deselect with '-m \"not live\"')",
+]

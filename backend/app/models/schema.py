@@ -73,6 +73,15 @@ class ExtractedSchemaStructure(BaseModel):
     )
 
 
+class FilePreviewInfo(BaseModel):
+    """Information for previewing the uploaded file."""
+    url: str = Field(..., description="URL path to access the file")
+    filename: str = Field(..., description="Original filename")
+    size: int = Field(..., description="File size in bytes")
+    mime_type: str = Field(..., description="MIME type of the file")
+    page_count: Optional[int] = Field(None, description="Number of pages (for PDFs)")
+
+
 class ExtractionMetadata(BaseModel):
     """Metadata about the extraction process."""
     source_file: str = Field(..., description="Original filename")
@@ -96,6 +105,7 @@ class SchemaExtractionResponse(BaseModel):
     confidence_score: float = Field(..., ge=0.0, le=1.0, description="Overall extraction confidence")
     extraction_metadata: ExtractionMetadata = Field(..., description="Extraction process metadata")
     warnings: list[str] = Field(default_factory=list, description="Extraction warnings or notes")
+    file_preview: Optional[FilePreviewInfo] = Field(None, description="Preview information for uploaded file")
 
 
 class SchemaCreateRequest(BaseModel):

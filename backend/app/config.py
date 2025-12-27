@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     upload_dir: str = "data/uploads"
 
     # Schema Extraction Configuration
-    schema_extraction_model: str = "anthropic/claude-3.5-sonnet"  # Vision model for extraction
+    schema_extraction_model: str = "google/gemini-3-flash-preview"  # Vision model for extraction
     schema_extraction_timeout: int = 60  # seconds
     schema_confidence_threshold: float = 0.5  # Minimum confidence for auto-accept
 

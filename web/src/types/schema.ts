@@ -53,6 +53,14 @@ export interface ExtractionMetadata {
   processing_time_ms?: number;
 }
 
+export interface FilePreviewInfo {
+  url: string;
+  filename: string;
+  size: number;
+  mime_type: string;
+  page_count?: number;
+}
+
 // API Request/Response Types
 
 export interface SchemaExtractionRequest {
@@ -64,6 +72,7 @@ export interface SchemaExtractionResponse {
   confidence_score: number;
   extraction_metadata: ExtractionMetadata;
   warnings: string[];
+  file_preview?: FilePreviewInfo | null;
 }
 
 export interface SchemaCreateRequest {

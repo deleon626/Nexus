@@ -83,7 +83,7 @@ async def parse_id_rule_from_text(
 
     agent = Agent(
         model=model,
-        system_prompt=ID_RULE_PARSING_PROMPT,
+        instructions=ID_RULE_PARSING_PROMPT,
     )
 
     # Build context message
@@ -94,7 +94,7 @@ async def parse_id_rule_from_text(
     message = f"{context}\n\nID rule description:\n{natural_language_rule}"
 
     # Call LLM
-    response = await agent.arun(message=message)
+    response = await agent.arun(input=message)
 
     # Parse response
     response_text = response.content

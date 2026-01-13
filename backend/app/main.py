@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -10,10 +12,34 @@ from app.db.supabase_client import init_supabase
 from app.db.redis_client import init_redis, close_redis
 from app.db.sqlite import init_db, close_db, async_session_maker
 from app.db.seed_default_schema import seed_default_schema
+from app.db.memory_store import memory_store
 from app.api.sessions import router as sessions_router
 from app.api.stt import router as stt_router
 from app.api.schemas import router as schemas_router
 from app.api.id_generation import router as id_generation_router, ids_router
+
+logger = logging.getLogger(__name__)
+
+# Cleanup interval in seconds (default: 5 minutes)
+CLEANUP_INTERVAL_SECONDS = 300
+
+
+async def cleanup_expired_data():
+    """Background task to periodically clean up expired sessions and confirmations."""
+    while True:
+        try:
+            await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
+            result = memory_store.cleanup_all_expired()
+            if result["sessions"] > 0 or result["confirmations"] > 0:
+                logger.info(
+                    f"Cleanup: removed {result['sessions']} expired sessions, "
+                    f"{result['confirmations']} expired confirmations"
+                )
+        except asyncio.CancelledError:
+            logger.info("Cleanup task cancelled")
+            break
+        except Exception as e:
+            logger.error(f"Cleanup task error: {e}")
 
 
 @asynccontextmanager
@@ -27,9 +53,20 @@ async def lifespan(app: FastAPI):
     async with async_session_maker() as session:
         await seed_default_schema(session)
 
+    # Start background cleanup task
+    cleanup_task = asyncio.create_task(cleanup_expired_data())
+    logger.info(f"✓ Cleanup task started (interval: {CLEANUP_INTERVAL_SECONDS}s)")
+
     print("✓ Application startup complete")
     yield
+    
     # Shutdown
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+    
     await close_redis()
     await close_db()  # Close SQLite connections
     print("✓ Application shutdown complete")
@@ -50,11 +87,9 @@ app.add_middleware(
         "http://localhost:5174",  # Vite dev server (fallback port)
         "http://localhost:3000",  # Supabase Studio
         "http://localhost:8080",  # Alternative ports
-        "http://localhost:3001",  # Next.js dev server
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",  # Next.js dev server
     ],
     allow_credentials=True,
     allow_methods=["*"],

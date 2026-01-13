@@ -332,6 +332,11 @@ See `docs/NEXT_STEPS.md` for implementation priority and detailed task breakdown
 - SQLite (local file `backend/data/nexus.db`) - MVP simplification from Supabase (004-frontend-data-input-mvp)
 
 ## Recent Changes
+- 2026-01-13: Removed web-next/ directory
+  - Abandoned Next.js migration from Dec 20, 2025
+  - All frontend development consolidated on web/ (Vite)
+  - Removed Next.js CORS config (port 3001) from backend
+  - 571MB disk space savings
 - 001-agno-migration: Migrated from Anthropic SDK to Agno framework with OpenRouter
   - Added `agno>=1.4.5` for agent framework
   - Implemented tools with `@tool` decorator and `stop_after_tool_call` support

@@ -47,3 +47,6 @@ redis-data/
 # Misc
 .claude/
 .specify/
+
+# Next.js directory (migration abandoned 2026-01-13)
+web-next/

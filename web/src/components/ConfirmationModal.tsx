@@ -73,9 +73,14 @@ function validateField(field: SchemaField, value: unknown): string | null {
     }
 
     if (rules.pattern) {
-      const regex = new RegExp(rules.pattern as string);
-      if (!regex.test(strValue)) {
-        return `${field.label} format is invalid`;
+      try {
+        const regex = new RegExp(rules.pattern as string);
+        if (!regex.test(strValue)) {
+          return `${field.label} format is invalid`;
+        }
+      } catch (e) {
+        console.error(`Invalid regex pattern for field ${field.id}:`, e);
+        // Fail open - if regex is invalid, skip pattern validation
       }
     }
   }

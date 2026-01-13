@@ -6,7 +6,7 @@ Handles QC data extraction, validation, and conversation management.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
 
 from agno.agent import Agent
@@ -315,7 +315,7 @@ IMPORTANT: When calling tools like show_confirmation_modal or commit_qc_data:
                     {
                         "role": "user",
                         "content": message,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 response_content = (
@@ -325,7 +325,7 @@ IMPORTANT: When calling tools like show_confirmation_modal or commit_qc_data:
                     {
                         "role": "assistant",
                         "content": response_content,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)
@@ -426,14 +426,14 @@ IMPORTANT: When calling tools like show_confirmation_modal or commit_qc_data:
                     {
                         "role": "user",
                         "content": message,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 context["messages"].append(
                     {
                         "role": "assistant",
                         "content": full_response,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)
@@ -496,7 +496,7 @@ IMPORTANT: When calling tools like show_confirmation_modal or commit_qc_data:
                     {
                         "role": "system",
                         "content": f"User confirmed data. {commit_result}",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)
@@ -515,7 +515,7 @@ IMPORTANT: When calling tools like show_confirmation_modal or commit_qc_data:
                     {
                         "role": "system",
                         "content": "User rejected the extracted data.",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)

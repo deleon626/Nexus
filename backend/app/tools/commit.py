@@ -6,7 +6,7 @@ Implements Human-in-the-Loop principle - only commits after user confirmation.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from agno.tools import tool
@@ -63,7 +63,7 @@ def commit_qc_data(
             "session_id": confirmation_data["session_id"],
             "data": final_data,
             "status": "pending_approval",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             # Note: created_by should come from authenticated user context
             # For MVP, we'll leave it null - will be added when auth is implemented
         }
@@ -88,7 +88,7 @@ def commit_qc_data(
                 "modifications": modifications,
                 "final_data": final_data,
             },
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         audit_result = supabase_client.table("events").insert(audit_event).execute()

@@ -5,7 +5,7 @@ For production, this should be replaced with Redis or similar.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 from threading import Lock
 
@@ -27,7 +27,7 @@ class SessionContext:
     @property
     def is_expired(self) -> bool:
         """Check if session has expired."""
-        return datetime.utcnow() > self.expires_at
+        return datetime.now(timezone.utc) > self.expires_at
 
 
 @dataclass
@@ -38,7 +38,7 @@ class ConfirmationModal:
     schema_id: Optional[str]
     extracted_data: Dict[str, Any]
     created_at: datetime = field(default_factory=datetime.utcnow)
-    expires_at: datetime = field(default_factory=lambda: datetime.utcnow() + timedelta(minutes=15))
+    expires_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc) + timedelta(minutes=15))
 
 
 class MemoryStore:
@@ -72,7 +72,7 @@ class MemoryStore:
         with self._session_lock:
             if session_id in self._sessions:
                 self._sessions[session_id].context = context
-                self._sessions[session_id].updated_at = datetime.utcnow()
+                self._sessions[session_id].updated_at = datetime.now(timezone.utc)
                 # Extend TTL on activity
                 self._sessions[session_id].ttl_seconds = ttl_seconds
             else:
@@ -153,7 +153,7 @@ class MemoryStore:
                 return None
 
             # Check expiration (15 minutes)
-            if datetime.utcnow() > confirmation.expires_at:
+            if datetime.now(timezone.utc) > confirmation.expires_at:
                 del self._confirmations[confirmation_id]
                 return None
 
@@ -189,7 +189,7 @@ class MemoryStore:
             # Get the most recent non-expired confirmation
             session_confirmations.sort(key=lambda x: x.created_at, reverse=True)
             for confirmation in session_confirmations:
-                if datetime.utcnow() <= confirmation.expires_at:
+                if datetime.now(timezone.utc) <= confirmation.expires_at:
                     return {
                         "confirmation_id": confirmation.confirmation_id,
                         "session_id": confirmation.session_id,
@@ -225,7 +225,7 @@ class MemoryStore:
             Number of confirmations removed
         """
         with self._confirmation_lock:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             expired_ids = [
                 conf_id for conf_id, conf in self._confirmations.items()
                 if now > conf.expires_at

@@ -41,8 +41,10 @@ export interface SessionResponse {
 }
 
 export interface MessageResponse {
-  message_id: string;
-  message: string; // Changed from 'response' to 'message' to match backend
+  session_id: string;
+  content: string;
+  role: string;
+  has_pending_confirmation: boolean;
 }
 
 export interface ConfirmationModal {
@@ -186,7 +188,7 @@ export async function sendMessage(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message,
+        content: message,
         images: images || [],
       }),
     }
@@ -219,14 +221,20 @@ export async function submitConfirmation(
     user_modifications: Record<string, unknown> | null;
   }
 ): Promise<ConfirmationResponse> {
+  // Map frontend field names to backend expected names
+  const requestBody = {
+    confirmed: data.approved,
+    modifications: data.user_modifications,
+  };
+
   const response = await fetchWithRetry(
-    `${API_BASE_URL}/api/sessions/${sessionId}/confirmation`,
+    `${API_BASE_URL}/api/sessions/${sessionId}/modal/confirm`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestBody),
     }
   );
   return handleResponse<ConfirmationResponse>(response);

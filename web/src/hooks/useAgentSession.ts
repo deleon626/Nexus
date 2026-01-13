@@ -22,7 +22,7 @@ interface UseAgentSessionReturn {
   isLoading: boolean;
   error: string | null;
   createNewSession: (schemaId: string, metadata?: Record<string, unknown>) => Promise<void>;
-  sendMessageToAgent: (content: string) => Promise<void>;
+  sendMessageToAgent: (content: string, images?: string[]) => Promise<void>;
   clearError: () => void;
   resetSession: () => void;
 }
@@ -53,7 +53,7 @@ export function useAgentSession(): UseAgentSessionReturn {
     }
   }, []);
 
-  const sendMessageToAgent = useCallback(async (content: string) => {
+  const sendMessageToAgent = useCallback(async (content: string, images?: string[]) => {
     if (!session) {
       setError('No active session');
       return;
@@ -63,7 +63,7 @@ export function useAgentSession(): UseAgentSessionReturn {
     setError(null);
 
     try {
-      const response = await sendMessage(session.id, content);
+      const response = await sendMessage(session.id, content, images);
 
       // Add user message
       const userMessage: Message = {
@@ -79,7 +79,7 @@ export function useAgentSession(): UseAgentSessionReturn {
         id: `temp-${Date.now() + 1}`,
         session_id: session.id,
         role: 'assistant',
-        content: response.message,
+        content: response.content,
         created_at: new Date().toISOString()
       };
 

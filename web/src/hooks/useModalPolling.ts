@@ -1,9 +1,15 @@
 /**
- * Hook for polling confirmation modal status.
+ * Hook for polling confirmation modal status with exponential backoff.
  *
  * Continuously polls the backend to check if the agent has requested
  * user confirmation. When a modal is ready, it retrieves the confirmation
  * data and stops polling.
+ *
+ * Features:
+ * - Exponential backoff: starts at 1s, doubles after empty responses, caps at 10s
+ * - Resets to 1s when modal is found
+ * - Pauses polling when browser tab is hidden (visibility API)
+ * - Resumes polling when tab becomes visible
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -12,7 +18,8 @@ import { getConfirmationModal, type ConfirmationModal } from '../services/api';
 interface UseModalPollingOptions {
   sessionId: string | null;
   enabled: boolean;
-  pollInterval?: number; // milliseconds
+  initialInterval?: number; // milliseconds (default: 1000)
+  maxInterval?: number; // milliseconds (default: 10000)
   onModalReady?: (modal: ConfirmationModal) => void;
 }
 
@@ -20,6 +27,7 @@ interface UseModalPollingReturn {
   modalData: ConfirmationModal | null;
   isPolling: boolean;
   error: string | null;
+  currentInterval: number;
   stopPolling: () => void;
   startPolling: () => void;
   clearModal: () => void;
@@ -28,12 +36,15 @@ interface UseModalPollingReturn {
 export function useModalPolling({
   sessionId,
   enabled,
-  pollInterval = 2000,
+  initialInterval = 1000,
+  maxInterval = 10000,
   onModalReady
 }: UseModalPollingOptions): UseModalPollingReturn {
   const [modalData, setModalData] = useState<ConfirmationModal | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentInterval, setCurrentInterval] = useState(initialInterval);
+  const [isVisible, setIsVisible] = useState(!document.hidden);
 
   // Store callback in ref to avoid dependency issues
   const onModalReadyRef = useRef(onModalReady);
@@ -41,10 +52,17 @@ export function useModalPolling({
     onModalReadyRef.current = onModalReady;
   }, [onModalReady]);
 
+  // Track current interval in ref for use in timeout callbacks
+  const intervalRef = useRef(initialInterval);
+  useEffect(() => {
+    intervalRef.current = currentInterval;
+  }, [currentInterval]);
+
   const clearModal = useCallback(() => {
     setModalData(null);
     setError(null);
-  }, []);
+    setCurrentInterval(initialInterval); // Reset backoff
+  }, [initialInterval]);
 
   // Manual control functions (exposed for external use if needed)
   const stopPolling = useCallback(() => {
@@ -52,18 +70,36 @@ export function useModalPolling({
   }, []);
 
   const startPolling = useCallback(() => {
+    setCurrentInterval(initialInterval); // Reset backoff when manually starting
     setIsPolling(true);
+  }, [initialInterval]);
+
+  // Handle visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
-  // Single effect handles all polling logic - eliminates dependency cycle
+  // Main polling effect with exponential backoff
   useEffect(() => {
-    // Don't poll if not enabled, no session, or modal already exists
-    if (!enabled || !sessionId || modalData) {
-      setIsPolling(false);
+    // Don't poll if not enabled, no session, modal already exists, or tab not visible
+    if (!enabled || !sessionId || modalData || !isVisible) {
+      if (!isVisible && enabled && sessionId && !modalData) {
+        // Keep isPolling true but don't actually poll when hidden
+        // This way UI shows "polling" but we're paused
+      } else {
+        setIsPolling(false);
+      }
       return;
     }
 
-    let intervalId: NodeJS.Timeout | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
     let isMounted = true;
 
     const checkForModal = async () => {
@@ -85,19 +121,25 @@ export function useModalPolling({
             return;
           }
 
+          // Modal found - reset backoff and stop polling
           setModalData(modal);
           setIsPolling(false);
+          setCurrentInterval(initialInterval);
           onModalReadyRef.current?.(modal);
-
-          // Clear interval since we found a modal
-          if (intervalId) {
-            clearInterval(intervalId);
-            intervalId = null;
-          }
           return;
         }
 
+        // No modal found - increase backoff interval
         setError(null);
+        setCurrentInterval(prev => {
+          const nextInterval = Math.min(prev * 2, maxInterval);
+          return nextInterval;
+        });
+
+        // Schedule next poll with current interval
+        if (isMounted) {
+          timeoutId = setTimeout(checkForModal, intervalRef.current * 2);
+        }
       } catch (err) {
         if (!isMounted) return;
 
@@ -112,28 +154,33 @@ export function useModalPolling({
             setError(err.message);
           }
         }
+
+        // Continue polling even on error, with backoff
+        if (isMounted) {
+          setCurrentInterval(prev => Math.min(prev * 2, maxInterval));
+          timeoutId = setTimeout(checkForModal, intervalRef.current * 2);
+        }
       }
     };
 
     // Start polling
     setIsPolling(true);
     checkForModal(); // Check immediately
-    intervalId = setInterval(checkForModal, pollInterval);
 
     // Cleanup on unmount or dependency change
     return () => {
       isMounted = false;
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
-      setIsPolling(false);
     };
-  }, [enabled, sessionId, modalData, pollInterval]);
+  }, [enabled, sessionId, modalData, isVisible, initialInterval, maxInterval]);
 
   return {
     modalData,
     isPolling,
     error,
+    currentInterval,
     stopPolling,
     startPolling,
     clearModal

@@ -23,6 +23,7 @@ import { VoiceRecorder } from '../components/VoiceRecorder';
 import { ConfirmationModal } from '../components/ConfirmationModal';
 import { SchemaPicker } from '../components/SchemaPicker';
 import { SchemaInfoCard } from '../components/SchemaInfoCard';
+import { ImageUpload } from '../components/ImageUpload';
 import { submitConfirmation } from '../services/api';
 import { getSchema } from '../services/schemaService';
 import type { SchemaListItem, SchemaResponse } from '../types/schema';
@@ -46,6 +47,8 @@ export function DataEntry() {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showChangeSchemaDialog, setShowChangeSchemaDialog] = useState(false);
   const [showSchemaPanel, setShowSchemaPanel] = useState(false);
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(true);
 
   // Poll for confirmation modal
   const {
@@ -56,13 +59,18 @@ export function DataEntry() {
   } = useModalPolling({
     sessionId: session?.id ?? null,
     enabled: session !== null && !isSessionLoading,
-    pollInterval: 2000,
+    initialInterval: 1000, // Start at 1s, will backoff to max 10s
     onModalReady: (modal) => {
       console.log('Modal ready:', modal);
     }
   });
 
-  // No longer auto-create session on mount - user must select schema first
+  // Auto-show modal when new modal data arrives
+  useEffect(() => {
+    if (modalData) {
+      setIsModalVisible(true);
+    }
+  }, [modalData]);
 
   // Fetch full schema details when a schema is selected
   useEffect(() => {
@@ -96,7 +104,11 @@ export function DataEntry() {
   const handleSendMessage = async (content: string) => {
     clearError();
     try {
-      await sendMessageToAgent(content);
+      // Include pending images with the message
+      const imagesToSend = pendingImages.length > 0 ? pendingImages : undefined;
+      await sendMessageToAgent(content, imagesToSend);
+      // Clear images after successful send
+      setPendingImages([]);
     } catch (err) {
       console.error('Failed to send message:', err);
     }
@@ -125,6 +137,7 @@ export function DataEntry() {
       // Reset session after 2 seconds
       setTimeout(() => {
         resetSession();
+        setPendingImages([]);
         setShowSuccessToast(false);
       }, 2000);
     } catch (err) {
@@ -158,6 +171,7 @@ export function DataEntry() {
   const handleConfirmChangeSchema = () => {
     resetSession();
     setSelectedSchema(null);
+    setPendingImages([]);
     setShowChangeSchemaDialog(false);
   };
 
@@ -293,8 +307,18 @@ export function DataEntry() {
             )}
 
             <ChatContainer messages={messages} isLoading={isSessionLoading} />
-            <div className="border-t border-gray-200 p-4 bg-white">
-              <div className="flex gap-3 items-end">
+            <div className="border-t border-gray-200 p-4 bg-white space-y-3">
+              {/* Image Upload Area */}
+              <ImageUpload
+                images={pendingImages}
+                onImagesChange={setPendingImages}
+                disabled={isSessionLoading || Boolean(modalData)}
+                maxImages={5}
+                maxSizeMB={5}
+              />
+              
+              {/* Chat Input Area */}
+              <div className="flex gap-3 items-start">
                 <div className="flex-1">
                   <ChatInput
                     onSendMessage={handleSendMessage}
@@ -302,10 +326,38 @@ export function DataEntry() {
                     placeholder={
                       modalData
                         ? 'Please review the confirmation modal...'
-                        : 'Describe your QC reading (e.g., "Scale shows 150.5 kg")'
+                        : pendingImages.length > 0
+                          ? 'Describe what the image shows...'
+                          : 'Describe your QC reading (e.g., "Scale shows 150.5 kg")'
                     }
                   />
                 </div>
+                {/* QC Data Toggle Button - Gray when empty, Green when data exists */}
+                <button
+                  onClick={() => setIsModalVisible(true)}
+                  disabled={!modalData}
+                  className={`p-3 rounded-lg transition-all flex items-center justify-center ${
+                    modalData
+                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={modalData ? 'Review QC data' : 'No QC data yet'}
+                >
+                  <div className="relative">
+                    {modalData ? (
+                      <>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-pulse" />
+                      </>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
                 <VoiceRecorder
                   onTranscription={handleTranscription}
                   disabled={isSessionLoading || Boolean(modalData)}
@@ -324,15 +376,18 @@ export function DataEntry() {
             </div>
           </div>
         )}
+
+
       </div>
 
       {/* Confirmation Modal */}
-      {modalData && (
+      {modalData && isModalVisible && (
         <ConfirmationModal
           data={modalData}
           schema={selectedSchema}
           onConfirm={handleConfirm}
           onReject={handleReject}
+          onClose={() => setIsModalVisible(false)}
           isSubmitting={isSubmitting}
         />
       )}

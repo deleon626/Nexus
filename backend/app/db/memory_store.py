@@ -17,6 +17,17 @@ class SessionContext:
     context: Dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
+    ttl_seconds: int = 3600  # Default 1 hour TTL
+    
+    @property
+    def expires_at(self) -> datetime:
+        """Calculate expiration based on last update + TTL."""
+        return self.updated_at + timedelta(seconds=self.ttl_seconds)
+    
+    @property
+    def is_expired(self) -> bool:
+        """Check if session has expired."""
+        return datetime.utcnow() > self.expires_at
 
 
 @dataclass
@@ -47,22 +58,28 @@ class MemoryStore:
         self._session_lock = Lock()
         self._confirmation_lock = Lock()
 
-    def set_session_context(self, session_id: str, context: Dict[str, Any]) -> None:
+    def set_session_context(
+        self, session_id: str, context: Dict[str, Any], ttl_seconds: int = 3600
+    ) -> None:
         """
         Store or update session context.
 
         Args:
             session_id: Session identifier
             context: Context data to store
+            ttl_seconds: Time-to-live in seconds (default: 1 hour)
         """
         with self._session_lock:
             if session_id in self._sessions:
                 self._sessions[session_id].context = context
                 self._sessions[session_id].updated_at = datetime.utcnow()
+                # Extend TTL on activity
+                self._sessions[session_id].ttl_seconds = ttl_seconds
             else:
                 self._sessions[session_id] = SessionContext(
                     session_id=session_id,
-                    context=context
+                    context=context,
+                    ttl_seconds=ttl_seconds
                 )
 
     def get_session_context(self, session_id: str) -> Optional[Dict[str, Any]]:
@@ -178,8 +195,8 @@ class MemoryStore:
                         "session_id": confirmation.session_id,
                         "schema_id": confirmation.schema_id,
                         "extracted_data": confirmation.extracted_data,
-                        "created_at": confirmation.created_at.isoformat(),
-                        "expires_at": confirmation.expires_at.isoformat(),
+                        "created_at": confirmation.created_at.isoformat() + "Z",
+                        "expires_at": confirmation.expires_at.isoformat() + "Z",
                     }
 
             return None
@@ -200,7 +217,7 @@ class MemoryStore:
                 return True
             return False
 
-    def cleanup_expired(self) -> int:
+    def cleanup_expired_confirmations(self) -> int:
         """
         Remove all expired confirmations.
 
@@ -218,6 +235,57 @@ class MemoryStore:
                 del self._confirmations[conf_id]
 
             return len(expired_ids)
+
+    # Alias for backward compatibility
+    cleanup_expired = cleanup_expired_confirmations
+
+    def cleanup_expired_sessions(self) -> int:
+        """
+        Remove all expired sessions.
+
+        Returns:
+            Number of sessions removed
+        """
+        with self._session_lock:
+            expired_ids = [
+                session_id for session_id, session in self._sessions.items()
+                if session.is_expired
+            ]
+
+            for session_id in expired_ids:
+                del self._sessions[session_id]
+
+            return len(expired_ids)
+
+    def cleanup_all_expired(self) -> Dict[str, int]:
+        """
+        Remove all expired sessions and confirmations.
+
+        Returns:
+            Dict with counts: {"sessions": N, "confirmations": M}
+        """
+        sessions_removed = self.cleanup_expired_sessions()
+        confirmations_removed = self.cleanup_expired_confirmations()
+        return {
+            "sessions": sessions_removed,
+            "confirmations": confirmations_removed
+        }
+
+    def get_stats(self) -> Dict[str, int]:
+        """
+        Get current store statistics.
+
+        Returns:
+            Dict with counts: {"sessions": N, "confirmations": M}
+        """
+        with self._session_lock:
+            session_count = len(self._sessions)
+        with self._confirmation_lock:
+            confirmation_count = len(self._confirmations)
+        return {
+            "sessions": session_count,
+            "confirmations": confirmation_count
+        }
 
     def clear_all(self) -> None:
         """Clear all stored data. For testing purposes only."""

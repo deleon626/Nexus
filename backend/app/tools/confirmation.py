@@ -6,13 +6,11 @@ Implements Human-in-the-Loop principle from Constitution.
 """
 
 import logging
-from datetime import datetime, timedelta
-from uuid import uuid4, UUID
+from uuid import uuid4
 
 from agno.tools import tool
 
-from app.db.redis_client import get_redis
-from app.models.agent import ConfirmationModalData, ConfirmationStatus
+from app.db.memory_store import memory_store
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +27,7 @@ def show_confirmation_modal(
     schema_id: str,
 ) -> str:
     """
-    Store confirmation data in Redis for client retrieval.
+    Store confirmation data in memory store for client retrieval.
 
     Args:
         session_id: Current session identifier
@@ -40,43 +38,18 @@ def show_confirmation_modal(
         Confirmation ID for client polling
 
     Raises:
-        RuntimeError: If Redis client not available
+        RuntimeError: If storage fails
     """
     try:
-        redis_client = get_redis()
-
         # Generate confirmation ID
-        confirmation_id = uuid4()
+        confirmation_id = str(uuid4())
 
-        # Create confirmation data with expiration
-        now = datetime.utcnow()
-        expires_at = now + timedelta(minutes=15)
-
-        confirmation_data = ConfirmationModalData(
+        # Store in memory store (handles expiration internally)
+        memory_store.store_confirmation(
             confirmation_id=confirmation_id,
-            session_id=UUID(session_id),
-            schema_id=UUID(schema_id),
+            session_id=session_id,
+            schema_id=schema_id,
             extracted_data=extracted_data,
-            created_at=now,
-            expires_at=expires_at,
-            status=ConfirmationStatus.PENDING,
-        )
-
-        # Store in Redis with TTL
-        redis_key = f"modal:{session_id}"
-        redis_client.setex(
-            redis_key,
-            900,  # 15 minutes TTL
-            confirmation_data.model_dump_json(),
-        )
-
-        # Store reverse lookup: confirmation_id -> session_id
-        # This allows commit_qc_data to find the session from confirmation_id
-        reverse_key = f"confirmation:{confirmation_id}"
-        redis_client.setex(
-            reverse_key,
-            900,  # Same 15 minutes TTL
-            session_id,
         )
 
         logger.info(
@@ -90,9 +63,6 @@ def show_confirmation_modal(
             f"Waiting for user to confirm or modify the extracted data."
         )
 
-    except RuntimeError as e:
-        logger.error(f"Redis client not available: {e}")
-        raise
     except Exception as e:
         logger.error(f"Failed to create confirmation modal: {e}")
         raise RuntimeError(f"Confirmation modal creation failed: {e}") from e

@@ -21,6 +21,7 @@ node_modules/
 web/node_modules/
 web/dist/
 web/.vite/
+pnpm-lock.yaml
 
 # IDE
 .vscode/
@@ -43,6 +44,9 @@ Thumbs.db
 postgres-data/
 storage-data/
 redis-data/
+
+# Archive (abandoned/experimental code)
+.archive/
 
 # Misc
 .claude/

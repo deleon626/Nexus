@@ -80,9 +80,9 @@ export function VoiceRecorder({ onTranscription, disabled = false }: VoiceRecord
         disabled={disabled}
         className={`relative p-3 rounded-full transition-all ${
           isRecording
-            ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-blue-600 hover:bg-blue-700'
-        } disabled:bg-gray-300 disabled:cursor-not-allowed text-white shadow-lg`}
+            ? 'bg-destructive hover:bg-destructive/90 animate-pulse'
+            : 'bg-primary hover:bg-primary/90'
+        } disabled:bg-muted disabled:cursor-not-allowed text-primary-foreground shadow-lg`}
         title={isRecording ? 'Stop recording' : 'Start recording'}
       >
         {isRecording ? (
@@ -109,21 +109,21 @@ export function VoiceRecorder({ onTranscription, disabled = false }: VoiceRecord
 
         {isRecording && (
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
           </span>
         )}
       </button>
 
       {isRecording && (
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+        <div className="flex items-center gap-2 text-sm text-foreground">
+          <span className="w-2 h-2 bg-destructive rounded-full animate-pulse"></span>
           <span className="font-mono font-medium">{formatDuration(duration)}</span>
         </div>
       )}
 
       {error && (
-        <div className="text-xs text-red-600 max-w-xs">
+        <div className="text-xs text-destructive max-w-xs">
           {error}
         </div>
       )}

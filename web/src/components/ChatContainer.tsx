@@ -28,7 +28,7 @@ export function ChatContainer({ messages, isLoading = false }: ChatContainerProp
 
   if (messages.length === 0 && !isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500 p-8">
+      <div className="flex-1 flex items-center justify-center text-muted-foreground p-8">
         <div className="text-center">
           <div className="text-lg font-medium mb-2">No messages yet</div>
           <div className="text-sm">Start a conversation by typing a message below</div>
@@ -40,7 +40,7 @@ export function ChatContainer({ messages, isLoading = false }: ChatContainerProp
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
+      className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted"
     >
       {messages.map((message) => (
         <ChatMessage key={message.id} message={message} />
@@ -48,14 +48,14 @@ export function ChatContainer({ messages, isLoading = false }: ChatContainerProp
 
       {isLoading && (
         <div className="flex justify-start mb-4">
-          <div className="bg-gray-100 border border-gray-200 rounded-lg px-4 py-3">
+          <div className="bg-muted border border rounded-lg px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="animate-pulse flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animation-delay-200"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animation-delay-400"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animation-delay-200"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animation-delay-400"></div>
               </div>
-              <span className="text-sm text-gray-600">AI is thinking...</span>
+              <span className="text-sm text-muted-foreground">AI is thinking...</span>
             </div>
           </div>
         </div>

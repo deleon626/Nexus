@@ -74,17 +74,17 @@ export function ChatInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="flex-1 resize-none border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed max-h-32 overflow-y-auto"
+          className="flex-1 resize-none border border-input rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-muted disabled:cursor-not-allowed max-h-32 overflow-y-auto"
         />
         <button
           type="submit"
           disabled={disabled || !message.trim()}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed transition-colors font-medium"
         >
           Send
         </button>
       </div>
-      <div className="text-xs text-gray-500 mt-2">
+      <div className="text-xs text-muted-foreground mt-2">
         Press Enter to send, Shift+Enter for new line
       </div>
     </form>

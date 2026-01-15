@@ -48,11 +48,11 @@ export function SchemaPicker({
   if (error) {
     return (
       <div className="space-y-2">
-        <div className="flex items-center justify-between p-3 border border-red-300 bg-red-50 rounded-md">
-          <span className="text-sm text-red-800">{error}</span>
+        <div className="flex items-center justify-between p-3 border border-destructive bg-destructive/10 rounded-md">
+          <span className="text-sm text-destructive">{error}</span>
           <button
             onClick={refresh}
-            className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded transition-colors"
+            className="px-3 py-1 text-sm bg-destructive/20 hover:bg-destructive/30 text-destructive rounded transition-colors"
           >
             Retry
           </button>

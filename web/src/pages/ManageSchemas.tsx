@@ -231,7 +231,7 @@ export function ManageSchemas() {
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'list'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground'
               }`}
             >
               All Schemas
@@ -241,7 +241,7 @@ export function ManageSchemas() {
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'create'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground'
               }`}
             >
               Create New
@@ -333,12 +333,12 @@ export function ManageSchemas() {
                       {editingSchema ? `Editing: ${schemaName}` : schemaName}
                     </h2>
                     {editingSchema && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
                         v{editingSchema.version} → New Version
                       </span>
                     )}
                     {saveSuccess && (
-                      <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+                      <span className="text-sm text-success bg-success/10 px-2 py-1 rounded">
                         ✓ {successMessage || 'Saved successfully'}
                       </span>
                     )}

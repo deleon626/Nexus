@@ -23,8 +23,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div
         className={`max-w-[70%] rounded-lg px-4 py-2 ${
           isUser
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-100 text-gray-900 border border-gray-200'
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted text-foreground border border'
         }`}
       >
         <div className="text-sm font-medium mb-1">
@@ -35,7 +35,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
         <div
           className={`text-xs mt-2 ${
-            isUser ? 'text-blue-100' : 'text-gray-500'
+            isUser ? 'text-primary-foreground/80' : 'text-muted-foreground'
           }`}
         >
           {new Date(message.created_at).toLocaleTimeString()}

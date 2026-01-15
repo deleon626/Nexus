@@ -187,6 +187,64 @@ result = show_confirmation_modal.entrypoint(
 - Use React Router for page navigation
 - Supabase client initialized in `src/services/supabase.ts`
 
+### Frontend Styling - Semantic Design Tokens
+
+**ALWAYS use semantic design tokens instead of hardcoded colors.** This ensures theme consistency and enables dark mode support.
+
+**Design Tokens**: `@web/src/styles/design-tokens.css`
+
+#### Token Mapping Reference
+
+| ❌ Avoid Hardcoded | ✅ Use Semantic Token |
+|-------------------|----------------------|
+| `bg-gray-50`, `bg-gray-100` | `bg-muted`, `bg-accent` |
+| `text-gray-500`, `text-gray-600` | `text-muted-foreground` |
+| `text-gray-700`, `text-gray-900` | `text-foreground`, `text-primary` |
+| `border-gray-200`, `border-gray-300` | `border`, `border-input` |
+| `bg-blue-50`, `bg-blue-100` | `bg-primary/10`, `bg-primary/20` |
+| `bg-blue-600`, `text-blue-600` | `bg-primary`, `text-primary` |
+| `hover:bg-blue-700` | `hover:bg-primary/90` |
+| `bg-green-50`, `bg-green-500` | `bg-success/10`, `bg-success` |
+| `text-green-600` | `text-success` |
+| `bg-red-50`, `bg-red-500` | `bg-destructive/10`, `bg-destructive` |
+| `text-red-600`, `text-red-700` | `text-destructive` |
+| `bg-white` | `bg-card` |
+| `bg-black` | Use `bg-background` in dark mode |
+
+#### Available Semantic Tokens
+
+**Colors:**
+- `primary`, `primary-foreground` - Primary actions/brand
+- `secondary`, `secondary-foreground` - Secondary elements
+- `success`, `success-foreground` - Success states (green)
+- `destructive`, `destructive-foreground` - Error/danger states (red)
+- `muted`, `muted-foreground` - Disabled/subtle text
+- `accent`, `accent-foreground` - Highlighted elements
+- `background`, `foreground` - Base page colors
+- `card`, `card-foreground` - Card/panel backgrounds
+- `border`, `input`, `ring` - Form elements
+
+**Usage:**
+```tsx
+// ✅ Good - semantic tokens
+<button className="bg-primary text-primary-foreground hover:bg-primary/90">
+<div className="bg-card border border-muted-foreground text-foreground">
+<span className="text-success">Success message</span>
+
+// ❌ Bad - hardcoded colors
+<button className="bg-blue-600 text-white hover:bg-blue-700">
+<div className="bg-white border border-gray-200 text-gray-900">
+<span className="text-green-600">Success message</span>
+```
+
+#### Rules
+
+1. **Never use hardcoded color values** (`blue-600`, `gray-500`, `red-50`, etc.)
+2. **Always prefer semantic tokens** for colors, backgrounds, borders
+3. **Use opacity modifiers** for variations (`bg-primary/10`, `text-destructive/80`)
+4. **Refer to `design-tokens.css`** for available tokens before creating new styles
+5. **Test in both themes** - tokens automatically adapt to light/dark mode
+
 ### File Naming
 - Backend: `snake_case.py` (PEP 8)
 - Frontend: `camelCase.ts/.tsx`

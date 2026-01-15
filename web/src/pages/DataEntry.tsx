@@ -182,9 +182,9 @@ export function DataEntry() {
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <h1 className="text-2xl font-semibold text-gray-900">QC Data Entry</h1>
-        <p className="text-sm text-gray-600 mt-1">
+      <div className="bg-card border-b border px-6 py-4">
+        <h1 className="text-2xl font-semibold text-foreground">QC Data Entry</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Describe your QC readings and the AI will help extract and validate the data
         </p>
       </div>
@@ -193,15 +193,15 @@ export function DataEntry() {
       <div className="flex-1 flex flex-col">
         {/* Error Display */}
         {(sessionError || pollingError) && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mx-4 mt-4">
+          <div className="bg-destructive/10 border-l-4 border-destructive p-4 mx-4 mt-4">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-destructive" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">
+                <p className="text-sm text-destructive">
                   {sessionError || pollingError}
                 </p>
               </div>
@@ -214,8 +214,8 @@ export function DataEntry() {
           <div className="flex items-center justify-center p-8">
             <div className="w-full max-w-md space-y-4">
               <div className="text-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Select QC Schema</h2>
-                <p className="text-sm text-gray-600">Choose the schema for this QC session</p>
+                <h2 className="text-lg font-semibold text-foreground mb-2">Select QC Schema</h2>
+                <p className="text-sm text-muted-foreground">Choose the schema for this QC session</p>
               </div>
 
               <SchemaPicker
@@ -228,8 +228,8 @@ export function DataEntry() {
               {selectedSchema && (
                 <div className="mt-4">
                   {isLoadingSchema ? (
-                    <div className="animate-pulse bg-gray-100 rounded-lg h-32 flex items-center justify-center">
-                      <span className="text-sm text-gray-500">Loading schema details...</span>
+                    <div className="animate-pulse bg-muted rounded-lg h-32 flex items-center justify-center">
+                      <span className="text-sm text-muted-foreground">Loading schema details...</span>
                     </div>
                   ) : fullSchemaData ? (
                     <SchemaInfoCard
@@ -240,8 +240,8 @@ export function DataEntry() {
                       defaultCollapsed={false}
                     />
                   ) : selectedSchema.id === 'default-schema' ? (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
-                      <p className="font-medium text-gray-700 mb-1">Default Schema</p>
+                    <div className="bg-muted border border rounded-lg p-4 text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground mb-1">Default Schema</p>
                       <p>Basic QC data entry without predefined fields. The AI will extract data based on your input.</p>
                     </div>
                   ) : null}
@@ -251,7 +251,7 @@ export function DataEntry() {
               <button
                 onClick={handleStartSession}
                 disabled={!selectedSchema || isSessionLoading}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+                className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isSessionLoading ? 'Starting Session...' : 'Start Session'}
               </button>
@@ -264,17 +264,17 @@ export function DataEntry() {
           <>
             {/* Selected Schema Info Bar + Collapsible Panel */}
             {selectedSchema && (
-              <div className="bg-blue-50 border-b border-blue-100">
+              <div className="bg-primary/10 border-b border-primary/20">
                 {/* Info bar row */}
                 <div className="px-6 py-3 flex items-center justify-between">
-                  <div className="text-sm text-blue-800">
+                  <div className="text-sm text-foreground">
                     <span className="font-medium">Schema:</span> {selectedSchema.form_name} (v{selectedSchema.version})
                   </div>
                   <div className="flex items-center gap-3">
                     {fullSchemaData && (
                       <button
                         onClick={() => setShowSchemaPanel(!showSchemaPanel)}
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
                       >
                         <span>{showSchemaPanel ? 'Hide Details' : 'View Details'}</span>
                         <svg className={`w-4 h-4 transition-transform ${showSchemaPanel ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -284,7 +284,7 @@ export function DataEntry() {
                     )}
                     <button
                       onClick={handleChangeSchema}
-                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-sm text-primary hover:text-primary/80 hover:underline"
                     >
                       Change Schema
                     </button>
@@ -293,7 +293,7 @@ export function DataEntry() {
 
                 {/* Collapsible panel */}
                 {showSchemaPanel && fullSchemaData && (
-                  <div className="px-6 pb-4 border-t border-blue-100 bg-white max-h-64 overflow-y-auto">
+                  <div className="px-6 pb-4 border-t border-primary/20 bg-card max-h-64 overflow-y-auto">
                     <SchemaInfoCard
                       formName={fullSchemaData.form_name}
                       formCode={fullSchemaData.form_code}
@@ -307,7 +307,7 @@ export function DataEntry() {
             )}
 
             <ChatContainer messages={messages} isLoading={isSessionLoading} />
-            <div className="border-t border-gray-200 p-4 bg-white space-y-3">
+            <div className="border-t border p-4 bg-card space-y-3">
               {/* Image Upload Area */}
               <ImageUpload
                 images={pendingImages}
@@ -338,8 +338,8 @@ export function DataEntry() {
                   disabled={!modalData}
                   className={`p-3 rounded-lg transition-all flex items-center justify-center ${
                     modalData
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? 'bg-success hover:bg-success/90 text-success-foreground'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed'
                   }`}
                   title={modalData ? 'Review QC data' : 'No QC data yet'}
                 >
@@ -369,9 +369,9 @@ export function DataEntry() {
 
         {/* Polling Indicator */}
         {isPolling && !modalData && (
-          <div className="absolute bottom-24 right-6 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 shadow-lg">
-            <div className="flex items-center gap-2 text-sm text-blue-700">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          <div className="absolute bottom-24 right-6 bg-primary/10 border border-primary/20 rounded-lg px-4 py-2 shadow-lg">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               <span>Checking for confirmation...</span>
             </div>
           </div>
@@ -394,14 +394,14 @@ export function DataEntry() {
 
       {/* Success Toast */}
       {showSuccessToast && (
-        <div className="fixed top-6 right-6 bg-green-50 border border-green-200 rounded-lg px-6 py-4 shadow-lg z-50 animate-fade-in">
+        <div className="fixed top-6 right-6 bg-success/10 border border-success/20 rounded-lg px-6 py-4 shadow-lg z-50 animate-fade-in">
           <div className="flex items-center gap-3">
-            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-green-900">Success!</p>
-              <p className="text-xs text-green-700">QC data submitted successfully</p>
+              <p className="text-sm font-medium text-foreground">Success!</p>
+              <p className="text-xs text-success">QC data submitted successfully</p>
             </div>
           </div>
         </div>
@@ -410,23 +410,23 @@ export function DataEntry() {
       {/* Change Schema Confirmation Dialog */}
       {showChangeSchemaDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-card rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Change Schema?
             </h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               Changing the schema will end your current session. Any unsaved conversation data will be lost.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={handleCancelChangeSchema}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-foreground bg-muted rounded-lg hover:bg-accent transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmChangeSchema}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-primary-foreground bg-destructive rounded-lg hover:bg-destructive/90 transition-colors"
               >
                 Yes, Change Schema
               </button>

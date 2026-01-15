@@ -148,8 +148,8 @@ export function ImageUpload({
         onDrop={handleDrop}
         className={`
           relative border-2 border-dashed rounded-lg p-3 text-center cursor-pointer transition-colors
-          ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-          ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'hover:bg-gray-50'}
+          ${isDragging ? 'border-primary bg-primary/10' : 'border-input hover:border-muted-foreground'}
+          ${disabled ? 'opacity-50 cursor-not-allowed bg-muted' : 'hover:bg-muted'}
         `}
       >
         <input
@@ -161,8 +161,8 @@ export function ImageUpload({
           disabled={disabled}
           className="hidden"
         />
-        
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -177,7 +177,7 @@ export function ImageUpload({
 
       {/* Error Message */}
       {error && (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-xs text-destructive">{error}</p>
       )}
 
       {/* Image Previews */}
@@ -186,7 +186,7 @@ export function ImageUpload({
           {images.map((base64, index) => (
             <div
               key={index}
-              className="relative group w-16 h-16 rounded-lg overflow-hidden border border-gray-200"
+              className="relative group w-16 h-16 rounded-lg overflow-hidden border border"
             >
               <img
                 src={`data:image/jpeg;base64,${base64}`}

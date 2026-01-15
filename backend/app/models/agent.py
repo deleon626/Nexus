@@ -59,7 +59,7 @@ class ConfirmationModalData(BaseModel):
 
     confirmation_id: UUID
     session_id: UUID
-    schema_id: UUID
+    schema_id: Optional[UUID] = None
     extracted_data: dict
     created_at: datetime
     expires_at: datetime

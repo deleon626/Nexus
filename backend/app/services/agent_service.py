@@ -5,8 +5,8 @@ Provides AI agent functionality using Agno framework with OpenRouter.
 Handles QC data extraction, validation, and conversation management.
 """
 
-import json
 import logging
+from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
 
 from agno.agent import Agent
@@ -19,6 +19,7 @@ from app.models.agent import ImageInput, ConfirmationRequest
 from app.tools.confirmation import show_confirmation_modal
 from app.tools.commit import commit_qc_data
 from app.db.memory_store import MemoryStore
+from app.services.schema_service import SchemaService
 
 
 logger = logging.getLogger(__name__)
@@ -111,6 +112,11 @@ When you extract data from images or voice:
 - Note any quality issues or anomalies
 - Ask clarifying questions if data is unclear
 - NEVER commit data without user confirmation
+
+IMPORTANT: When calling tools like show_confirmation_modal or commit_qc_data:
+- Use the EXACT session_id provided at the start of the message (in [Session ID: xxx] format)
+- Use the schema_id from the schema context if provided
+- Never generate or guess these IDs - they must match the actual session
 """
 
         try:
@@ -148,6 +154,51 @@ When you extract data from images or voice:
             elif img_input.base64:
                 agno_images.append(Image(content=img_input.base64))
         return agno_images
+
+    async def _get_schema_context(self, schema_id: str) -> str:
+        """
+        Fetch schema and format as context for agent.
+
+        Args:
+            schema_id: Schema identifier
+
+        Returns:
+            Formatted schema context string or empty string if unavailable
+        """
+        if not schema_id or schema_id == "default-schema":
+            return ""
+
+        try:
+            service = SchemaService()
+            schema = await service.get_schema_by_id(schema_id)
+            if not schema:
+                return ""
+
+            # Format fields for agent context
+            fields = []
+            schema_def = schema.schema_definition
+
+            # Per-sample fields
+            for field in schema_def.get("per_sample_fields", []):
+                field_info = f"- {field['label']} ({field['id']}): {field['field_type']}"
+                if field.get("required"):
+                    field_info += " [REQUIRED]"
+                if field.get("unit"):
+                    field_info += f" (unit: {field['unit']})"
+                fields.append(field_info)
+
+            # Batch metadata fields
+            for field in schema_def.get("batch_metadata_fields", []):
+                field_info = f"- {field['label']} ({field['id']}): {field['field_type']} [BATCH]"
+                fields.append(field_info)
+
+            if not fields:
+                return ""
+
+            return f"\n\n[Schema ID: {schema_id}]\nQC Schema Fields:\n" + "\n".join(fields)
+        except Exception as e:
+            logger.warning(f"Failed to fetch schema context for {schema_id}: {e}")
+            return ""
 
     async def _load_session_context(self, session_id: str) -> dict:
         """
@@ -209,20 +260,54 @@ When you extract data from images or voice:
             if session_id:
                 context = await self._load_session_context(session_id)
 
+            # Get schema context to enhance agent's understanding
+            schema_id = context.get("schema_id")
+            schema_context = await self._get_schema_context(schema_id)
+
             # Convert images to Agno Image objects
             agno_images = []
             if images:
                 agno_images = self._convert_images(images)
 
-            # Build conversation history from context
-            # For now, just pass the current message
-            # Future: Include full message history from context["messages"]
+            # Build conversation history from context (last 10 messages max)
+            conversation_history = ""
+            messages_list = context.get("messages", [])
+            if messages_list:
+                # Take last 10 messages to avoid context overflow
+                recent_messages = messages_list[-10:]
+                history_parts = []
+                for msg in recent_messages:
+                    role = msg.get("role", "unknown")
+                    content = msg.get("content", "")
+                    if role == "user":
+                        history_parts.append(f"User: {content}")
+                    elif role == "assistant":
+                        history_parts.append(f"Assistant: {content}")
+                    elif role == "system":
+                        history_parts.append(f"[System: {content}]")
+                if history_parts:
+                    conversation_history = (
+                        "\n\n--- Previous Conversation ---\n"
+                        + "\n".join(history_parts)
+                        + "\n--- End Previous Conversation ---\n\n"
+                    )
 
-            # Run agent with message and images
+            # Build enhanced message with schema context and history
+            enhanced_message = message
+            if conversation_history:
+                enhanced_message = f"{conversation_history}Current message: {message}"
+            if schema_context:
+                enhanced_message = f"{enhanced_message}{schema_context}"
+            
+            # Include session_id so agent tools can use the correct ID
+            if session_id:
+                enhanced_message = f"[Session ID: {session_id}]\n{enhanced_message}"
+
+            # Run agent with enhanced message and images
             if agno_images:
-                response = self.agent.run(message, images=agno_images)
+                response = self.agent.run(enhanced_message, images=agno_images)
             else:
-                response = self.agent.run(message)
+                response = self.agent.run(enhanced_message)
 
             # Update context with new message and response
             if session_id:
@@ -230,7 +315,7 @@ When you extract data from images or voice:
                     {
                         "role": "user",
                         "content": message,
-                        "timestamp": str(json.dumps(None)),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 response_content = (
@@ -240,7 +325,7 @@ When you extract data from images or voice:
                     {
                         "role": "assistant",
                         "content": response_content,
-                        "timestamp": str(json.dumps(None)),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)
@@ -281,19 +366,57 @@ When you extract data from images or voice:
             if session_id:
                 context = await self._load_session_context(session_id)
 
+            # Get schema context to enhance agent's understanding
+            schema_id = context.get("schema_id")
+            schema_context = await self._get_schema_context(schema_id)
+
             # Convert images to Agno Image objects
             agno_images = []
             if images:
                 agno_images = self._convert_images(images)
 
+            # Build conversation history from context (last 10 messages max)
+            conversation_history = ""
+            messages_list = context.get("messages", [])
+            if messages_list:
+                # Take last 10 messages to avoid context overflow
+                recent_messages = messages_list[-10:]
+                history_parts = []
+                for msg in recent_messages:
+                    role = msg.get("role", "unknown")
+                    content = msg.get("content", "")
+                    if role == "user":
+                        history_parts.append(f"User: {content}")
+                    elif role == "assistant":
+                        history_parts.append(f"Assistant: {content}")
+                    elif role == "system":
+                        history_parts.append(f"[System: {content}]")
+                if history_parts:
+                    conversation_history = (
+                        "\n\n--- Previous Conversation ---\n"
+                        + "\n".join(history_parts)
+                        + "\n--- End Previous Conversation ---\n\n"
+                    )
+
+            # Build enhanced message with schema context and history
+            enhanced_message = message
+            if conversation_history:
+                enhanced_message = f"{conversation_history}Current message: {message}"
+            if schema_context:
+                enhanced_message = f"{enhanced_message}{schema_context}"
+            
+            # Include session_id so agent tools can use the correct ID
+            if session_id:
+                enhanced_message = f"[Session ID: {session_id}]\n{enhanced_message}"
+
             # Stream response from agent
             full_response = ""
             if agno_images:
-                for chunk in self.agent.run(message, images=agno_images, stream=True):
+                for chunk in self.agent.run(enhanced_message, images=agno_images, stream=True):
                     full_response += str(chunk)
                     yield str(chunk)
             else:
-                for chunk in self.agent.run(message, stream=True):
+                for chunk in self.agent.run(enhanced_message, stream=True):
                     full_response += str(chunk)
                     yield str(chunk)
 
@@ -303,14 +426,14 @@ When you extract data from images or voice:
                     {
                         "role": "user",
                         "content": message,
-                        "timestamp": str(json.dumps(None)),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 context["messages"].append(
                     {
                         "role": "assistant",
                         "content": full_response,
-                        "timestamp": str(json.dumps(None)),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)
@@ -373,7 +496,7 @@ When you extract data from images or voice:
                     {
                         "role": "system",
                         "content": f"User confirmed data. {commit_result}",
-                        "timestamp": str(json.dumps(None)),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)
@@ -392,7 +515,7 @@ When you extract data from images or voice:
                     {
                         "role": "system",
                         "content": "User rejected the extracted data.",
-                        "timestamp": str(json.dumps(None)),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
                 await self._save_session_context(session_id, context)

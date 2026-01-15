@@ -7,7 +7,7 @@ Uses SQLite for persistent storage and in-memory store for session context.
 
 import logging
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse

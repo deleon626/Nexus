@@ -10,7 +10,6 @@ from typing import Optional
 from json_repair import repair_json
 
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db.sqlite import async_session_maker
@@ -41,6 +40,14 @@ class SchemaValidationError(Exception):
     def __init__(self, message: str, field: str = None):
         self.message = message
         self.field = field
+        super().__init__(self.message)
+
+
+class SchemaNotFoundError(Exception):
+    """Raised when a schema is not found."""
+
+    def __init__(self, message: str):
+        self.message = message
         super().__init__(self.message)
 
 
@@ -552,3 +559,72 @@ Return ONLY valid JSON, no markdown or explanation."""
             schema.updated_at = datetime.utcnow()
 
             return True
+
+    async def update_schema(
+        self,
+        schema_id: str,
+        schema_definition: dict,
+        update_reason: Optional[str] = None,
+    ) -> FormTemplate:
+        """
+        Create a new version of an existing schema.
+
+        The original schema is archived (soft deleted) and a new version
+        is created with an incremented version_number.
+
+        Args:
+            schema_id: UUID of the schema to update
+            schema_definition: New schema structure (ExtractedSchemaStructure dict)
+            update_reason: Optional reason for the update
+
+        Returns:
+            New FormTemplate instance with incremented version
+
+        Raises:
+            SchemaNotFoundError: If the original schema is not found
+        """
+        # Fetch original schema
+        original = await self.get_schema_by_id(schema_id)
+        if not original:
+            raise SchemaNotFoundError(f"Schema {schema_id} not found")
+
+        # Archive the original schema
+        await self.archive_schema(schema_id)
+
+        # Calculate new version
+        new_version_number = original.version_number + 1
+        # Parse version string (e.g., "1.0.0" -> "1.0.1")
+        version_parts = original.version.split(".")
+        if len(version_parts) == 3:
+            major, minor, patch = version_parts
+            new_version = f"{major}.{minor}.{new_version_number}"
+        else:
+            # Fallback if version format is unexpected
+            new_version = f"1.0.{new_version_number}"
+
+        # Convert schema_definition to dict if it's a Pydantic model
+        if hasattr(schema_definition, "model_dump"):
+            schema_dict = schema_definition.model_dump()
+        else:
+            schema_dict = schema_definition
+
+        # Create new version
+        async with get_async_session() as session:
+            new_template = FormTemplate(
+                id=str(uuid.uuid4()),
+                form_code=original.form_code,
+                form_name=original.form_name,
+                category=original.category,
+                version=new_version,
+                version_number=new_version_number,
+                schema_definition=schema_dict,
+                status=FormStatus.ACTIVE.value,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            )
+
+            session.add(new_template)
+            await session.flush()
+            await session.refresh(new_template)
+
+            return new_template

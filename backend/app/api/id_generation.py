@@ -9,7 +9,6 @@ from app.models.id_generation import (
     IDRuleParseRequest,
     IDRuleParseResponse,
     IDRuleCreateRequest,
-    IDRuleResponse,
     IDRuleListResponse,
     IDGenerateRequest,
     IDGenerateResponse,

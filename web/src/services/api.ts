@@ -4,8 +4,16 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+/** Pydantic validation error detail item */
+interface ValidationErrorDetail {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+}
+
+/** API error response - detail can be string or Pydantic validation errors */
 export interface ApiError {
-  detail: string;
+  detail: string | ValidationErrorDetail[];
 }
 
 export interface TranscriptionResponse {
@@ -33,8 +41,10 @@ export interface SessionResponse {
 }
 
 export interface MessageResponse {
-  message_id: string;
-  message: string; // Changed from 'response' to 'message' to match backend
+  session_id: string;
+  content: string;
+  role: string;
+  has_pending_confirmation: boolean;
 }
 
 export interface ConfirmationModal {
@@ -100,6 +110,21 @@ async function fetchWithRetry(
 }
 
 /**
+ * Extract error message from API error response.
+ * Handles both string errors and Pydantic validation error arrays.
+ */
+function extractErrorMessage(error: ApiError): string {
+  if (typeof error.detail === 'string') {
+    return error.detail;
+  }
+  // Pydantic validation errors - extract messages from array
+  if (Array.isArray(error.detail) && error.detail.length > 0) {
+    return error.detail.map(e => e.msg).join(', ');
+  }
+  return 'API request failed';
+}
+
+/**
  * Handle API response errors
  */
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -107,7 +132,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const error: ApiError = await response.json().catch(() => ({
       detail: `HTTP ${response.status}: ${response.statusText}`,
     }));
-    throw new Error(error.detail || 'API request failed');
+    throw new Error(extractErrorMessage(error));
   }
   return response.json();
 }
@@ -163,7 +188,7 @@ export async function sendMessage(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message,
+        content: message,
         images: images || [],
       }),
     }
@@ -196,14 +221,20 @@ export async function submitConfirmation(
     user_modifications: Record<string, unknown> | null;
   }
 ): Promise<ConfirmationResponse> {
+  // Map frontend field names to backend expected names
+  const requestBody = {
+    confirmed: data.approved,
+    modifications: data.user_modifications,
+  };
+
   const response = await fetchWithRetry(
-    `${API_BASE_URL}/api/sessions/${sessionId}/confirmation`,
+    `${API_BASE_URL}/api/sessions/${sessionId}/modal/confirm`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestBody),
     }
   );
   return handleResponse<ConfirmationResponse>(response);

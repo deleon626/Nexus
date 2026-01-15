@@ -1,12 +1,10 @@
 """Session management service with SQLite backend."""
 
 import uuid
-from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.db.models import Session as DBSession, Message as DBMessage, Report as DBReport
 

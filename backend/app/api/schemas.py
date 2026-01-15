@@ -1,6 +1,5 @@
 """API routes for schema extraction and management."""
 
-from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
@@ -8,9 +7,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, sta
 from app.models.schema import (
     SchemaExtractionResponse,
     SchemaCreateRequest,
-    SchemaResponse,
-    ExtractedSchemaStructure,
-    ExtractionMetadata,
+    SchemaUpdateRequest,
     FilePreviewInfo,
 )
 from app.services.file_service import (
@@ -18,7 +15,12 @@ from app.services.file_service import (
     save_temp_file_for_preview,
     FileProcessingError,
 )
-from app.services.schema_service import SchemaService, SchemaExtractionError, SchemaValidationError
+from app.services.schema_service import (
+    SchemaService,
+    SchemaExtractionError,
+    SchemaValidationError,
+    SchemaNotFoundError,
+)
 from app.utils.file_validation import validate_upload_file, FileValidationError
 
 router = APIRouter(prefix="/api/schemas", tags=["schemas"])
@@ -222,6 +224,45 @@ async def get_schema(schema_id: str):
         "schema_definition": schema.schema_definition,
         "created_at": schema.created_at.isoformat() if schema.created_at else None,
         "updated_at": schema.updated_at.isoformat() if schema.updated_at else None,
+    }
+
+
+@router.put("/{schema_id}", response_model=dict)
+async def update_schema(schema_id: str, request: SchemaUpdateRequest):
+    """
+    Update schema by creating a new version.
+
+    - **schema_id**: Original schema UUID
+    - **request**: Updated schema definition
+
+    Returns new version with incremented version_number.
+    The original schema is archived (soft deleted).
+    """
+    service = SchemaService()
+
+    try:
+        updated = await service.update_schema(
+            schema_id=schema_id,
+            schema_definition=request.schema_definition,
+            update_reason=request.update_reason,
+        )
+    except SchemaNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Schema {schema_id} not found",
+        )
+
+    return {
+        "id": updated.id,
+        "form_code": updated.form_code,
+        "form_name": updated.form_name,
+        "category": updated.category,
+        "version": updated.version,
+        "version_number": updated.version_number,
+        "status": updated.status,
+        "schema_definition": updated.schema_definition,
+        "created_at": updated.created_at.isoformat() if updated.created_at else None,
+        "updated_at": updated.updated_at.isoformat() if updated.updated_at else None,
     }
 
 

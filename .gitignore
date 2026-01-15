@@ -21,6 +21,8 @@ node_modules/
 web/node_modules/
 web/dist/
 web/.vite/
+.next/
+pnpm-lock.yaml
 
 # IDE
 .vscode/
@@ -44,6 +46,12 @@ postgres-data/
 storage-data/
 redis-data/
 
+# Archive (abandoned/experimental code)
+.archive/
+
 # Misc
 .claude/
 .specify/
+
+# Next.js directory (migration abandoned 2026-01-13)
+web-next/

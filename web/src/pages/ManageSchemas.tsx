@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { SchemaUploader } from '@/components/SchemaUploader';
 import { SchemaPreview } from '@/components/SchemaPreview';
-import { SchemaEditor } from '@/components/SchemaEditor';
+import { VisualSchemaEditor } from '@/components/VisualSchemaEditor';
 import { SchemaList } from '@/components/SchemaList';
 import { ExampleSchemaPanel } from '@/components/ExampleSchemaPanel';
 import DocumentPreview from '@/components/DocumentPreview';
@@ -359,7 +359,7 @@ export function ManageSchemas() {
                   >
                     <TabsList className="grid w-full max-w-md grid-cols-2">
                       <TabsTrigger value="preview">Preview</TabsTrigger>
-                      <TabsTrigger value="edit">Edit JSON</TabsTrigger>
+                      <TabsTrigger value="edit">Visual Editor</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="preview" className="mt-6">
@@ -392,7 +392,7 @@ export function ManageSchemas() {
 
                     <TabsContent value="edit" className="mt-6">
                       {extractedSchema && (
-                        <SchemaEditor
+                        <VisualSchemaEditor
                           schema={extractedSchema}
                           onChange={handleSchemaChange}
                           onSave={handleSaveSchema}

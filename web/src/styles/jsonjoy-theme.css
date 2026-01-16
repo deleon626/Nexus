@@ -1,0 +1,100 @@
+/**
+ * jsonjoy-builder theme bridge
+ * Maps jsonjoy CSS variables to Nexus design tokens (shadcn/ui compatible)
+ */
+
+/* Import the base jsonjoy styles */
+@import 'jsonjoy-builder/styles.css';
+
+/* Override with Nexus design tokens */
+.jsonjoy {
+  /* Core colors - map to shadcn/ui CSS variables */
+  --jsonjoy-background: hsl(var(--background));
+  --jsonjoy-foreground: hsl(var(--foreground));
+  
+  /* Card surfaces */
+  --jsonjoy-card: hsl(var(--card));
+  --jsonjoy-card-foreground: hsl(var(--card-foreground));
+  
+  /* Popover/dropdown */
+  --jsonjoy-popover: hsl(var(--popover));
+  --jsonjoy-popover-foreground: hsl(var(--popover-foreground));
+  
+  /* Primary action color */
+  --jsonjoy-primary: hsl(var(--primary));
+  --jsonjoy-primary-foreground: hsl(var(--primary-foreground));
+  
+  /* Secondary/muted elements */
+  --jsonjoy-secondary: hsl(var(--secondary));
+  --jsonjoy-secondary-foreground: hsl(var(--secondary-foreground));
+  --jsonjoy-muted: hsl(var(--muted));
+  --jsonjoy-muted-foreground: hsl(var(--muted-foreground));
+  
+  /* Accent color */
+  --jsonjoy-accent: hsl(var(--accent));
+  --jsonjoy-accent-foreground: hsl(var(--accent-foreground));
+  
+  /* Destructive/error */
+  --jsonjoy-destructive: hsl(var(--destructive));
+  --jsonjoy-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  /* Borders and inputs */
+  --jsonjoy-border: hsl(var(--border));
+  --jsonjoy-input: hsl(var(--input));
+  --jsonjoy-ring: hsl(var(--ring));
+  
+  /* Border radius - match Nexus rounded corners */
+  --jsonjoy-radius: var(--radius);
+  
+  /* Typography - use system font stack */
+  --jsonjoy-font-sans: var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+}
+
+/* Dark mode support - automatically applied when .dark class is on parent */
+.dark .jsonjoy {
+  /* Dark mode variables are inherited from shadcn/ui dark theme */
+  /* No overrides needed if shadcn properly sets CSS variables */
+}
+
+/* Additional Nexus-specific styling */
+.jsonjoy {
+  /* Ensure proper font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Match Nexus spacing */
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Style the schema editor container */
+.jsonjoy-editor-container {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Improve button styles to match shadcn */
+.jsonjoy button {
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.jsonjoy button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Input field styling */
+.jsonjoy input,
+.jsonjoy select,
+.jsonjoy textarea {
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.jsonjoy input:focus,
+.jsonjoy select:focus,
+.jsonjoy textarea:focus {
+  outline: none;
+  ring: 2px solid hsl(var(--ring));
+}

@@ -13,5 +13,17 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     open: true
-  }
+  },
+  optimizeDeps: {
+    include: [
+      'jsonjoy-builder',
+      'monaco-editor',
+      'monaco-editor/esm/vs/editor/editor.api',
+    ],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/jsonjoy-builder/, /node_modules/],
+    },
+  },
 })

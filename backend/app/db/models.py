@@ -202,6 +202,12 @@ class FormTemplate(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     updated_by: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
 
+    # Source Document Storage
+    source_document_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    source_document_filename: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    source_document_size: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    source_document_mime_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
     # Relationships
     submissions: Mapped[list["FormSubmission"]] = relationship(
         "FormSubmission",

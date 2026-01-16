@@ -1,11 +1,12 @@
 /**
- * Hook for fetching and managing schema list with search.
+ * Hook for fetching and managing schema list with search and selection.
  *
  * Handles:
  * - Fetching schemas on mount with pagination
  * - Client-side search filtering by form_name and form_code
  * - Loading and error states
  * - Manual refresh capability
+ * - Multi-select for bulk operations
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -25,6 +26,13 @@ interface UseSchemaListReturn {
   setSearchTerm: (term: string) => void;
   refresh: () => Promise<void>;
   total: number;
+  // Selection state
+  selectedIds: Set<string>;
+  toggleSelection: (id: string) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  isAllSelected: boolean;
+  selectedCount: number;
 }
 
 export function useSchemaList(options: UseSchemaListOptions = {}): UseSchemaListReturn {
@@ -35,6 +43,7 @@ export function useSchemaList(options: UseSchemaListOptions = {}): UseSchemaList
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [total, setTotal] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const fetchSchemas = useCallback(async () => {
     setIsLoading(true);
@@ -57,6 +66,11 @@ export function useSchemaList(options: UseSchemaListOptions = {}): UseSchemaList
     fetchSchemas();
   }, [fetchSchemas]);
 
+  // Clear selection when schemas change (e.g., after refresh)
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [schemas]);
+
   // Client-side search filtering (memoized for performance)
   const filteredSchemas = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -70,6 +84,33 @@ export function useSchemaList(options: UseSchemaListOptions = {}): UseSchemaList
     );
   }, [schemas, searchTerm]);
 
+  // Selection handlers
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedIds(new Set(filteredSchemas.map((s) => s.id)));
+  }, [filteredSchemas]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const isAllSelected = useMemo(() => {
+    return filteredSchemas.length > 0 && filteredSchemas.every((s) => selectedIds.has(s.id));
+  }, [filteredSchemas, selectedIds]);
+
+  const selectedCount = selectedIds.size;
+
   return {
     schemas,
     filteredSchemas,
@@ -79,5 +120,12 @@ export function useSchemaList(options: UseSchemaListOptions = {}): UseSchemaList
     setSearchTerm,
     refresh: fetchSchemas,
     total,
+    // Selection state
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    isAllSelected,
+    selectedCount,
   };
 }

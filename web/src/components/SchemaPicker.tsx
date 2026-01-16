@@ -72,7 +72,8 @@ export function SchemaPicker({
         version: '1.0.0',
         version_number: 1,
         status: 'active',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        has_source_document: false
       };
       onSelect(value, defaultSchema);
     } else {

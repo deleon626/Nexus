@@ -3,16 +3,20 @@
  *
  * Features:
  * - Search by form name or code
+ * - Multi-select with checkboxes for bulk operations
+ * - Bulk archive with confirmation dialog
  * - Loading skeleton state
  * - Error state with retry
- * - Edit and Archive actions
+ * - Edit, Archive, and View Document actions
  */
 
+import { useState } from 'react';
 import { useSchemaList } from '../hooks/useSchemaList';
 import { Skeleton } from './ui/skeleton';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { Checkbox } from './ui/checkbox';
 import {
   Table,
   TableBody,
@@ -21,8 +25,11 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table';
-import { deleteSchema } from '../services/schemaService';
+import { BulkActionBar } from './BulkActionBar';
+import { BulkConfirmDialog } from './BulkConfirmDialog';
+import { deleteSchema, bulkArchiveSchemas, getSchemaDocumentUrl } from '../services/schemaService';
 import type { SchemaListItem } from '../types/schema';
+import { FileText } from 'lucide-react';
 
 interface SchemaListProps {
   onEdit?: (schema: SchemaListItem) => void;
@@ -37,7 +44,16 @@ export function SchemaList({ onEdit, onArchive }: SchemaListProps) {
     searchTerm,
     setSearchTerm,
     refresh,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    isAllSelected,
+    selectedCount,
   } = useSchemaList();
+
+  const [isBulkArchiving, setIsBulkArchiving] = useState(false);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   const handleArchive = async (schemaId: string) => {
     if (!confirm('Archive this schema? It will no longer appear in the active list.')) {
@@ -51,6 +67,33 @@ export function SchemaList({ onEdit, onArchive }: SchemaListProps) {
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to archive schema');
     }
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedCount === 0) return;
+
+    setIsBulkArchiving(true);
+    try {
+      const result = await bulkArchiveSchemas(Array.from(selectedIds));
+
+      if (result.errors.length > 0) {
+        console.error('Bulk archive errors:', result.errors);
+        alert(`Archived ${result.archived_count} schemas. ${result.errors.length} failed.`);
+      }
+
+      await refresh();
+      clearSelection();
+      setShowBulkConfirm(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to archive schemas');
+    } finally {
+      setIsBulkArchiving(false);
+    }
+  };
+
+  const handleViewDocument = (schemaId: string) => {
+    const url = getSchemaDocumentUrl(schemaId);
+    window.open(url, '_blank');
   };
 
   if (isLoading) {
@@ -102,10 +145,32 @@ export function SchemaList({ onEdit, onArchive }: SchemaListProps) {
             : 'No schemas found. Create your first schema!'}
         </div>
       ) : (
-        <div className="border rounded-lg">
+        <div className="border rounded-lg overflow-hidden">
+          {/* Bulk Action Bar */}
+          <BulkActionBar
+            selectedCount={selectedCount}
+            onArchive={() => setShowBulkConfirm(true)}
+            onClearSelection={clearSelection}
+            isArchiving={isBulkArchiving}
+          />
+
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-14">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        selectAll();
+                      } else {
+                        clearSelection();
+                      }
+                    }}
+                    aria-label="Select all schemas"
+                    className="h-5 w-5"
+                  />
+                </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Version</TableHead>
@@ -115,8 +180,30 @@ export function SchemaList({ onEdit, onArchive }: SchemaListProps) {
             </TableHeader>
             <TableBody>
               {filteredSchemas.map((schema) => (
-                <TableRow key={schema.id}>
-                  <TableCell className="font-medium">{schema.form_name}</TableCell>
+                <TableRow
+                  key={schema.id}
+                  className={selectedIds.has(schema.id) ? 'bg-primary/5' : ''}
+                >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(schema.id)}
+                      onCheckedChange={() => toggleSelection(schema.id)}
+                      aria-label={`Select ${schema.form_name}`}
+                      className="h-5 w-5"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      {schema.form_name}
+                      {schema.has_source_document && (
+                        <FileText
+                          className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-primary"
+                          onClick={() => handleViewDocument(schema.id)}
+                          aria-label="View source document"
+                        />
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {schema.form_code}
                   </TableCell>
@@ -129,6 +216,16 @@ export function SchemaList({ onEdit, onArchive }: SchemaListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
+                    {schema.has_source_document && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewDocument(schema.id)}
+                        aria-label="View source document"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    )}
                     {onEdit && (
                       <Button
                         variant="ghost"
@@ -153,6 +250,15 @@ export function SchemaList({ onEdit, onArchive }: SchemaListProps) {
           </Table>
         </div>
       )}
+
+      {/* Bulk Confirm Dialog */}
+      <BulkConfirmDialog
+        open={showBulkConfirm}
+        onOpenChange={setShowBulkConfirm}
+        selectedCount={selectedCount}
+        onConfirm={handleBulkArchive}
+        isLoading={isBulkArchiving}
+      />
     </div>
   );
 }

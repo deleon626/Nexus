@@ -12,6 +12,8 @@ import { ExampleSchemaPanel } from '@/components/ExampleSchemaPanel';
 import DocumentPreview from '@/components/DocumentPreview';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { extractSchema, createSchema, getSchema, updateSchema } from '@/services/schemaService';
 import {
   EXAMPLE_SCHEMA,
@@ -44,6 +46,10 @@ export function ManageSchemas() {
   const [extractionError, setExtractionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
 
+  // Document storage option (default true when uploading new schema)
+  const [storeDocument, setStoreDocument] = useState<boolean>(true);
+  const [extractionSessionId, setExtractionSessionId] = useState<string | null>(null);
+
   // Edit mode state
   const [editingSchema, setEditingSchema] = useState<SchemaResponse | null>(null);
   const [isLoadingSchema, setIsLoadingSchema] = useState(false);
@@ -51,6 +57,12 @@ export function ManageSchemas() {
   // Client-side preview state (before extraction)
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [clientPreviewUrl, setClientPreviewUrl] = useState<string | null>(null);
+
+  // Track unsaved changes
+  const [originalSchema, setOriginalSchema] = useState<ExtractedSchemaStructure | null>(null);
+  const hasUnsavedChanges = extractedSchema !== null && 
+    originalSchema !== null && 
+    JSON.stringify(extractedSchema) !== JSON.stringify(originalSchema);
 
   // Clean up object URL when component unmounts or file changes
   useEffect(() => {
@@ -60,6 +72,19 @@ export function ManageSchemas() {
       }
     };
   }, [clientPreviewUrl]);
+
+  // Warn user before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Handle file selection (before extraction)
   const handleFileSelect = (file: File | null) => {
@@ -82,6 +107,7 @@ export function ManageSchemas() {
     setError(null);
     setExtractionError(null);
     setSchemaName(name);
+    setStoreDocument(true); // Default to storing document for new uploads
 
     try {
       const response = await extractSchema(file, name);
@@ -89,9 +115,15 @@ export function ManageSchemas() {
       // Store file preview info from backend
       if (response.file_preview) {
         setFilePreview(response.file_preview);
+        // Extract sessionId from file_preview URL (format: /uploads/temp/{sessionId}_{uuid}.ext)
+        const urlMatch = response.file_preview.url.match(/\/uploads\/temp\/([^_]+)_/);
+        if (urlMatch) {
+          setExtractionSessionId(urlMatch[1]);
+        }
       }
 
       setExtractedSchema(response.extracted_schema);
+      setOriginalSchema(response.extracted_schema); // Track baseline for unsaved changes
       setExtractionMetadata(response.extraction_metadata);
       setConfidenceScore(response.confidence_score);
       setViewMode('preview');
@@ -129,23 +161,26 @@ export function ManageSchemas() {
 
         setSaveSuccess(true);
         setSuccessMessage(`New version created: v${updated.version}`);
-
-        // Reset edit state after save and return to list
-        setTimeout(() => {
-          setEditingSchema(null);
-          setActiveTab('list');
-          handleStartOver();
-        }, 2000);
+        setOriginalSchema(extractedSchema); // Reset baseline after save
+        // User can manually navigate back to Library or continue editing
       } else {
         // Create new schema (existing logic)
-        await createSchema({
-          form_code: schemaName.toLowerCase().replace(/\s+/g, '-'),
-          form_name: schemaName,
-          schema_definition: extractedSchema,
-          extraction_metadata: extractionMetadata || undefined,
-        });
+        // Pass storeDocument and sessionId for document storage
+        await createSchema(
+          {
+            form_code: schemaName.toLowerCase().replace(/\s+/g, '-'),
+            form_name: schemaName,
+            schema_definition: extractedSchema,
+            extraction_metadata: extractionMetadata || undefined,
+          },
+          storeDocument && !!extractionSessionId,
+          extractionSessionId || undefined
+        );
         setSaveSuccess(true);
-        setSuccessMessage('Schema created successfully');
+        setSuccessMessage(storeDocument && extractionSessionId
+          ? 'Schema created with source document'
+          : 'Schema created successfully');
+        setOriginalSchema(extractedSchema); // Reset baseline after save
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to save schema');
@@ -157,6 +192,7 @@ export function ManageSchemas() {
   const handleStartOver = () => {
     setViewMode('upload');
     setExtractedSchema(null);
+    setOriginalSchema(null); // Reset baseline
     setExtractionMetadata(null);
     setConfidenceScore(0);
     setSchemaName('');
@@ -176,10 +212,31 @@ export function ManageSchemas() {
 
   const handleUseExample = () => {
     setExtractedSchema(EXAMPLE_SCHEMA);
+    setOriginalSchema(EXAMPLE_SCHEMA); // Track baseline for unsaved changes
     setExtractionMetadata(EXAMPLE_METADATA);
     setConfidenceScore(EXAMPLE_METADATA.confidence_score);
     setSchemaName(EXAMPLE_SCHEMA_NAME);
     setViewMode('preview');
+  };
+
+  const handleCreateManually = () => {
+    const name = window.prompt('Enter a name for your new schema:');
+    if (!name || !name.trim()) return;
+
+    // Create empty schema structure
+    const emptySchema: ExtractedSchemaStructure = {
+      per_sample_fields: [],
+      sections: [],
+      batch_metadata_fields: [],
+      validation_rules: {},
+    };
+
+    setExtractedSchema(emptySchema);
+    setOriginalSchema(emptySchema);
+    setExtractionMetadata(null);
+    setConfidenceScore(0);
+    setSchemaName(name.trim());
+    setViewMode('edit'); // Go directly to editor
   };
 
   const handleEditSchema = async (schema: SchemaListItem) => {
@@ -190,6 +247,7 @@ export function ManageSchemas() {
       const fullSchema = await getSchema(schema.id);
       setEditingSchema(fullSchema);
       setExtractedSchema(fullSchema.schema_definition);
+      setOriginalSchema(fullSchema.schema_definition); // Track baseline for unsaved changes
       setSchemaName(fullSchema.form_name);
       setActiveTab('create');
       setViewMode('edit');
@@ -213,7 +271,15 @@ export function ManageSchemas() {
               </p>
             </div>
             {activeTab === 'create' && viewMode !== 'upload' && (
-              <Button variant="outline" onClick={handleStartOver}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  if (hasUnsavedChanges && !window.confirm('You have unsaved changes. Are you sure you want to start over?')) {
+                    return;
+                  }
+                  handleStartOver();
+                }}
+              >
                 Start Over
               </Button>
             )}
@@ -227,7 +293,12 @@ export function ManageSchemas() {
         <div className="border-b mb-6">
           <nav className="flex space-x-8">
             <button
-              onClick={() => setActiveTab('list')}
+              onClick={() => {
+                if (hasUnsavedChanges && !window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                  return;
+                }
+                setActiveTab('list');
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'list'
                   ? 'border-primary text-primary'
@@ -237,7 +308,12 @@ export function ManageSchemas() {
               All Schemas
             </button>
             <button
-              onClick={() => setActiveTab('create')}
+              onClick={() => {
+                if (hasUnsavedChanges && !window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                  return;
+                }
+                setActiveTab('create');
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'create'
                   ? 'border-primary text-primary'
@@ -293,8 +369,28 @@ export function ManageSchemas() {
                   </>
                 ) : (
                   <>
-                    <h2 className="text-xl font-semibold">Example Schema</h2>
-                    <ExampleSchemaPanel onUseExample={handleUseExample} />
+                    <h2 className="text-xl font-semibold">Or Start Fresh</h2>
+                    <div className="space-y-4">
+                      {/* Create Manually Option */}
+                      <div className="border rounded-lg p-6 bg-card">
+                        <h3 className="font-medium mb-2">Create from Scratch</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Build your schema manually without uploading a document.
+                        </p>
+                        <Button onClick={handleCreateManually} variant="outline" className="w-full">
+                          Create Manually
+                        </Button>
+                      </div>
+
+                      {/* Example Schema Option */}
+                      <div className="border rounded-lg p-6 bg-card">
+                        <h3 className="font-medium mb-2">Use Example Template</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Start with a pre-configured QC form template.
+                        </p>
+                        <ExampleSchemaPanel onUseExample={handleUseExample} />
+                      </div>
+                    </div>
                   </>
                 )}
               </div>
@@ -371,6 +467,23 @@ export function ManageSchemas() {
                             confidenceScore={confidenceScore}
                           />
 
+                          {/* Document Storage Option (only for new schemas) */}
+                          {!editingSchema && extractionSessionId && (
+                            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                              <Checkbox
+                                id="store-document"
+                                checked={storeDocument}
+                                onCheckedChange={(checked) => setStoreDocument(checked === true)}
+                              />
+                              <Label
+                                htmlFor="store-document"
+                                className="text-sm text-muted-foreground cursor-pointer"
+                              >
+                                Store source document (allows viewing original file later)
+                              </Label>
+                            </div>
+                          )}
+
                           {/* Action Buttons */}
                           <div className="flex gap-4 justify-end">
                             <Button
@@ -392,12 +505,31 @@ export function ManageSchemas() {
 
                     <TabsContent value="edit" className="mt-6">
                       {extractedSchema && (
-                        <VisualSchemaEditor
-                          schema={extractedSchema}
-                          onChange={handleSchemaChange}
-                          onSave={handleSaveSchema}
-                          isLoading={isSaving}
-                        />
+                        <div className="space-y-4">
+                          {/* Document Storage Option (only for new schemas) */}
+                          {!editingSchema && extractionSessionId && (
+                            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                              <Checkbox
+                                id="store-document-edit"
+                                checked={storeDocument}
+                                onCheckedChange={(checked) => setStoreDocument(checked === true)}
+                              />
+                              <Label
+                                htmlFor="store-document-edit"
+                                className="text-sm text-muted-foreground cursor-pointer"
+                              >
+                                Store source document (allows viewing original file later)
+                              </Label>
+                            </div>
+                          )}
+
+                          <VisualSchemaEditor
+                            schema={extractedSchema}
+                            onChange={handleSchemaChange}
+                            onSave={handleSaveSchema}
+                            isLoading={isSaving}
+                          />
+                        </div>
                       )}
                     </TabsContent>
                   </Tabs>

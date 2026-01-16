@@ -1,57 +1,85 @@
-# Environment variables
-.env
-.env.local
-backend/.env
-web/.env
+# Logs
+logs/
+*.log
 
 # Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 backend/.venv/
-backend/__pycache__/
-**/__pycache__/
-**/*.pyc
 backend/.pytest_cache/
-backend/dist/
-backend/build/
-backend/*.log
-backend/data/
-backend/test_endpoints.sh
 
 # Node
 node_modules/
 web/node_modules/
-web/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 web/.vite/
-.next/
-pnpm-lock.yaml
+
+# Environment
+.env
+.env.local
+*.env
 
 # IDE
 .vscode/
 .idea/
-.cursor/
-.serena/
-.windsurfrules
 *.swp
 *.swo
-*.swn
-
-# Design tools
-.superdesign/
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Docker volumes
-postgres-data/
-storage-data/
-redis-data/
+# Database
+*.db
+*.sqlite
+backend/data/
 
-# Archive (abandoned/experimental code)
+# Uploads
+backend/uploads/temp/
+
+# UV Package Manager
+.uv/
+.python-version
+uv.lock
+
+# Python Tool Caches
+**/.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Testing
+coverage/
+*.cover
+*.py,cover
+.hypothesis/
+
+# Vite / Build
+*.tsbuildinfo
+web/dist/
+
+# SQLite WAL files
+*.db-shm
+*.db-wal
+
+# AI / MCP Tools
+.claude/
+.serena/
+.specify/
+.cursor/
+.superdesign/
+.windsurfrules
+
+# Archive
 .archive/
 
-# Misc
-.claude/
-.specify/
-
-# Next.js directory (migration abandoned 2026-01-13)
+# Abandoned directories
 web-next/

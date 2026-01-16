@@ -70,10 +70,10 @@ function fieldToJsonSchema(field: SchemaField): JSONSchema7 {
   switch (field.field_type) {
     case 'text':
       base.type = 'string';
-      if (field.validation_rules?.minLength) {
+      if (field.validation_rules?.minLength !== undefined) {
         base.minLength = field.validation_rules.minLength as number;
       }
-      if (field.validation_rules?.maxLength) {
+      if (field.validation_rules?.maxLength !== undefined) {
         base.maxLength = field.validation_rules.maxLength as number;
       }
       if (field.validation_rules?.pattern) {
@@ -158,63 +158,57 @@ function sectionToJsonSchema(section: SchemaSection): JSONSchema7 {
 export function nexusToJsonSchema(nexus: ExtractedSchemaStructure): JSONSchema7 {
   const properties: Record<string, JSONSchema7> = {};
 
-  // Per-sample fields group
-  if (nexus.per_sample_fields.length > 0) {
-    const perSampleProps: Record<string, JSONSchema7> = {};
-    const perSampleRequired: string[] = [];
+  // Per-sample fields group - ALWAYS create to allow adding new fields
+  const perSampleProps: Record<string, JSONSchema7> = {};
+  const perSampleRequired: string[] = [];
 
-    nexus.per_sample_fields.forEach((field) => {
-      perSampleProps[field.id] = fieldToJsonSchema(field);
-      if (field.required) {
-        perSampleRequired.push(field.id);
-      }
-    });
+  nexus.per_sample_fields.forEach((field) => {
+    perSampleProps[field.id] = fieldToJsonSchema(field);
+    if (field.required) {
+      perSampleRequired.push(field.id);
+    }
+  });
 
-    properties['per_sample_fields'] = {
-      type: 'object',
-      title: 'Per Sample Fields',
-      description: 'Fields that apply to each sample in the batch',
-      properties: perSampleProps,
-      required: perSampleRequired.length > 0 ? perSampleRequired : undefined,
-    };
-  }
+  properties['per_sample_fields'] = {
+    type: 'object',
+    title: 'Per Sample Fields',
+    description: 'Fields that apply to each sample in the batch',
+    properties: perSampleProps,
+    required: perSampleRequired.length > 0 ? perSampleRequired : undefined,
+  };
 
-  // Sections group
-  if (nexus.sections.length > 0) {
-    const sectionsProps: Record<string, JSONSchema7> = {};
+  // Sections group - ALWAYS create to allow adding new sections
+  const sectionsProps: Record<string, JSONSchema7> = {};
 
-    nexus.sections.forEach((section) => {
-      sectionsProps[section.id] = sectionToJsonSchema(section);
-    });
+  nexus.sections.forEach((section) => {
+    sectionsProps[section.id] = sectionToJsonSchema(section);
+  });
 
-    properties['sections'] = {
-      type: 'object',
-      title: 'Sections',
-      description: 'Graded sections with criteria',
-      properties: sectionsProps,
-    };
-  }
+  properties['sections'] = {
+    type: 'object',
+    title: 'Sections',
+    description: 'Graded sections with criteria',
+    properties: sectionsProps,
+  };
 
-  // Batch metadata fields group
-  if (nexus.batch_metadata_fields.length > 0) {
-    const batchProps: Record<string, JSONSchema7> = {};
-    const batchRequired: string[] = [];
+  // Batch metadata fields group - ALWAYS create to allow adding new fields
+  const batchProps: Record<string, JSONSchema7> = {};
+  const batchRequired: string[] = [];
 
-    nexus.batch_metadata_fields.forEach((field) => {
-      batchProps[field.id] = fieldToJsonSchema(field);
-      if (field.required) {
-        batchRequired.push(field.id);
-      }
-    });
+  nexus.batch_metadata_fields.forEach((field) => {
+    batchProps[field.id] = fieldToJsonSchema(field);
+    if (field.required) {
+      batchRequired.push(field.id);
+    }
+  });
 
-    properties['batch_metadata_fields'] = {
-      type: 'object',
-      title: 'Batch Metadata Fields',
-      description: 'Fields that apply to the entire batch',
-      properties: batchProps,
-      required: batchRequired.length > 0 ? batchRequired : undefined,
-    };
-  }
+  properties['batch_metadata_fields'] = {
+    type: 'object',
+    title: 'Batch Metadata Fields',
+    description: 'Fields that apply to the entire batch',
+    properties: batchProps,
+    required: batchRequired.length > 0 ? batchRequired : undefined,
+  };
 
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -222,7 +216,7 @@ export function nexusToJsonSchema(nexus: ExtractedSchemaStructure): JSONSchema7 
     title: 'QC Schema',
     properties,
     // All groups are required at top level
-    ...(Object.keys(properties).length > 0 && { required: Object.keys(properties) }),
+    required: Object.keys(properties),
   };
 }
 
@@ -230,9 +224,12 @@ export function nexusToJsonSchema(nexus: ExtractedSchemaStructure): JSONSchema7 
  * Convert JSON Schema property definition back to Nexus SchemaField
  */
 function jsonSchemaToField(prop: JSONSchema7, key: string): SchemaField {
+  // Sanitize key - generate fallback if empty/whitespace only
+  const sanitizedKey = key.trim() || `field_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  
   const field: SchemaField = {
-    id: prop['x-nexus-id'] || key,
-    label: prop.title || key,
+    id: prop['x-nexus-id'] || sanitizedKey,
+    label: prop.title || sanitizedKey,
     label_id: prop['x-nexus-label-id'],
     field_type: prop['x-nexus-field-type'] || inferFieldType(prop),
     required: false, // Will be set by parent
@@ -269,17 +266,29 @@ function inferFieldType(prop: JSONSchema7): FieldType {
   if (prop['x-nexus-graded']) {
     return 'graded_choice';
   }
-  if (prop.enum && prop.type === 'string') {
+
+  // Handle union types like ["string", "null"] - extract first non-null type
+  let schemaType = prop.type;
+  if (Array.isArray(schemaType)) {
+    schemaType = schemaType.find((t) => t !== 'null') || 'string';
+  }
+
+  // Handle choice fields
+  if (prop.enum && schemaType === 'string') {
     return 'choice';
   }
   if (prop.format === 'date') {
     return 'date';
   }
-  if (prop.type === 'boolean') {
+  if (schemaType === 'boolean') {
     return 'boolean';
   }
-  if (prop.type === 'number' || prop.type === 'integer') {
+  if (schemaType === 'number' || schemaType === 'integer') {
     return 'number';
+  }
+  // Unsupported complex types (array, object) default to text
+  if (schemaType === 'array' || schemaType === 'object') {
+    return 'text';
   }
   return 'text';
 }
@@ -337,6 +346,9 @@ export function jsonSchemaToNexus(jsonSchema: JSONSchema7): ExtractedSchemaStruc
     return result;
   }
 
+  // Known group keys that we handle specially
+  const knownGroups = new Set(['per_sample_fields', 'sections', 'batch_metadata_fields']);
+
   // Extract per_sample_fields
   const perSampleGroup = jsonSchema.properties['per_sample_fields'];
   if (perSampleGroup && typeof perSampleGroup === 'object') {
@@ -384,6 +396,19 @@ export function jsonSchemaToNexus(jsonSchema: JSONSchema7): ExtractedSchemaStruc
       });
     }
   }
+
+  // Handle orphan fields at root level (not in known groups)
+  // These are added to per_sample_fields as a fallback to prevent data loss
+  Object.entries(jsonSchema.properties).forEach(([key, prop]) => {
+    if (!knownGroups.has(key) && typeof prop === 'object' && prop !== null) {
+      const propSchema = prop as JSONSchema7;
+      // Only treat as orphan field if it looks like a field (has type), not a group (has properties)
+      if (propSchema.type && !propSchema.properties) {
+        const field = jsonSchemaToField(propSchema, key);
+        result.per_sample_fields.push(field);
+      }
+    }
+  });
 
   return result;
 }

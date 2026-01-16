@@ -9,6 +9,8 @@ import type {
   SchemaUpdateRequest,
   SchemaResponse,
   SchemaListResponse,
+  BulkArchiveRequest,
+  BulkArchiveResponse,
 } from '../types/schema';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -60,12 +62,28 @@ export async function extractSchema(
  * Save extracted schema to database
  *
  * @param schema - Schema data to save
+ * @param storeDocument - If true, store the source document permanently
+ * @param sessionId - Session ID for temp file (required if storeDocument=true)
  * @returns Saved schema with ID and version
  */
 export async function createSchema(
-  schema: SchemaCreateRequest
+  schema: SchemaCreateRequest,
+  storeDocument = false,
+  sessionId?: string
 ): Promise<SchemaResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/schemas`, {
+  const params = new URLSearchParams();
+  if (storeDocument) {
+    params.append('store_document', 'true');
+  }
+  if (sessionId) {
+    params.append('session_id', sessionId);
+  }
+
+  const url = params.toString()
+    ? `${API_BASE_URL}/api/schemas?${params.toString()}`
+    : `${API_BASE_URL}/api/schemas`;
+
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -153,4 +171,36 @@ export async function deleteSchema(schemaId: string): Promise<void> {
     }));
     throw new Error(error.detail || 'Failed to delete schema');
   }
+}
+
+/**
+ * Bulk archive multiple schemas
+ *
+ * @param schemaIds - Array of schema IDs to archive
+ * @returns Bulk archive result with counts and any errors
+ */
+export async function bulkArchiveSchemas(
+  schemaIds: string[]
+): Promise<BulkArchiveResponse> {
+  const request: BulkArchiveRequest = { schema_ids: schemaIds };
+
+  const response = await fetch(`${API_BASE_URL}/api/schemas/bulk-archive`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  return handleResponse<BulkArchiveResponse>(response);
+}
+
+/**
+ * Get URL for schema source document
+ *
+ * @param schemaId - Schema ID
+ * @returns URL to download/view source document
+ */
+export function getSchemaDocumentUrl(schemaId: string): string {
+  return `${API_BASE_URL}/api/schemas/${schemaId}/document`;
 }

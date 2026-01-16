@@ -313,3 +313,157 @@ async def save_temp_file_for_preview(
             f"Failed to save temp file: {str(e)}",
             error_code="TEMP_SAVE_ERROR",
         )
+
+
+# =============================================================================
+# Permanent Document Storage (for source documents)
+# =============================================================================
+
+
+def get_documents_dir() -> Path:
+    """
+    Get the permanent documents storage directory.
+
+    Returns:
+        Path: Absolute path to documents directory
+
+    Note:
+        Creates directory if it doesn't exist.
+    """
+    upload_dir = get_upload_dir()
+    docs_dir = upload_dir / "documents"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    return docs_dir
+
+
+async def save_schema_document(
+    file_content: bytes,
+    original_filename: str,
+    schema_id: str,
+) -> dict:
+    """
+    Save source document permanently for a schema.
+
+    Args:
+        file_content: Raw file bytes
+        original_filename: Original filename (for extension and metadata)
+        schema_id: Schema UUID for directory organization
+
+    Returns:
+        Dict with: path, filename, size, mime_type
+
+    Raises:
+        FileProcessingError: If file save fails
+    """
+    try:
+        docs_dir = get_documents_dir()
+        schema_dir = docs_dir / schema_id
+        schema_dir.mkdir(parents=True, exist_ok=True)
+
+        # Preserve original extension
+        ext = Path(original_filename).suffix.lower()
+        stored_filename = f"source{ext}"
+        file_path = schema_dir / stored_filename
+
+        # Write file
+        file_path.write_bytes(file_content)
+
+        # Detect MIME type
+        import mimetypes
+        mime_type, _ = mimetypes.guess_type(original_filename)
+
+        return {
+            "path": f"documents/{schema_id}/{stored_filename}",
+            "filename": original_filename,
+            "size": len(file_content),
+            "mime_type": mime_type or "application/octet-stream",
+        }
+
+    except Exception as e:
+        raise FileProcessingError(
+            f"Failed to save schema document: {str(e)}",
+            error_code="DOCUMENT_SAVE_ERROR",
+        )
+
+
+async def delete_schema_document(schema_id: str) -> bool:
+    """
+    Delete stored document for a schema.
+
+    Args:
+        schema_id: Schema UUID
+
+    Returns:
+        bool: True if deleted, False if not found
+    """
+    import shutil
+
+    docs_dir = get_documents_dir()
+    schema_dir = docs_dir / schema_id
+
+    if schema_dir.exists():
+        shutil.rmtree(schema_dir)
+        return True
+    return False
+
+
+def get_schema_document_url(document_path: str) -> str:
+    """
+    Convert relative document path to accessible URL.
+
+    Args:
+        document_path: Relative path (e.g., "documents/{schema_id}/source.pdf")
+
+    Returns:
+        str: Full URL path to access document
+    """
+    return f"/uploads/{document_path}"
+
+
+async def move_temp_to_permanent(
+    session_id: str,
+    schema_id: str,
+) -> dict | None:
+    """
+    Move a temp file to permanent document storage.
+
+    Args:
+        session_id: Session ID prefix used when saving temp file
+        schema_id: Schema UUID for permanent storage
+
+    Returns:
+        Dict with document info, or None if no temp file found
+    """
+    try:
+        temp_dir = get_temp_upload_dir()
+        # Find temp file(s) for this session
+        temp_files = list(temp_dir.glob(f"{session_id}_*"))
+
+        if not temp_files:
+            return None
+
+        # Use the first matching file
+        temp_file = temp_files[0]
+        content = temp_file.read_bytes()
+
+        # Extract original filename from temp name (format: {session_id}_{uuid}.ext)
+        # We'll use a generic name since original is encoded in UUID
+        original_filename = temp_file.name.split("_", 1)[1] if "_" in temp_file.name else temp_file.name
+
+        # Save to permanent storage
+        result = await save_schema_document(
+            file_content=content,
+            original_filename=original_filename,
+            schema_id=schema_id,
+        )
+
+        # Clean up temp file
+        cleanup_file(str(temp_file))
+
+        return result
+
+    except Exception as e:
+        raise FileProcessingError(
+            f"Failed to move temp file to permanent storage: {str(e)}",
+            error_code="DOCUMENT_MOVE_ERROR",
+        )

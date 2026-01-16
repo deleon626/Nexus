@@ -134,6 +134,7 @@ class SchemaResponse(BaseModel):
     schema_definition: ExtractedSchemaStructure
     status: str
     extraction_metadata: Optional[ExtractionMetadata]
+    source_document: Optional["SourceDocumentInfo"] = Field(None, description="Source document info if stored")
     created_at: datetime
     updated_at: datetime
 
@@ -148,6 +149,7 @@ class SchemaListItem(BaseModel):
     version_number: int
     status: str
     created_at: datetime
+    has_source_document: bool = Field(default=False, description="Whether schema has stored source document")
 
 
 class SchemaListResponse(BaseModel):
@@ -156,3 +158,31 @@ class SchemaListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+# Source Document Storage Models
+class SourceDocumentInfo(BaseModel):
+    """Information about a stored source document."""
+    path: str = Field(..., description="Relative path to document file")
+    filename: str = Field(..., description="Original filename")
+    size: int = Field(..., description="File size in bytes")
+    mime_type: str = Field(..., description="MIME type (e.g., application/pdf)")
+    url: str = Field(..., description="URL to access/download document")
+
+
+# Bulk Operations Models
+class BulkArchiveRequest(BaseModel):
+    """Request to archive multiple schemas."""
+    schema_ids: list[str] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of schema IDs to archive (max 100)"
+    )
+
+
+class BulkArchiveResponse(BaseModel):
+    """Response from bulk archive operation."""
+    archived_count: int = Field(..., description="Number of schemas successfully archived")
+    failed_ids: list[str] = Field(default_factory=list, description="Schema IDs that failed to archive")
+    errors: list[str] = Field(default_factory=list, description="Error messages for failures")

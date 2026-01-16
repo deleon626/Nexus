@@ -3,16 +3,21 @@
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
+from fastapi.responses import FileResponse
 
 from app.models.schema import (
     SchemaExtractionResponse,
     SchemaCreateRequest,
     SchemaUpdateRequest,
     FilePreviewInfo,
+    BulkArchiveRequest,
+    BulkArchiveResponse,
 )
 from app.services.file_service import (
     prepare_image_for_extraction,
     save_temp_file_for_preview,
+    move_temp_to_permanent,
+    get_upload_dir,
     FileProcessingError,
 )
 from app.services.schema_service import (
@@ -142,6 +147,7 @@ async def list_schemas(
             "version_number": s.version_number,
             "status": s.status,
             "created_at": s.created_at.isoformat() if s.created_at else None,
+            "has_source_document": s.source_document_path is not None,
         })
 
     return {
@@ -153,7 +159,11 @@ async def list_schemas(
 
 
 @router.post("", response_model=dict, status_code=status.HTTP_201_CREATED)
-async def create_schema(request: SchemaCreateRequest):
+async def create_schema(
+    request: SchemaCreateRequest,
+    store_document: bool = Query(False, description="Store the source document permanently"),
+    session_id: Optional[str] = Query(None, description="Session ID to retrieve temp document"),
+):
     """
     Create a new schema.
 
@@ -163,10 +173,28 @@ async def create_schema(request: SchemaCreateRequest):
     - **form_name**: Human-readable name
     - **category**: Optional category
     - **schema_definition**: Schema structure
+    - **store_document**: If true, move temp file to permanent storage
+    - **session_id**: Session ID used during extraction (required if store_document=true)
 
     Returns the saved schema with id and version.
     """
     service = SchemaService()
+    source_document = None
+
+    # Handle document storage if requested
+    if store_document and session_id:
+        try:
+            # Generate schema_id first (we'll use it for directory naming)
+            import uuid
+            schema_id = str(uuid.uuid4())
+            source_document = await move_temp_to_permanent(
+                session_id=session_id,
+                schema_id=schema_id,
+            )
+        except FileProcessingError:
+            # Document storage failed, but we can still create schema without it
+            # Log warning but continue
+            pass
 
     try:
         saved = await service.save_schema(
@@ -174,6 +202,7 @@ async def create_schema(request: SchemaCreateRequest):
             form_name=request.form_name,
             schema_definition=request.schema_definition,
             category=request.category,
+            source_document=source_document,
         )
     except SchemaValidationError as e:
         raise HTTPException(
@@ -190,6 +219,7 @@ async def create_schema(request: SchemaCreateRequest):
         "version_number": saved.version_number,
         "status": saved.status,
         "schema_definition": saved.schema_definition,
+        "has_source_document": saved.source_document_path is not None,
         "created_at": saved.created_at.isoformat() if saved.created_at else None,
         "updated_at": saved.updated_at.isoformat() if saved.updated_at else None,
     }
@@ -285,3 +315,61 @@ async def delete_schema(schema_id: str):
         )
 
     return None
+
+
+@router.post("/bulk-archive", response_model=BulkArchiveResponse)
+async def bulk_archive_schemas(request: BulkArchiveRequest):
+    """
+    Archive multiple schemas at once.
+
+    - **schema_ids**: List of schema UUIDs to archive (max 100)
+
+    Returns count of archived schemas and any failures.
+    """
+    service = SchemaService()
+    result = await service.bulk_archive_schemas(request.schema_ids)
+
+    return BulkArchiveResponse(
+        archived_count=result["archived_count"],
+        failed_ids=result["failed_ids"],
+        errors=result["errors"],
+    )
+
+
+@router.get("/{schema_id}/document")
+async def get_schema_document(schema_id: str):
+    """
+    Get source document for a schema.
+
+    - **schema_id**: Schema UUID
+
+    Returns file download or 404 if no document.
+    """
+    service = SchemaService()
+    schema = await service.get_schema_by_id(schema_id)
+
+    if not schema:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Schema {schema_id} not found",
+        )
+
+    if not schema.source_document_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No source document for this schema",
+        )
+
+    file_path = get_upload_dir() / schema.source_document_path
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Source document file not found on disk",
+        )
+
+    return FileResponse(
+        path=str(file_path),
+        filename=schema.source_document_filename,
+        media_type=schema.source_document_mime_type,
+    )

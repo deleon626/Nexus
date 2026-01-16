@@ -1,4 +1,4 @@
-.PHONY: dev dev-no-docker backend web db db-detach db-down db-clean install test lint format clean help
+.PHONY: dev dev-no-docker backend web db db-detach db-down db-clean install test lint format logs logs-docker logs-backend logs-web clean help
 .DEFAULT_GOAL := help
 
 # === MAIN COMMANDS ===
@@ -40,6 +40,19 @@ lint:                   ## Run linters
 
 format:                 ## Format backend code
 	@cd backend && uv run black app/ && uv run ruff check app/ --fix
+
+# === LOGS ===
+logs:                   ## Stream all logs (Docker + Backend + Web)
+	@npm run logs
+
+logs-docker:            ## Stream Docker logs only
+	@docker-compose logs -f
+
+logs-backend:           ## Stream backend logs only
+	@npm run logs:backend
+
+logs-web:               ## Stream web logs only
+	@npm run logs:web
 
 # === CLEANUP ===
 clean:                  ## Full cleanup

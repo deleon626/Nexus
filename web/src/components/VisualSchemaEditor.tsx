@@ -3,7 +3,7 @@
  * Handles conversion between Nexus ExtractedSchemaStructure and JSON Schema
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SchemaVisualEditor as JsonJoyEditor, type JSONSchema } from 'jsonjoy-builder';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -41,21 +41,45 @@ export function VisualSchemaEditor({
   isLoading = false,
   readOnly = false,
 }: VisualSchemaEditorProps) {
+  // Defensive: ensure schema is never null/undefined
+  const safeSchema = schema ?? {
+    per_sample_fields: [],
+    sections: [],
+    batch_metadata_fields: [],
+  };
+
+  // Track if last change originated from this editor (to prevent re-sync loop)
+  const lastChangeFromEditor = useRef(false);
+
   // Convert Nexus schema to JSON Schema for the editor
-  const [jsonSchema, setJsonSchema] = useState<JSONSchema7>(() => 
-    nexusToJsonSchema(schema)
-  );
+  const [jsonSchema, setJsonSchema] = useState<JSONSchema7>(() => {
+    const converted = nexusToJsonSchema(safeSchema);
+    // Ensure the schema has properties object (required for visual editing)
+    return {
+      ...converted,
+      properties: converted.properties || {},
+    };
+  });
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState<'visual' | 'json'>('visual');
 
-  // Re-initialize when external schema changes
+  // Re-initialize when external schema changes (but skip if change came from this editor)
   useEffect(() => {
-    const newJsonSchema = nexusToJsonSchema(schema);
-    setJsonSchema(newJsonSchema);
+    // Skip re-sync if change originated from this editor to prevent loop
+    if (lastChangeFromEditor.current) {
+      lastChangeFromEditor.current = false;
+      return;
+    }
+    const newJsonSchema = nexusToJsonSchema(safeSchema);
+    // Ensure the schema has properties object (required for visual editing)
+    setJsonSchema({
+      ...newJsonSchema,
+      properties: newJsonSchema.properties || {},
+    });
     setIsDirty(false);
     setError(null);
-  }, [schema]);
+  }, [safeSchema]);
 
   // Handle changes from the visual editor
   const handleEditorChange = useCallback((newJsonSchema: JSONSchema) => {
@@ -63,6 +87,9 @@ export function VisualSchemaEditor({
       setJsonSchema(newJsonSchema as JSONSchema7);
       setIsDirty(true);
       setError(null);
+
+      // Mark that this change originated from editor (to skip re-sync in useEffect)
+      lastChangeFromEditor.current = true;
 
       // Convert back to Nexus format and notify parent
       const nexusSchema = jsonSchemaToNexus(newJsonSchema as JSONSchema7);
@@ -74,11 +101,11 @@ export function VisualSchemaEditor({
 
   // Validate roundtrip on save
   const handleSave = useCallback(() => {
-    if (!validateRoundtrip(schema)) {
+    if (!validateRoundtrip(safeSchema)) {
       setError('Warning: Some schema data may be lost during conversion');
     }
     onSave?.();
-  }, [schema, onSave]);
+  }, [safeSchema, onSave]);
 
   return (
     <Card className="w-full">
@@ -166,10 +193,10 @@ export function VisualSchemaEditor({
 
       <CardFooter className="flex justify-between text-xs text-muted-foreground">
         <div>
-          Fields: {schema.per_sample_fields.length} per-sample, {schema.batch_metadata_fields.length} batch
+          Fields: {safeSchema.per_sample_fields.length} per-sample, {safeSchema.batch_metadata_fields.length} batch
         </div>
         <div>
-          Sections: {schema.sections.length}
+          Sections: {safeSchema.sections.length}
         </div>
       </CardFooter>
     </Card>

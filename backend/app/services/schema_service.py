@@ -406,6 +406,7 @@ Return ONLY valid JSON, no markdown or explanation."""
         category: str = None,
         extraction_metadata: ExtractionMetadata = None,
         facility_id: str = None,
+        source_document: dict = None,
     ) -> FormTemplate:
         """
         Save or update a schema with versioning.
@@ -417,6 +418,7 @@ Return ONLY valid JSON, no markdown or explanation."""
             category: Optional form category
             extraction_metadata: Optional extraction metadata
             facility_id: Optional facility scope
+            source_document: Optional dict with path, filename, size, mime_type
 
         Returns:
             Saved FormTemplate instance
@@ -464,6 +466,11 @@ Return ONLY valid JSON, no markdown or explanation."""
                 status=FormStatus.ACTIVE.value,
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow(),
+                # Source document fields
+                source_document_path=source_document.get("path") if source_document else None,
+                source_document_filename=source_document.get("filename") if source_document else None,
+                source_document_size=source_document.get("size") if source_document else None,
+                source_document_mime_type=source_document.get("mime_type") if source_document else None,
             )
 
             session.add(new_template)
@@ -559,6 +566,50 @@ Return ONLY valid JSON, no markdown or explanation."""
             schema.updated_at = datetime.utcnow()
 
             return True
+
+    async def bulk_archive_schemas(self, schema_ids: list[str]) -> dict:
+        """
+        Archive multiple schemas in a single transaction.
+
+        Args:
+            schema_ids: List of schema UUIDs to archive
+
+        Returns:
+            Dict with: archived_count, failed_ids, errors
+        """
+        archived_count = 0
+        failed_ids = []
+        errors = []
+
+        async with get_async_session() as session:
+            for schema_id in schema_ids:
+                try:
+                    query = select(FormTemplate).where(FormTemplate.id == schema_id)
+                    result = await session.execute(query)
+                    schema = result.scalar_one_or_none()
+
+                    if not schema:
+                        failed_ids.append(schema_id)
+                        errors.append(f"Schema {schema_id} not found")
+                        continue
+
+                    if schema.status == FormStatus.ARCHIVED.value:
+                        # Already archived, skip but don't count as failure
+                        continue
+
+                    schema.status = FormStatus.ARCHIVED.value
+                    schema.updated_at = datetime.utcnow()
+                    archived_count += 1
+
+                except Exception as e:
+                    failed_ids.append(schema_id)
+                    errors.append(f"Error archiving {schema_id}: {str(e)}")
+
+        return {
+            "archived_count": archived_count,
+            "failed_ids": failed_ids,
+            "errors": errors,
+        }
 
     async def update_schema(
         self,

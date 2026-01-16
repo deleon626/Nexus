@@ -111,6 +111,7 @@ export interface SchemaListItem {
   version_number: number;
   status: string;
   created_at: string;
+  has_source_document: boolean;
 }
 
 export interface SchemaListResponse {
@@ -118,4 +119,26 @@ export interface SchemaListResponse {
   total: number;
   page: number;
   page_size: number;
+}
+
+// Source Document Types
+
+export interface SourceDocumentInfo {
+  path: string;
+  filename: string;
+  size: number;
+  mime_type: string;
+  url: string;
+}
+
+// Bulk Operations Types
+
+export interface BulkArchiveRequest {
+  schema_ids: string[];
+}
+
+export interface BulkArchiveResponse {
+  archived_count: number;
+  failed_ids: string[];
+  errors: string[];
 }

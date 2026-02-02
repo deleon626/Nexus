@@ -83,3 +83,11 @@ web/dist/
 
 # Abandoned directories
 web-next/
+
+# Build artifacts
+web-agui/apps/dojo/.next/
+
+# macOS duplicates
+* 2.py
+* 2.ts
+* 2.tsx

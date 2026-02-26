@@ -2,7 +2,7 @@
 phase: 05-pwa-polish-production
 plan: 03
 type: execute
-wave: 2
+wave: 1
 depends_on: []
 files_modified: [src/features/pwa/hooks/useStorageMonitor.ts, src/features/pwa/utils/storageCleanup.ts, src/features/pwa/constants.ts, src/db/db.ts]
 autonomous: true

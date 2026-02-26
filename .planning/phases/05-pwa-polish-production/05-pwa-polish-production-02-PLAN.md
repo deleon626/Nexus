@@ -2,7 +2,7 @@
 phase: 05-pwa-polish-production
 plan: 02
 type: execute
-wave: 2
+wave: 1
 depends_on: []
 files_modified: [src/features/pwa/components/ReloadPrompt.tsx, src/App.tsx]
 autonomous: false

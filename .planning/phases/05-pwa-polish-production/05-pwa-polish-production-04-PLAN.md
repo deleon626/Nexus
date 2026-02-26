@@ -5,7 +5,7 @@ type: execute
 wave: 3
 depends_on: ["05-pwa-polish-production-01", "05-pwa-polish-production-03"]
 files_modified: [src/routes/settings.tsx, src/features/pwa/components/StorageIndicator.tsx]
-autonomous: true
+autonomous: false
 requirements: []
 user_setup: []
 

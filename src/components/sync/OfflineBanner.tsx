@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useOnline } from '../../hooks/useOnline';
-import { cn } from '../../lib/utils';
 
 export default function OfflineBanner() {
   const { isOnline } = useOnline();

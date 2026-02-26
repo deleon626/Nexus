@@ -4,10 +4,19 @@ import SignInPage from "./sign-in";
 import AdminBuilder from "./admin/builder";
 import WorkerForms from "./worker/forms";
 import ReviewerDashboard from "./reviewer/dashboard";
+import OfflineBanner from "../components/sync/OfflineBanner";
+import SyncIndicator from "../components/sync/SyncIndicator";
 
 export default function AppRoutes() {
   return (
     <ProtectedRoute>
+      <OfflineBanner />
+      <header className="border-b bg-background">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-xl font-bold">Nexus QC Forms</h1>
+          <SyncIndicator />
+        </div>
+      </header>
       <Routes>
         {/* Sign-in route (outside protected wrapper, but handled by ProtectedRoute) */}
         <Route path="/sign-in" element={<SignInPage />} />

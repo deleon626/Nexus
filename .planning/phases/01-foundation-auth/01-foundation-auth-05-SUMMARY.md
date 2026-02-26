@@ -85,7 +85,7 @@ Each task was committed atomically:
 4. **Task 4: Create role-based dashboard routes (placeholders)** - `35457ae` (feat)
 5. **Task 5: Set up React Router and integrate protected routes** - `dd302b5` (feat)
 
-**Plan metadata:** `f6d4e3d` (docs: complete plan)
+**Plan metadata:** `c8a22c0` (docs: complete plan)
 
 ## Self-Check: PASSED
 

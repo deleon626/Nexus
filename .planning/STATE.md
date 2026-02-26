@@ -67,6 +67,10 @@ Overall:  [███░░░░░░░] 6/27 plans (22%)
 | Separate client config files | lib/convex.ts and lib/clerk.ts for testability and clean separation |
 | Role-based routing on root | Admin → /admin/builder, Worker → /worker/forms, Reviewer → /reviewer/dashboard |
 | Protected route wrapper pattern | ProtectedRoute handles auth checks and redirects, role-specific wrappers for granular control |
+| UUID for localId generation | Enables client-side identification before server sync, critical for offline-first |
+| Exponential backoff: 5s, 15s, 45s | Balances retry aggressiveness with user experience; 3 max attempts before manual retry |
+| Last-write-wins with server tiebreaker | Simple conflict resolution for single-user-per-submission model |
+| Immediate queue item deletion | No completed items table reduces storage overhead |
 
 ### Known Risks & Mitigations
 

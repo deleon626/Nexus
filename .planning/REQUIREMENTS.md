@@ -102,8 +102,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVW-02 | Phase 4 | Pending |
 | REVW-03 | Phase 4 | Pending |
 | REVW-04 | Phase 4 | Pending |
-| AUTH-01 | Phase 1 | In Progress |
-| AUTH-02 | Phase 1 | In Progress |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | In Progress |
 
 **Coverage:**

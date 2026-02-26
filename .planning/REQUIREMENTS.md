@@ -18,7 +18,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **FORM-01**: Admin can create form templates via drag-and-drop UI
 - [x] **FORM-02**: Admin can use 10 core field types (text, number, decimal, date, time, select, checkbox, passFail, textarea, photo)
-- [ ] **FORM-03**: Admin can set field validation rules (required, min/max, options)
+- [x] **FORM-03**: Admin can set field validation rules (required, min/max, options)
 - [ ] **FORM-04**: Form templates have version tracking for audit trail
 
 ### Form Filling
@@ -92,7 +92,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OFFL-04 | Phase 1 | Complete |
 | FORM-01 | Phase 2 | Complete |
 | FORM-02 | Phase 2 | Complete |
-| FORM-03 | Phase 2 | Pending |
+| FORM-03 | Phase 2 | Complete |
 | FORM-04 | Phase 2 | Pending |
 | FILL-01 | Phase 3 | Pending |
 | FILL-02 | Phase 3 | Pending |

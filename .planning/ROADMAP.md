@@ -130,7 +130,15 @@
 4. Sync queue cleanup runs periodically to prevent bloat
 5. App is deployed on Coolify infrastructure with proper environment configuration
 
-**Plans:** TBD
+**Plans:** 5/5 plans
+
+| Wave | Plans | Description | Status |
+|------|-------|-------------|--------|
+| 1 | 05-pwa-polish-production-01-PLAN.md | PWA install prompt (beforeinstallprompt event) | PENDING |
+| 2 | 05-pwa-polish-production-02-PLAN.md | Service worker update prompt (useRegisterSW) | PENDING |
+| 2 | 05-pwa-polish-production-03-PLAN.md | Storage monitoring and auto-cleanup | PENDING |
+| 3 | 05-pwa-polish-production-04-PLAN.md | Settings page with storage indicator | PENDING |
+| 4 | 05-pwa-polish-production-05-PLAN.md | Production deployment on Coolify | PENDING |
 
 ---
 

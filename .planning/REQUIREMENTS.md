@@ -23,10 +23,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Form Filling
 
-- [ ] **FILL-01**: Worker can fill forms with manual data entry
-- [ ] **FILL-02**: Worker can capture photos via device camera
-- [ ] **FILL-03**: Worker can fill forms using voice input (online-only via Whisper API + Agno LLM)
-- [ ] **FILL-04**: Worker sees form validation errors before submission
+- [x] **FILL-01**: Worker can fill forms with manual data entry
+- [x] **FILL-02**: Worker can capture photos via device camera
+- [x] **FILL-03**: Worker can fill forms using voice input (online-only via Whisper API + Agno LLM)
+- [x] **FILL-04**: Worker sees form validation errors before submission
 
 ### Review Workflow
 
@@ -94,10 +94,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FORM-02 | Phase 2 | Complete |
 | FORM-03 | Phase 2 | Complete |
 | FORM-04 | Phase 2 | Complete |
-| FILL-01 | Phase 3 | Pending |
-| FILL-02 | Phase 3 | Pending |
-| FILL-03 | Phase 3 | Pending |
-| FILL-04 | Phase 3 | Pending |
+| FILL-01 | Phase 3 | Complete |
+| FILL-02 | Phase 3 | Complete |
+| FILL-03 | Phase 3 | Complete |
+| FILL-04 | Phase 3 | Complete |
 | REVW-01 | Phase 4 | Pending |
 | REVW-02 | Phase 4 | Pending |
 | REVW-03 | Phase 4 | Pending |

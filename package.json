@@ -17,6 +17,7 @@
     "@tanstack/query-sync-storage-persister": "^5.62.11",
     "@tanstack/react-query": "^5.62.11",
     "@tanstack/react-query-persist-client": "^5.62.11",
+    "compressorjs": "^1.2.1",
     "convex": "^1.32.0",
     "date-fns": "^4.1.0",
     "dexie": "^4.0.10",

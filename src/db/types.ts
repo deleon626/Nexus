@@ -90,3 +90,22 @@ export interface OrganizationData {
   name: string;
   lastSyncAt: Date;
 }
+
+/**
+ * Draft represents an auto-saved form filling session.
+ * Stores in-progress form data with 7-day expiration to prevent data loss.
+ * Workers can resume drafts from the draft picker modal.
+ */
+export interface Draft {
+  id?: number; // Auto-incremented by Dexie
+  localId: string; // UUID for client-side identification
+  formId: string; // Template ID reference
+  formName: string; // Form name for display (denormalized for draft picker)
+  batchNumber: string; // Production batch number
+  formData: Record<string, any>; // Form field values
+  orgId: string; // Organization for multi-tenant isolation
+  userId: string; // Clerk user ID who created draft
+  expiresAt: number; // Timestamp for 7-day expiry (auto-cleanup)
+  createdAt: Date;
+  updatedAt: Date;
+}

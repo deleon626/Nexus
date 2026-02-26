@@ -4,6 +4,7 @@ import type {
   Template,
   SyncQueueItem,
   OrganizationData,
+  Draft,
 } from './types';
 
 /**
@@ -21,6 +22,7 @@ class NexusDB extends Dexie {
   templates!: Table<Template>;
   syncQueue!: Table<SyncQueueItem>;
   organizations!: Table<OrganizationData>;
+  drafts!: Table<Draft>;
 
   constructor() {
     super('nexus-db');
@@ -34,6 +36,15 @@ class NexusDB extends Dexie {
       syncQueue: '++id, localId, operation, endpoint, recordId, recordType, status, createdAt',
       organizations: 'orgId, name, lastSyncAt',
     });
+
+    // Version 2: Add drafts table for auto-save (FILL-01)
+    this.version(2).stores({
+      submissions: '++id, localId, batchNumber, templateId, orgId, userId, status, createdAt',
+      templates: 'id, name, version, orgId, published, updatedAt',
+      syncQueue: '++id, localId, operation, endpoint, recordId, recordType, status, createdAt',
+      organizations: 'orgId, name, lastSyncAt',
+      drafts: '++id, localId, formId, batchNumber, orgId, userId, expiresAt, createdAt',
+    });
   }
 }
 
@@ -41,4 +52,4 @@ class NexusDB extends Dexie {
 export const db = new NexusDB();
 
 // Export types for use in components
-export type { Submission, Template, SyncQueueItem, OrganizationData } from './types';
+export type { Submission, Template, SyncQueueItem, OrganizationData, Draft } from './types';

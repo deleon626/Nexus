@@ -1,7 +1,7 @@
 # State: Nexus
 
 **Project:** Mobile QC Form Data Entry PWA
-**Last Updated:** 2026-02-27T18:54:00Z
+**Last Updated:** 2026-02-27T19:04:19Z
 
 ---
 
@@ -27,17 +27,17 @@
 ## Current Position
 
 **Phase:** Phase 2 - Form Builder
-**Plan:** 10 (Drag-and-Drop Form Builder UI) - COMPLETE
+**Plan:** 11 (Convex Template Storage) - COMPLETE
 **Status:** In progress
 
 **Progress Bar:**
 ```
 Phase 1: [█████████] 7/7 plans COMPLETE
-Phase 2: [█████░░░░░] 3/4 plans
+Phase 2: [█████████] 4/4 plans COMPLETE
 Phase 3: [░░░░░░░░░░] 0/5 plans
 Phase 4: [░░░░░░░░░░] 0/4 plans
 Phase 5: [░░░░░░░░░░] 0/5 plans
-Overall:  [████░░░░░░] 10/27 plans (37%)
+Overall:  [██████░░░░] 11/27 plans (41%)
 ```
 
 ---
@@ -86,6 +86,10 @@ Overall:  [████░░░░░░] 10/27 plans (37%)
 | Phase 02-form-builder P08 | 2min | 3 tasks | 4 files |
 | Phase 02-form-builder P09 | 2min | 2 tasks | 11 files |
 | Phase 02-form-builder P10 | 69s | 3 tasks | 10 files |
+| Phase 02-form-builder P11 | 8min | 3 tasks | 11 files |
+| Dual-layer storage pattern | Convex (cloud) + Dexie (offline) for template persistence |
+| Version auto-increment on publish | Template version increments only when published, not on every save (FORM-04) |
+| Server-side validation with Convex | Using v.* validators for field schema validation (FORM-03) |
 
 ### Known Risks & Mitigations
 
@@ -117,18 +121,18 @@ Overall:  [████░░░░░░] 10/27 plans (37%)
 ## Session Continuity
 
 ### Last Action
-- Completed Plan 10: Drag-and-Drop Form Builder UI
-- Installed lucide-react for icons
-- Created SortableField component with @dnd-kit/sortable (drag handle, selection ring, required indicator)
-- Created FormBuilderCanvas with DndContext + SortableContext + DragOverlay
-- Created FieldSidebar with 10 clickable field type cards
-- Created FieldEditor with type-specific validation editors (text, number, decimal, date, time, select, checkbox, passFail, textarea, photo)
-- Created shadcn-style UI components (button, label, input, textarea, select, checkbox)
-- Updated builder route with complete 3-panel layout
-- All requirements FORM-01, FORM-02 completed; FORM-04 deferred to Plan 11
+- Completed Plan 11: Convex Template Storage with Version Tracking
+- Created Convex schema with formTemplates table (version tracking, server-side validation)
+- Created Convex functions for template CRUD (create, update, publish, unpublish, delete)
+- Updated Dexie Template type to match FormTemplate interface
+- Created useTemplatePersistence hook with dual-layer storage (Convex + Dexie)
+- Created FormTemplatesList component with Load/Delete actions
+- Integrated Save/Publish buttons in builder route with toast notifications
+- Added date-fns for relative time formatting
+- All requirements FORM-01, FORM-03, FORM-04 completed
 
 ### Next Steps
-1. Plan 11: Convex server-side validation and save/publish mutations
+1. Phase 3: Form Filling (requires user planning)
 
 ### Blocked By
 - User must set VITE_CLERK_PUBLISHABLE_KEY and VITE_CONVEX_URL in .env.local

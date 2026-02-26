@@ -8,8 +8,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current Phase:** 03-form-filling
-**Current Plan:** 02
-**Status:** In Progress
+**Current Plan:** 03
+**Status:** Resuming
 
 ## Progress
 
@@ -17,12 +17,24 @@ See: .planning/PROJECT.md
 | ----- | ----- | -------- |
 | 01-foundation-auth | 4 | 4/4 (100%) |
 | 02-form-builder | 9 | 9/9 (100%) |
-| 03-form-filling | 9 | 1/9 (11%) |
+| 03-form-filling | 9 | 3/9 (33%) |
 | 04-form-review | 0 | 0/0 |
 | 05-deployment | 0 | 0/0 |
 
 ## Session Log
 
+- 2026-02-27: Completed 03-form-filling-02 (Auto-Save and Progress Hooks)
+  - Created useFormDraft hook with 30-second auto-save interval
+  - Draft names: "Form Name - Batch 123 - Feb 27" using date-fns format
+  - Draft management: saveDraft(), deleteDraft(), getDraftsByForm()
+  - Created useFormProgress hook with required-field completion calculation
+  - Progress display: "X/Y fields filled" format
+- 2026-02-27: Completed 03-form-filling-03 (Photo Capture Hook)
+  - Added compressorjs v1.2.1 dependency
+  - Created usePhotoCapture hook with getUserMedia camera access
+  - Compressor.js integration: quality 0.6, maxWidth 1920, maxHeight 1920
+  - Base64 output for offline storage
+  - Error handling for permission denied, no camera, camera in use
 - 2026-02-27: Completed 03-form-filling-01 (Draft Persistence Layer)
   - Added Draft type to db/types.ts
   - Added drafts table to Dexie with version 2 schema
@@ -32,6 +44,9 @@ See: .planning/PROJECT.md
 
 ## Decisions
 
+- 2026-02-27: [Phase 03-Plan 03] Use Compressor.js instead of browser-image-compression for photo compression - simpler API, smaller bundle, handles EXIF and cross-browser issues
+- 2026-02-27: [Phase 03-Plan 03] Photo compression settings: quality 0.6, maxWidth 1920, maxHeight 1920 for ~500KB target and iOS canvas crash prevention
+- 2026-02-27: [Phase 03-Plan 03] Use facingMode: 'environment' for rear camera default - QC photos require product/equipment capture, not selfies
 - 2026-02-27: Separate drafts table over reusing submissions table for different lifecycle, queries, and retention policy
 - 2026-02-27: Use millisecond timestamp (expiresAt: number) for efficient Dexie where().below() queries
 - [Phase 03-form-filling]: Separate drafts table over reusing submissions table for different lifecycle, queries, and retention policy
@@ -42,4 +57,6 @@ None
 
 ## Requirements Completed
 
-- FILL-01: Partial - Draft persistence layer complete, useFormDraft hook pending in next plan
+- FILL-02: Photo capture hook with camera access and compression complete
+- FILL-01: Draft persistence layer complete with auto-save and progress hooks
+- FILL-04: Draft expiration (7 days) and cleanup utility complete

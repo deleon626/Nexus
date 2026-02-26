@@ -82,7 +82,19 @@
 4. Form validation shows errors inline and prevents invalid submissions
 5. Drafts auto-save to prevent data loss from app closure or battery issues
 
-**Plans:** TBD
+**Plans:** 9/9 plans ready
+
+| Wave | Plans | Description |
+|------|-------|-------------|
+| 1 | 03-form-filling-01-PLAN.md | Draft persistence layer (Dexie schema, types, constants) |
+| 1 | 03-form-filling-02-PLAN.md | Auto-save and progress hooks |
+| 1 | 03-form-filling-03-PLAN.md | Photo capture hook with compression |
+| 2 | 03-form-filling-04-PLAN.md | Convex Whisper API transcription |
+| 2 | 03-form-filling-05-PLAN.md | Voice input hook with MediaRecorder |
+| 2 | 03-form-filling-06-PLAN.md | Form field components (10 types with voice/photo) |
+| 3 | 03-form-filling-07-PLAN.md | FormFiller container with validation |
+| 3 | 03-form-filling-08-PLAN.md | Form selection UX (list, batch prompt, drafts) |
+| 4 | 03-form-filling-09-PLAN.md | Main page orchestrating complete flow |
 
 ---
 
@@ -128,8 +140,8 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 7/7 | Complete | 2026-02-27 |
-| 2. Form Builder | 0/4 | Ready to execute | - |
-| 3. Form Filling | 0/5 | Not started | - |
+| 2. Form Builder | 3/4 | Ready to execute | - |
+| 3. Form Filling | 9/9 | Ready to execute | - |
 | 4. Review Workflow | 0/4 | Not started | - |
 | 5. PWA Polish & Production | 0/5 | Not started | - |
 

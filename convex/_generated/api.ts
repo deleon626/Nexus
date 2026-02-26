@@ -37,6 +37,9 @@ export type API = {
     unpublishTemplate: FunctionReference<'mutation', '_internal', any, any>;
     deleteTemplate: FunctionReference<'mutation', '_internal', any, any>;
   };
+  voice: {
+    transcribeAudio: FunctionReference<'mutation', '_internal', any, { text: string }>;
+  };
 };
 
 // Create the api object with proper structure for Convex
@@ -50,5 +53,8 @@ export const api: API = {
     publishTemplate: 'formTemplates:publishTemplate' as any,
     unpublishTemplate: 'formTemplates:unpublishTemplate' as any,
     deleteTemplate: 'formTemplates:deleteTemplate' as any,
+  },
+  voice: {
+    transcribeAudio: 'voice:transcribeAudio' as any,
   },
 };

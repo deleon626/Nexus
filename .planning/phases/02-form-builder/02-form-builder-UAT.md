@@ -3,7 +3,7 @@ status: testing
 phase: 02-form-builder
 source: [02-form-builder-08-SUMMARY.md, 02-form-builder-09-SUMMARY.md, 02-form-builder-10-SUMMARY.md, 02-form-builder-11-SUMMARY.md]
 started: 2026-02-27T04:00:00Z
-updated: 2026-02-27T04:00:00Z
+updated: 2026-02-27T04:15:00Z
 ---
 
 ## Current Test
@@ -12,13 +12,15 @@ number: 1
 name: View Form Builder Page
 expected: |
   Navigate to /admin/builder. Page shows 3-panel layout: left sidebar with "Add Fields" header and field type cards, center canvas area, right panel with field editor.
-awaiting: user response
+awaiting: user response (retry after fix)
 
 ## Tests
 
 ### 1. View Form Builder Page
 expected: Navigate to /admin/builder. Page shows 3-panel layout: left sidebar with "Add Fields" header and field type cards, center canvas area, right panel with field editor.
-result: pending
+result: issue
+reported: "Vite error: Failed to resolve import '@/lib/convex/_generated' from useTemplatePersistence.ts"
+severity: blocker
 
 ### 2. Sidebar Shows 10 Field Types
 expected: Left sidebar displays 10 clickable field type cards with icons: Text, Number, Decimal, Date, Time, Select, Checkbox, Pass/Fail, Textarea, Photo. Each shows icon, label, and brief description.
@@ -68,10 +70,26 @@ result: pending
 
 total: 12
 passed: 0
-issues: 0
-pending: 12
+issues: 1
+pending: 11
 skipped: 0
 
 ## Gaps
 
-[none yet]
+- truth: "Navigate to /admin/builder. Page shows 3-panel layout"
+  status: failed
+  reason: "User reported: Vite error: Failed to resolve import '@/lib/convex/_generated'"
+  severity: blocker
+  test: 1
+  root_cause: "Wrong import path and missing API export in Convex generated files"
+  artifacts:
+    - path: "src/features/formBuilder/hooks/useTemplatePersistence.ts"
+      issue: "Import used @/lib/convex/_generated instead of ../../../convex/_generated/api"
+    - path: "convex/_generated/api.ts"
+      issue: "Only had type declaration, no actual api object export"
+    - path: "convex/functions.ts"
+      issue: "Should be formTemplates.ts for Convex file-based routing"
+  missing:
+    - "Fix import path to ../../../convex/_generated/api"
+    - "Add actual api object export"
+    - "Rename functions.ts to formTemplates.ts"

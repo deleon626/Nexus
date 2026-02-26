@@ -12,7 +12,7 @@
  */
 
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import { api } from '@convex/_generated/api';
 import { db } from '@/db/dexie';
 import { useFormBuilderStore } from '@/features/formBuilder/store/formBuilderStore';
 import type { FormTemplate } from '@/features/formBuilder/types';

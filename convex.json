@@ -1,0 +1,6 @@
+{
+  "functions": "convex/functions.ts",
+  "schema": "convex/schema.ts",
+  "gen": "convex/_generated",
+  "node": ".env"
+}

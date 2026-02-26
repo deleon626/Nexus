@@ -29,7 +29,17 @@
 4. Pending submissions sync automatically when connectivity returns
 5. User sees clear sync status indicators (offline/syncing/synced/failed)
 
-**Plans:** TBD
+**Plans:** 7 plans in 4 waves
+
+| Wave | Plans | Description |
+|------|-------|-------------|
+| 1 | 01-foundation-auth-01-PLAN.md | Project initialization (Vite + React + TypeScript + dependencies + Tailwind + shadcn/ui) |
+| 1 | 01-foundation-auth-02-PLAN.md | PWA manifest + service worker configuration with Workbox strategies |
+| 1 | 01-foundation-auth-03-PLAN.md | Dexie.js local database schema (submissions, templates, syncQueue) |
+| 2 | 01-foundation-auth-04-PLAN.md | Clerk + Convex auth integration (providers, clients) |
+| 3 | 01-foundation-auth-05-PLAN.md | Protected routing with role-based redirects (sign-in, dashboards) |
+| 3 | 01-foundation-auth-06-PLAN.md | Offline sync engine (queue, worker, conflict resolution) |
+| 4 | 01-foundation-auth-07-PLAN.md | Sync status UI (indicator, offline banner, queue view) |
 
 ---
 
@@ -111,7 +121,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 0/6 | Not started | - |
+| 1. Foundation & Auth | 0/7 | Not started | - |
 | 2. Form Builder | 0/4 | Not started | - |
 | 3. Form Filling | 0/5 | Not started | - |
 | 4. Review Workflow | 0/4 | Not started | - |

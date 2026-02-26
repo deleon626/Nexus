@@ -9,7 +9,7 @@
 
 **Core Value:** Eliminate the paper-to-digital data entry bottleneck for factory floor quality control.
 
-**Current Focus:** Phase 2 (Form Builder) - Building type-safe form schema with 10 field types and Zod validation.
+**Current Focus:** Phase 2 (Form Builder) - Building drag-and-drop form builder UI with @dnd-kit.
 
 **Tech Stack:**
 - Frontend: Vite + React + TypeScript + Tailwind + shadcn/ui
@@ -18,23 +18,26 @@
 - Offline: Dexie.js (IndexedDB) + custom sync engine
 - Voice: Whisper API (OpenRouter) + Agno (LLM field extraction)
 - PWA: vite-plugin-pwa (Workbox integration)
+- Drag & Drop: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+- State: Zustand with persist middleware
+- Icons: lucide-react
 
 ---
 
 ## Current Position
 
 **Phase:** Phase 2 - Form Builder
-**Plan:** 08 (Form schema foundation) - COMPLETE
+**Plan:** 10 (Drag-and-Drop Form Builder UI) - COMPLETE
 **Status:** In progress
 
 **Progress Bar:**
 ```
 Phase 1: [█████████] 7/7 plans COMPLETE
-Phase 2: [███░░░░░░░] 1/4 plans
+Phase 2: [█████░░░░░] 3/4 plans
 Phase 3: [░░░░░░░░░░] 0/5 plans
 Phase 4: [░░░░░░░░░░] 0/4 plans
 Phase 5: [░░░░░░░░░░] 0/5 plans
-Overall:  [███░░░░░░░] 8/27 plans (30%)
+Overall:  [████░░░░░░] 10/27 plans (37%)
 ```
 
 ---
@@ -77,7 +80,12 @@ Overall:  [███░░░░░░░] 8/27 plans (30%)
 | Queue warning threshold at 50 items | Prompts users to connect to stable internet |
 | Zod discriminated unions for field types | Runtime validation with TypeScript type inference |
 | FormTemplate version field | Enables audit trail for form changes (FORM-04) |
+| @dnd-kit for drag-and-drop | Modern, accessible replacement for react-beautiful-dnd |
+| lucide-react for icons | Consistent icon library for field types and UI elements |
+| SessionStorage for draft state | Prevents stale drafts across browser sessions |
 | Phase 02-form-builder P08 | 2min | 3 tasks | 4 files |
+| Phase 02-form-builder P09 | 2min | 2 tasks | 11 files |
+| Phase 02-form-builder P10 | 69s | 3 tasks | 10 files |
 
 ### Known Risks & Mitigations
 
@@ -109,17 +117,18 @@ Overall:  [███░░░░░░░] 8/27 plans (30%)
 ## Session Continuity
 
 ### Last Action
-- Completed Plan 08: Form schema foundation with discriminated unions
-- Installed @dnd-kit (drag-and-drop), zustand (state management), zod (validation)
-- Created FormField discriminated union with 10 field types (text, number, decimal, date, time, select, checkbox, passFail, textarea, photo)
-- Created Zod validation schemas for runtime type checking
-- Created FormTemplate type with version tracking for audit trail
-- All requirements FORM-02, FORM-03 completed
+- Completed Plan 10: Drag-and-Drop Form Builder UI
+- Installed lucide-react for icons
+- Created SortableField component with @dnd-kit/sortable (drag handle, selection ring, required indicator)
+- Created FormBuilderCanvas with DndContext + SortableContext + DragOverlay
+- Created FieldSidebar with 10 clickable field type cards
+- Created FieldEditor with type-specific validation editors (text, number, decimal, date, time, select, checkbox, passFail, textarea, photo)
+- Created shadcn-style UI components (button, label, input, textarea, select, checkbox)
+- Updated builder route with complete 3-panel layout
+- All requirements FORM-01, FORM-02 completed; FORM-04 deferred to Plan 11
 
 ### Next Steps
-1. Plan 09: Zustand store for form builder state (already partially done)
-2. Plan 10: Field component rendering
-3. Plan 11: Convex server-side validation
+1. Plan 11: Convex server-side validation and save/publish mutations
 
 ### Blocked By
 - User must set VITE_CLERK_PUBLISHABLE_KEY and VITE_CONVEX_URL in .env.local

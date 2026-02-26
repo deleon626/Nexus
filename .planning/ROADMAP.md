@@ -56,14 +56,14 @@
 3. Form templates version automatically when published, creating audit trail
 4. Admin can publish and unpublish forms, controlling worker visibility
 
-**Plans:** 4/4 plans
+**Plans:** 3/4 plans complete
 
-| Wave | Plans | Description |
-|------|-------|-------------|
-| 1 | 02-form-builder-08-PLAN.md | Form schema and type definitions (JSON Schema + Zod) |
-| 1 | 02-form-builder-09-PLAN.md | Zustand store and field registry |
-| 2 | 02-form-builder-10-PLAN.md | @dnd-kit drag-and-drop builder UI (has checkpoint) |
-| 3 | 02-form-builder-11-PLAN.md | Field validation and template versioning |
+| Wave | Plans | Description | Status |
+|------|-------|-------------|--------|
+| 1 | 02-form-builder-08-PLAN.md | Form schema and type definitions (JSON Schema + Zod) | COMPLETE |
+| 1 | 02-form-builder-09-PLAN.md | Zustand store and field registry | COMPLETE |
+| 2 | 02-form-builder-10-PLAN.md | @dnd-kit drag-and-drop builder UI (has checkpoint) | COMPLETE |
+| 3 | 02-form-builder-11-PLAN.md | Field validation and template versioning | PENDING |
 
 ---
 

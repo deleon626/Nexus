@@ -15,7 +15,9 @@
  * @see 03-CONTEXT.md "Voice Input UX" section
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { convex } from '@/lib/convex';
+import { useOnline } from '@/hooks/useOnline';
 
 // ============================================================================
 // Types
@@ -41,8 +43,8 @@ export interface VoiceInputOptions {
   language?: 'id' | 'en';
   /** Maximum recording duration in seconds (default 30) */
   maxDuration?: number;
-  /** Whether voice input is enabled (online check) */
-  isOnline?: boolean;
+  /** Optional onTranscript callback for direct field population */
+  onTranscript?: (text: string) => void;
 }
 
 /**
@@ -62,6 +64,9 @@ export interface TranscribeVoiceResult {
 /**
  * Voice input hook with recording and transcription
  *
+ * Automatically checks online status using useOnline hook.
+ * Calls Convex voice transcription mutation on recording stop.
+ *
  * @param options - Optional voice input configuration
  * @returns Voice input state and recording function
  *
@@ -69,13 +74,12 @@ export interface TranscribeVoiceResult {
  * ```tsx
  * const { isRecording, isTranscribing, error, startRecording, stopRecording } = useVoiceInput({
  *   language: 'id',
- *   isOnline: true
+ *   onTranscript: (text) => console.log('Transcribed:', text)
  * });
  *
  * const handleToggleRecording = async () => {
  *   if (isRecording) {
- *     const result = await stopRecording();
- *     console.log('Transcribed:', result.text);
+ *     await stopRecording();
  *   } else {
  *     startRecording();
  *   }
@@ -86,8 +90,11 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
   const {
     language = 'id',
     maxDuration = 30,
-    isOnline = true,
+    onTranscript,
   } = options;
+
+  // Use useOnline hook for online detection
+  const { isOnline } = useOnline();
 
   const [state, setState] = useState<VoiceInputState>({
     isRecording: false,
@@ -166,7 +173,7 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
 
       setState((prev) => ({ ...prev, error: errorMessage }));
     }
-  }, [isOnline, maxDuration]);
+  }, [isOnline, maxDuration, language]);
 
   /**
    * Stop voice recording and get transcription
@@ -200,18 +207,16 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
               type: mediaRecorderRef.current?.mimeType || 'audio/webm',
             });
 
-            // TODO: Send to Convex backend for Whisper transcription
-            // For now, return empty result - this will be implemented in Plan 05
-            // const result = await convex.functions.voice.transcribe({
-            //   audio: await blobToBase64(blob),
-            //   language,
-            // });
+            // Convert blob to base64 for API call
+            const audioBase64 = await blobToBase64(blob);
 
-            // Placeholder result - actual transcription will be added when Plan 05 is implemented
-            const result: TranscribeVoiceResult = {
-              text: '',
-              language: language === 'id' ? 'indonesian' : 'english',
-            };
+            // Call Convex voice transcription mutation
+            const result = await convex.api.voice.transcribeAudio(audioBase64, language);
+
+            // Call onTranscript callback if provided (for direct field population)
+            if (onTranscript && result.text) {
+              onTranscript(result.text);
+            }
 
             setState((prev) => ({
               ...prev,
@@ -219,7 +224,10 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
               error: null,
             }));
 
-            resolve(result);
+            resolve({
+              text: result.text,
+              language: language === 'id' ? 'indonesian' : 'english',
+            });
           } catch (err) {
             const errorMessage =
               err instanceof Error
@@ -238,7 +246,7 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
         mediaRecorderRef.current.stop();
       });
     },
-    [language]
+    [language, onTranscript]
   );
 
   /**
@@ -254,6 +262,16 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
       mediaRecorderRef.current.stop();
     }
   }, []);
+
+  /**
+   * Cleanup on unmount
+   * Stops recording and clears timeouts
+   */
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
 
   return {
     isRecording: state.isRecording,

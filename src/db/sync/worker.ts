@@ -8,12 +8,6 @@ import {
 // In-flight request tracking (prevent race conditions)
 const inFlightRequests = new Set<string>();
 
-// Exponential backoff intervals: 5s, 15s, 45s
-function getBackoffDelay(attemptCount: number): number {
-  const delays = [5000, 15000, 45000]; // 5s, 15s, 45s
-  return delays[Math.min(attemptCount, delays.length - 1)];
-}
-
 // Process a single queue item
 async function processItem(item: any): Promise<boolean> {
   const inFlightKey = `${item.operation}_${item.endpoint}_${item.recordId}`;

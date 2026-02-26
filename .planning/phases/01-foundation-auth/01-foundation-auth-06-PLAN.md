@@ -241,7 +241,6 @@ npm install -D @types/uuid
 Create **src/db/sync/worker.ts** with background sync worker:
 
 ```typescript
-import * as inFlightKeys from './in-flight-tracker';
 import {
   getPendingItems,
   markInFlight,

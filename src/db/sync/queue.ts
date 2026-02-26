@@ -2,11 +2,6 @@ import { db } from '../dexie';
 import type { SyncQueueItem, SyncOperation } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-// Generate a unique tracking key for in-flight request deduplication
-function generateInFlightKey(operation: SyncOperation, endpoint: string, recordId: string): string {
-  return `${operation}_${endpoint}_${recordId}`;
-}
-
 // Add item to sync queue
 export async function addToQueue(
   operation: SyncOperation,

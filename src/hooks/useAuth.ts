@@ -40,8 +40,9 @@ export function useAuth() {
 
     // Extract role and orgId from Clerk session claims
     // Clerk metadata.role stores user role, orgId comes from Clerk Organizations
-    const role = sessionClaims?.metadata?.role as UserRole | undefined;
-    const orgId = sessionClaims?.orgId as string | undefined;
+    const claims = sessionClaims as any;
+    const role = claims?.unsafeMetadata?.role as UserRole | undefined;
+    const orgId = claims?.orgId as string | undefined;
 
     setAuthState({
       isAuthenticated: true,

@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/dexie';
 import {
-  getQueueStats,
   retryFailedItems,
   triggerSync,
   startSyncWorker,
@@ -28,7 +27,7 @@ export function useSync() {
     () => db.syncQueue.where('status').equals('pending').count(),
     []
   );
-  const queueCount = pendingItems?.data || 0;
+  const queueCount = pendingItems ?? 0;
 
   // Update sync status based on queue count
   useEffect(() => {

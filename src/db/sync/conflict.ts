@@ -43,12 +43,12 @@ export async function resolveConflict(
   const result = compareVersions(local, server);
 
   if (result.winner === 'local') {
-    // Local wins — keep local version, mark server for update
-    return { ...local, needsSync: true };
+    // Local wins — keep local version
+    return { ...local };
   }
 
   // Server wins — use server version, update local
-  return { ...server, needsSync: false };
+  return { ...server };
 }
 
 // Check if submission needs sync based on version comparison

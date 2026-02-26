@@ -1,7 +1,7 @@
 # State: Nexus
 
 **Project:** Mobile QC Form Data Entry PWA
-**Last Updated:** 2026-02-27T02:18:00Z
+**Last Updated:** 2026-02-27T18:54:00Z
 
 ---
 
@@ -9,7 +9,7 @@
 
 **Core Value:** Eliminate the paper-to-digital data entry bottleneck for factory floor quality control.
 
-**Current Focus:** Phase 1 (Foundation & Auth) - Setting up PWA infrastructure, authentication, and offline sync engine.
+**Current Focus:** Phase 2 (Form Builder) - Building type-safe form schema with 10 field types and Zod validation.
 
 **Tech Stack:**
 - Frontend: Vite + React + TypeScript + Tailwind + shadcn/ui
@@ -23,18 +23,18 @@
 
 ## Current Position
 
-**Phase:** Phase 1 - Foundation & Auth
-**Plan:** 07 (Sync status UI) - COMPLETE
-**Status:** Milestone complete
+**Phase:** Phase 2 - Form Builder
+**Plan:** 08 (Form schema foundation) - COMPLETE
+**Status:** In progress
 
 **Progress Bar:**
 ```
 Phase 1: [█████████] 7/7 plans COMPLETE
-Phase 2: [░░░░░░░░░░] 0/4 plans
+Phase 2: [███░░░░░░░] 1/4 plans
 Phase 3: [░░░░░░░░░░] 0/5 plans
 Phase 4: [░░░░░░░░░░] 0/4 plans
 Phase 5: [░░░░░░░░░░] 0/5 plans
-Overall:  [███░░░░░░░] 7/27 plans (26%)
+Overall:  [███░░░░░░░] 8/27 plans (30%)
 ```
 
 ---
@@ -75,6 +75,9 @@ Overall:  [███░░░░░░░] 7/27 plans (26%)
 | 5-second heartbeat timeout | Prevents hanging on slow networks during reachability checks |
 | Yellow banner for offline state | Provides visibility without alarm |
 | Queue warning threshold at 50 items | Prompts users to connect to stable internet |
+| Zod discriminated unions for field types | Runtime validation with TypeScript type inference |
+| FormTemplate version field | Enables audit trail for form changes (FORM-04) |
+| Phase 02-form-builder P08 | 2min | 3 tasks | 4 files |
 
 ### Known Risks & Mitigations
 
@@ -106,18 +109,17 @@ Overall:  [███░░░░░░░] 7/27 plans (26%)
 ## Session Continuity
 
 ### Last Action
-- Completed Plan 07: Sync status UI component
-- Created useOnline hook with 30s heartbeat ping for reliable offline detection
-- Created SyncIndicator component with 4 states (Offline, Syncing, Synced, Failed)
-- Created OfflineBanner component with dismissible behavior
-- Created SyncQueueView component with live query for pending items
-- Integrated sync components into route layouts with header bar
-- Fixed TypeScript build errors from previous plan (react-router v7 paths, unused imports, Clerk metadata)
-- All requirements OFFL-01, OFFL-02, OFFL-03 completed
+- Completed Plan 08: Form schema foundation with discriminated unions
+- Installed @dnd-kit (drag-and-drop), zustand (state management), zod (validation)
+- Created FormField discriminated union with 10 field types (text, number, decimal, date, time, select, checkbox, passFail, textarea, photo)
+- Created Zod validation schemas for runtime type checking
+- Created FormTemplate type with version tracking for audit trail
+- All requirements FORM-02, FORM-03 completed
 
 ### Next Steps
-1. Phase 2: Form schema and template builder (4 plans)
-2. Plan 08: Form schema definition with JSON Schema
+1. Plan 09: Zustand store for form builder state (already partially done)
+2. Plan 10: Field component rendering
+3. Plan 11: Convex server-side validation
 
 ### Blocked By
 - User must set VITE_CLERK_PUBLISHABLE_KEY and VITE_CONVEX_URL in .env.local

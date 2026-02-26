@@ -7,9 +7,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.0 milestone
-**Current Phase:** 03-form-filling
-**Current Plan:** 09
-**Status:** Complete
+**Current Phase:** 04
+**Current Plan:** Not started
+**Status:** Ready to plan
 
 ## Progress
 

@@ -1,51 +1,142 @@
 /**
  * Form Filling Types
  *
- * Type definitions for the form filling feature including session state,
- * field values, and progress tracking.
+ * Type definitions for form filling sessions, drafts, and progress tracking.
+ * These types support the worker form filling workflow with auto-save and resume capabilities.
  */
 
+// Re-export FormField types from formBuilder
+export type {
+  FormField,
+  FieldType,
+  BaseField,
+  TextField,
+  NumberField,
+  DecimalField,
+  DateField,
+  TimeField,
+  SelectField,
+  CheckboxField,
+  PassFailField,
+  TextareaField,
+  PhotoField,
+  FieldOption,
+  FormTemplate,
+} from '../formBuilder/types';
+
+// Re-export PhotoCapture types from usePhotoCapture
+export type {
+  PhotoCaptureState,
+  CapturePhotoOptions,
+  CapturePhotoResult,
+} from './hooks/usePhotoCapture';
+
+// ============================================================================
+// Form Field Value Types
+// ============================================================================
+
 /**
- * FormFieldValue represents all possible values for form fields.
- * This union type accommodates all field types in the system.
+ * Union type of all possible form field values.
+ * Supports all field types defined in FormBuilder.
  */
 export type FormFieldValue =
-  | string // text, date, time
-  | number // number, decimal
-  | string[] // checkbox, select (multi)
-  | 'pass' | 'fail' // passFail field
-  | undefined; // empty/unfilled fields
+  | string        // text, number, decimal, date, time, select, textarea, photo (base64)
+  | number        // number, decimal
+  | string[]      // checkbox (multiple selections)
+  | 'pass'        // passFail field
+  | 'fail'        // passFail field
+  | null          // empty/unfilled field
+  | undefined;    // empty/unfilled field
 
 /**
- * FormSession tracks the active form filling session.
- * Used by the useFormDraft hook for auto-save persistence.
+ * Record mapping field IDs to their values.
+ * Used for form data storage and draft persistence.
+ */
+export type FormDataRecord = Record<string, FormFieldValue>;
+
+// ============================================================================
+// Form Session Types
+// ============================================================================
+
+/**
+ * Active form filling session state.
+ * Tracks the current form being filled and its draft status.
  */
 export interface FormSession {
-  /** Template ID being filled */
+  /** Form template ID being filled */
   formId: string;
-  /** User-entered batch number */
+  /** Production batch number for this submission */
   batchNumber: string;
-  /** Local draft ID (if resuming existing draft) */
+  /** Local draft ID (if resuming or after first auto-save) */
   draftId?: string;
   /** Whether this session was resumed from an existing draft */
   isResumed: boolean;
 }
 
+// ============================================================================
+// Form Progress Types
+// ============================================================================
+
 /**
- * FormProgress represents completion status for the progress bar.
- * Used by the useFormProgress hook to calculate completion percentage.
+ * Form completion progress metrics.
+ * Based on required fields only (optional fields don't affect progress).
  */
 export interface FormProgress {
-  /** Number of required fields that have been filled */
+  /** Number of required fields filled with valid values */
   completed: number;
   /** Total number of required fields in the form */
   total: number;
-  /** Completion percentage (0-100) */
+  /** Percentage of completion (0-100) */
   percentage: number;
 }
 
+// ============================================================================
+// Draft Types
+// ============================================================================
+
 /**
- * FormDraftData represents the stored draft data structure.
- * Maps field IDs to their current values for persistence.
+ * Draft metadata for display in draft picker.
+ * Re-exports Draft from db/types.ts for convenience.
  */
-export type FormDraftData = Record<string, FormFieldValue>;
+export type DraftMetadata = {
+  localId: string;
+  formName: string;
+  batchNumber: string;
+  createdAt: Date;
+  expiresAt: number;
+};
+
+// ============================================================================
+// Type Guards
+// ============================================================================
+
+/**
+ * Check if a form field value is considered "filled" (not empty).
+ * Used for progress calculation.
+ */
+export function isFieldValueFilled(value: FormFieldValue): boolean {
+  if (value === undefined || value === null) {
+    return false;
+  }
+
+  if (typeof value === 'string') {
+    return value.length > 0;
+  }
+
+  if (typeof value === 'number') {
+    return !isNaN(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  return false;
+}
+
+/**
+ * Check if a pass/fail value is valid.
+ */
+export function isPassFailValue(value: FormFieldValue): value is 'pass' | 'fail' {
+  return value === 'pass' || value === 'fail';
+}

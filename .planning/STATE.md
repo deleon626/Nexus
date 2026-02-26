@@ -8,7 +8,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current Phase:** 03-form-filling
-**Current Plan:** 07
+**Current Plan:** 08
 **Status:** Completed
 
 ## Progress
@@ -17,12 +17,24 @@ See: .planning/PROJECT.md
 | ----- | ----- | -------- |
 | 01-foundation-auth | 4 | 4/4 (100%) |
 | 02-form-builder | 9 | 9/9 (100%) |
-| 03-form-filling | 9 | 7/9 (78%) |
+| 03-form-filling | 9 | 8/9 (89%) |
 | 04-form-review | 0 | 0/0 |
 | 05-deployment | 0 | 0/0 |
 
 ## Session Log
 
+- 2026-02-27: Completed 03-form-filling-08 (Form Selection UX)
+  - Created FormList component with real-time search filtering
+  - Recent forms (3 most recent) shown at top, sorted by last filled
+  - Draft badge indicator on forms with in-progress drafts
+  - Offline indicator when showing cached forms only
+  - Empty state with "No forms published yet" message
+  - localStorage integration for tracking recent forms
+  - Dexie queries for templates and drafts
+  - Created BatchNumberPrompt modal for batch entry before form filling
+  - Created DraftPickerModal for resume or start new selection
+  - Created SuccessScreen with animated checkmark
+  - Created SubmissionSummary for pre-submit confirmation
 - 2026-02-26: Completed 03-form-filling-07 (Form Filling Container)
   - Created ProgressBar component with X/Y fields display and visual bar
   - Created FormFiller main container with React Hook Form integration
@@ -82,6 +94,10 @@ See: .planning/PROJECT.md
 
 ## Decisions
 
+- 2026-02-27: [Phase 03-Plan 08] localStorage for recent forms tracking instead of Dexie - simpler API, survives IndexedDB clears
+- 2026-02-27: [Phase 03-Plan 08] Store up to 10 recent forms (display top 3) - balance between utility and storage
+- 2026-02-27: [Phase 03-Plan 08] Relative time formatting for drafts (e.g., "5 minutes ago") - more human-readable than timestamps
+- 2026-02-27: [Phase 03-Plan 08] Batch number required with Enter key submit - keyboard-friendly for factory floor workers
 - 2026-02-27: [Phase 03-Plan 05] Import useOnline() hook internally in useVoiceInput rather than accepting as prop - simpler API, ensures online status is always current
 - 2026-02-27: [Phase 03-Plan 05] onTranscript callback pattern for direct field population per CONTEXT.md "no confirmation step" requirement
 - 2026-02-27: [Phase 03-Plan 05] Auto-stop recording at 30 seconds - Whisper API has 25MB limit, prevents excessively long recordings
@@ -110,7 +126,7 @@ None
 | 03-03 | 1 | 2 | ~120s | 2026-02-27 |
 | 03-02 | 2 | 4 | ~180s | 2026-02-27 |
 | 03-01 | 3 | 5 | ~150s | 2026-02-27 |
-| Phase 03-form-filling P08 | 300 | 4 tasks | 5 files |
+| 03-08 | 4 | 5 | 300s | 2026-02-27 |
 
 ## Requirements Completed
 

@@ -1,7 +1,7 @@
 # State: Nexus
 
 **Project:** Mobile QC Form Data Entry PWA
-**Last Updated:** 2026-02-27
+**Last Updated:** 2026-02-27T02:18:00Z
 
 ---
 
@@ -24,17 +24,17 @@
 ## Current Position
 
 **Phase:** Phase 1 - Foundation & Auth
-**Plan:** 06 (Offline sync engine)
-**Status:** In progress
+**Plan:** 07 (Sync status UI) - COMPLETE
+**Status:** Phase 1 complete, ready for Phase 2
 
 **Progress Bar:**
 ```
-Phase 1: [█████░░░░] 6/7 plans
+Phase 1: [█████████] 7/7 plans COMPLETE
 Phase 2: [░░░░░░░░░░] 0/4 plans
 Phase 3: [░░░░░░░░░░] 0/5 plans
 Phase 4: [░░░░░░░░░░] 0/4 plans
 Phase 5: [░░░░░░░░░░] 0/5 plans
-Overall:  [███░░░░░░░] 6/27 plans (22%)
+Overall:  [███░░░░░░░] 7/27 plans (26%)
 ```
 
 ---
@@ -71,6 +71,10 @@ Overall:  [███░░░░░░░] 6/27 plans (22%)
 | Exponential backoff: 5s, 15s, 45s | Balances retry aggressiveness with user experience; 3 max attempts before manual retry |
 | Last-write-wins with server tiebreaker | Simple conflict resolution for single-user-per-submission model |
 | Immediate queue item deletion | No completed items table reduces storage overhead |
+| 30-second heartbeat interval | Balances battery usage with responsiveness for offline detection |
+| 5-second heartbeat timeout | Prevents hanging on slow networks during reachability checks |
+| Yellow banner for offline state | Provides visibility without alarm |
+| Queue warning threshold at 50 items | Prompts users to connect to stable internet |
 
 ### Known Risks & Mitigations
 
@@ -102,17 +106,18 @@ Overall:  [███░░░░░░░] 6/27 plans (22%)
 ## Session Continuity
 
 ### Last Action
-- Completed Plan 06: Offline sync engine
-- Created sync queue management service (queue.ts) with addToQueue, getPendingItems, markInFlight, markCompleted, markFailed
-- Created background sync worker (worker.ts) with exponential backoff (5s, 15s, 45s)
-- Created conflict resolution module (conflict.ts) with last-write-wins logic
-- Created React useSync hook with live query for sync status tracking
-- Added uuid and dexie-react-hooks dependencies
-- All requirements OFFL-01, OFFL-02, OFFL-03, OFFL-04 completed
+- Completed Plan 07: Sync status UI component
+- Created useOnline hook with 30s heartbeat ping for reliable offline detection
+- Created SyncIndicator component with 4 states (Offline, Syncing, Synced, Failed)
+- Created OfflineBanner component with dismissible behavior
+- Created SyncQueueView component with live query for pending items
+- Integrated sync components into route layouts with header bar
+- Fixed TypeScript build errors from previous plan (react-router v7 paths, unused imports, Clerk metadata)
+- All requirements OFFL-01, OFFL-02, OFFL-03 completed
 
 ### Next Steps
-1. Execute Plan 07: Sync status UI component
-2. Phase 2: Form schema and template builder
+1. Phase 2: Form schema and template builder (4 plans)
+2. Plan 08: Form schema definition with JSON Schema
 
 ### Blocked By
 - User must set VITE_CLERK_PUBLISHABLE_KEY and VITE_CONVEX_URL in .env.local

@@ -24,17 +24,17 @@
 ## Current Position
 
 **Phase:** Phase 1 - Foundation & Auth
-**Plan:** 02 (PWA manifest + service worker)
+**Plan:** 04 (Clerk + Convex auth integration)
 **Status:** In progress
 
 **Progress Bar:**
 ```
-Phase 1: [█░░░░░░░░░] 1/7 plans
+Phase 1: [████░░░░░] 4/7 plans
 Phase 2: [░░░░░░░░░░] 0/4 plans
 Phase 3: [░░░░░░░░░░] 0/5 plans
 Phase 4: [░░░░░░░░░░] 0/4 plans
 Phase 5: [░░░░░░░░░░] 0/5 plans
-Overall:  [█░░░░░░░░░] 1/27 plans (4%)
+Overall:  [███░░░░░░░] 4/27 plans (15%)
 ```
 
 ---
@@ -63,7 +63,9 @@ Overall:  [█░░░░░░░░░] 1/27 plans (4%)
 | Manual file creation instead of npm create vite | Avoids interactive prompts that would block autonomous execution |
 | Tailwind CSS v4 with @tailwindcss/vite plugin | Latest version with native Vite integration (no PostCSS config needed) |
 | Deferred tailwindcss-animate plugin | Will add when actual Radix components are installed that need it |
-| Phase 01-foundation-auth P02 | 1772128496 | 3 tasks | 10 files |
+| Provider nesting order | ClerkProvider (outer) -> ConvexProviderWithClerk (inner) for auth token bridging |
+| Separate client config files | lib/convex.ts and lib/clerk.ts for testability and clean separation |
+| Phase 01-foundation-auth P04 | 42 | 3 tasks | 4 files |
 
 ### Known Risks & Mitigations
 
@@ -95,17 +97,19 @@ Overall:  [█░░░░░░░░░] 1/27 plans (4%)
 ## Session Continuity
 
 ### Last Action
-- Completed Plan 01: Project Foundation (Vite + React + TypeScript + Tailwind + shadcn/ui)
-- All Phase 1 dependencies installed (Clerk, Convex, Dexie, TanStack Query, PWA plugin, React Router)
-- Ready for Plan 02: PWA manifest + service worker configuration
+- Completed Plan 04: Clerk + Convex auth integration
+- Convex client initialized with VITE_CONVEX_URL from environment
+- Clerk configuration with VITE_CLERK_PUBLISHABLE_KEY from environment
+- App wrapped with ClerkProvider and ConvexProviderWithClerk for auth token bridging
+- All providers configured with runtime validation for missing environment variables
 
 ### Next Steps
-1. Execute Plan 02: PWA manifest + service worker with Workbox strategies
-2. Plan 03: Dexie.js local database schema
-3. Plan 04: Clerk + Convex auth integration
+1. Execute Plan 05: Protected routing with sign-in UI
+2. Plan 06: User session context and auth hooks
+3. Plan 07: Role-based access control middleware
 
 ### Blocked By
-- None - proceeding to Plan 02
+- User must set VITE_CLERK_PUBLISHABLE_KEY and VITE_CONVEX_URL in .env.local
 
 ---
 

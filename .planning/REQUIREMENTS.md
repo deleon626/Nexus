@@ -37,9 +37,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Auth & Multi-tenancy
 
-- [ ] **AUTH-01**: User can sign in via Clerk authentication
-- [ ] **AUTH-02**: User has role-based access (Admin, Worker, Reviewer, Viewer)
-- [ ] **AUTH-03**: Organization data is isolated per tenant
+- [x] **AUTH-01**: User can sign in via Clerk authentication
+- [x] **AUTH-02**: User has role-based access (Admin, Worker, Reviewer, Viewer)
+- [x] **AUTH-03**: Organization data is isolated per tenant
 
 ## v2 Requirements
 

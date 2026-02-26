@@ -33,25 +33,33 @@ export interface Submission {
 /**
  * Template represents a form template defined by admins.
  * Cached locally for offline form filling.
+ *
+ * Matches FormTemplate from features/formBuilder/types.ts for consistency.
+ * Re-exported here to avoid circular dependencies between db and formBuilder features.
  */
 export interface Template {
   id: string; // Template ID from server
   name: string;
-  version: number;
+  version: number; // FORM-04: Version tracking for audit trail
   orgId: string; // Organization for multi-tenant isolation
-  schema: {
-    fields: Array<{
-      id: string;
-      type: string;
-      label: string;
-      required?: boolean;
-      validation?: Record<string, any>;
-      options?: string[]; // For select/checkbox fields
-    }>;
-  };
+  fields: Array<{
+    id: string;
+    type: string;
+    label: string;
+    required: boolean;
+    placeholder?: string;
+    helpText?: string;
+    validation?: Record<string, any>;
+    options?: Array<{ value: string; label: string }>;
+    passLabel?: string;
+    failLabel?: string;
+    rows?: number;
+  }>; // Form fields array matching FormTemplate schema
   published: boolean;
   createdAt: Date;
   updatedAt: Date;
+  publishedAt?: Date; // When template was published
+  createdBy: string; // Clerk user ID of creator
 }
 
 /**

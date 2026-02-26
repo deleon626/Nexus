@@ -36,8 +36,7 @@
 | 1 | 7/7 | Complete    | 2026-02-26 | 1 | 01-foundation-auth-02-PLAN.md | PWA manifest + service worker configuration with Workbox strategies |
 | 1 | 01-foundation-auth-03-PLAN.md | Dexie.js local database schema (submissions, templates, syncQueue) |
 | 2 | 01-foundation-auth-04-PLAN.md | Clerk + Convex auth integration (providers, clients) |
-| 3 | 01-foundation-auth-05-PLAN.md | Protected routing with role-based redirects (sign-in, dashboards) |
-| 3 | 01-foundation-auth-06-PLAN.md | Offline sync engine (queue, worker, conflict resolution) |
+| 3 | 8/9 | In Progress|  | 3 | 01-foundation-auth-06-PLAN.md | Offline sync engine (queue, worker, conflict resolution) |
 | 4 | 01-foundation-auth-07-PLAN.md | Sync status UI (indicator, offline banner, queue view) |
 
 ---
@@ -82,7 +81,7 @@
 4. Form validation shows errors inline and prevents invalid submissions
 5. Drafts auto-save to prevent data loss from app closure or battery issues
 
-**Plans:** 2/9 plans complete
+**Plans:** 8/9 plans executed
 
 | Wave | Plans | Description | Status |
 |------|-------|-------------|--------|

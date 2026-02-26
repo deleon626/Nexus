@@ -16,7 +16,7 @@ import { api } from '@convex/_generated/api';
 import { db } from '@/db/dexie';
 import { useFormBuilderStore } from '@/features/formBuilder/store/formBuilderStore';
 import type { FormTemplate } from '@/features/formBuilder/types';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 interface UseTemplatePersistenceOptions {
   orgId: string;
@@ -49,7 +49,7 @@ interface UseTemplatePersistenceReturn {
 export function useTemplatePersistence({
   orgId,
 }: UseTemplatePersistenceOptions): UseTemplatePersistenceReturn {
-  const { user } = useAuth();
+  const { userId } = useAuth();
   const loadTemplateIntoStore = useFormBuilderStore((state) => state.loadTemplate);
   const resetStore = useFormBuilderStore((state) => state.reset);
   const saveTemplateFromStore = useFormBuilderStore((state) => state.saveTemplate);
@@ -85,7 +85,7 @@ export function useTemplatePersistence({
    * Caches result to Dexie for offline access (OFFL-01).
    */
   const saveTemplate = async (): Promise<string | null> => {
-    if (!user?.id) {
+    if (!userId) {
       console.error('User not authenticated');
       return null;
     }
@@ -98,7 +98,7 @@ export function useTemplatePersistence({
       const templateWithMeta: Omit<FormTemplate, 'id'> & { id?: string } = {
         ...templateData,
         orgId,
-        createdBy: user.id,
+        createdBy: userId,
         id: currentTemplateId || undefined,
       };
 
@@ -136,7 +136,7 @@ export function useTemplatePersistence({
         createdAt: templateWithMeta.createdAt,
         updatedAt: new Date(),
         publishedAt: templateWithMeta.publishedAt,
-        createdBy: user.id,
+        createdBy: userId,
       });
 
       return templateId;

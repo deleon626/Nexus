@@ -7,24 +7,38 @@ import ReviewerDashboard from "./reviewer/dashboard";
 import OfflineBanner from "../components/sync/OfflineBanner";
 import SyncIndicator from "../components/sync/SyncIndicator";
 
+// Error boundary for sync components
+function SyncComponents() {
+  try {
+    return (
+      <>
+        <OfflineBanner />
+        <header className="border-b bg-background">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <h1 className="text-xl font-bold">Nexus QC Forms</h1>
+            <SyncIndicator />
+          </div>
+        </header>
+      </>
+    );
+  } catch (error) {
+    return (
+      <header className="border-b bg-background">
+        <div className="container mx-auto px-4 py-3">
+          <h1 className="text-xl font-bold">Nexus QC Forms</h1>
+        </div>
+      </header>
+    );
+  }
+}
+
 export default function AppRoutes() {
   return (
     <ProtectedRoute>
-      <OfflineBanner />
-      <header className="border-b bg-background">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold">Nexus QC Forms</h1>
-          <SyncIndicator />
-        </div>
-      </header>
+      <SyncComponents />
       <Routes>
-        {/* Sign-in route (outside protected wrapper, but handled by ProtectedRoute) */}
         <Route path="/sign-in" element={<SignInPage />} />
-
-        {/* Root redirects to role-based dashboard (handled by ProtectedRoute) */}
-        <Route path="/" element={<Navigate to="/" replace />} />
-
-        {/* Role-specific routes */}
+        <Route path="/" element={<Navigate to="/admin/builder" replace />} />
         <Route
           path="/admin/builder"
           element={
@@ -49,9 +63,7 @@ export default function AppRoutes() {
             </ReviewerRoute>
           }
         />
-
-        {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/admin/builder" replace />} />
       </Routes>
     </ProtectedRoute>
   );

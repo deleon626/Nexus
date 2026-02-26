@@ -11,8 +11,26 @@ interface AuthState {
   orgId: string | null;
 }
 
+// Check if we're in dev mode without real credentials
+const isDevModeWithoutCredentials =
+  import.meta.env.DEV &&
+  (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || !import.meta.env.VITE_CONVEX_URL);
+
+// Mock auth for dev mode - simulates an admin user
+function useMockAuth(): AuthState {
+  return {
+    isAuthenticated: true,
+    isLoading: false,
+    userId: 'dev-user-123',
+    role: 'admin', // Default to admin in dev mode for full access
+    orgId: 'dev-org-123',
+  };
+}
+
 export function useAuth() {
-  const { isLoaded, userId, sessionClaims } = useClerkAuth();
+  // Use mock auth in dev mode without credentials
+  const mockAuth = useMockAuth();
+  const clerkAuth = useClerkAuth();
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     isLoading: true,
@@ -22,6 +40,14 @@ export function useAuth() {
   });
 
   useEffect(() => {
+    // In dev mode without credentials, use mock auth
+    if (isDevModeWithoutCredentials) {
+      setAuthState(mockAuth);
+      return;
+    }
+
+    const { isLoaded, userId, sessionClaims } = clerkAuth;
+
     if (!isLoaded) {
       setAuthState(prev => ({ ...prev, isLoading: true }));
       return;
@@ -39,7 +65,6 @@ export function useAuth() {
     }
 
     // Extract role and orgId from Clerk session claims
-    // Clerk metadata.role stores user role, orgId comes from Clerk Organizations
     const claims = sessionClaims as any;
     const role = claims?.unsafeMetadata?.role as UserRole | undefined;
     const orgId = claims?.orgId as string | undefined;
@@ -51,7 +76,7 @@ export function useAuth() {
       role: role || null,
       orgId: orgId || null,
     });
-  }, [isLoaded, userId, sessionClaims]);
+  }, [clerkAuth, mockAuth]);
 
   return authState;
 }
@@ -68,3 +93,6 @@ export function useRole() {
     role,
   };
 }
+
+// Export the dev mode check for use in other components
+export { isDevModeWithoutCredentials };

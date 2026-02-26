@@ -39,5 +39,16 @@ export type API = {
   };
 };
 
-// Default export for api import
-export const api: API;
+// Create the api object with proper structure for Convex
+export const api: API = {
+  formTemplates: {
+    listTemplates: 'formTemplates:listTemplates' as any,
+    getTemplate: 'formTemplates:getTemplate' as any,
+    listPublishedTemplates: 'formTemplates:listPublishedTemplates' as any,
+    createTemplate: 'formTemplates:createTemplate' as any,
+    updateTemplate: 'formTemplates:updateTemplate' as any,
+    publishTemplate: 'formTemplates:publishTemplate' as any,
+    unpublishTemplate: 'formTemplates:unpublishTemplate' as any,
+    deleteTemplate: 'formTemplates:deleteTemplate' as any,
+  },
+};

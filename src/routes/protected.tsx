@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { useAuth, useRole } from "../hooks/useAuth";
+import { useAuth, useRole, isDevModeWithoutCredentials } from "../context/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,18 +12,17 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoading) return; // Wait for auth state to load
+    // In dev mode without credentials, skip all auth checks
+    if (isDevModeWithoutCredentials) return;
+
+    if (isLoading) return;
 
     if (!isAuthenticated) {
-      // Redirect to sign-in if not authenticated
       navigate("/sign-in", { replace: true });
       return;
     }
 
-    // Role-based routing after sign-in (per user decision)
     const currentPath = window.location.pathname;
-
-    // If on root path, redirect to role-based dashboard
     if (currentPath === "/") {
       if (isAdmin) {
         navigate("/admin/builder", { replace: true });
@@ -31,14 +30,15 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         navigate("/worker/forms", { replace: true });
       } else if (isReviewer && !isAdmin) {
         navigate("/reviewer/dashboard", { replace: true });
-      } else {
-        // Viewer or no role — show a default page
-        navigate("/profile", { replace: true });
       }
     }
   }, [isAuthenticated, isLoading, role, isAdmin, isWorker, isReviewer, navigate]);
 
-  // Show loading while checking auth
+  // In dev mode, always show children
+  if (isDevModeWithoutCredentials) {
+    return <>{children}</>;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -47,7 +47,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Don't render children if not authenticated (redirect will happen)
   if (!isAuthenticated) {
     return null;
   }
@@ -55,17 +54,19 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
-// Role-specific route wrappers (for future use)
+// Role-specific route wrappers
 export function AdminRoute({ children }: ProtectedRouteProps) {
   const { isAdmin } = useRole();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isDevModeWithoutCredentials) return;
     if (!isAdmin) {
       navigate("/", { replace: true });
     }
   }, [isAdmin, navigate]);
 
+  if (isDevModeWithoutCredentials) return <>{children}</>;
   return isAdmin ? <>{children}</> : null;
 }
 
@@ -74,11 +75,13 @@ export function WorkerRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isDevModeWithoutCredentials) return;
     if (!isWorker) {
       navigate("/", { replace: true });
     }
   }, [isWorker, navigate]);
 
+  if (isDevModeWithoutCredentials) return <>{children}</>;
   return isWorker ? <>{children}</> : null;
 }
 
@@ -87,10 +90,12 @@ export function ReviewerRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isDevModeWithoutCredentials) return;
     if (!isReviewer) {
       navigate("/", { replace: true });
     }
   }, [isReviewer, navigate]);
 
+  if (isDevModeWithoutCredentials) return <>{children}</>;
   return isReviewer ? <>{children}</> : null;
 }

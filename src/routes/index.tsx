@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router";
 import ProtectedRoute, { AdminRoute, WorkerRoute, ReviewerRoute } from "./protected";
 import SignInPage from "./sign-in";
 import AdminBuilder from "./admin/builder";
-import WorkerForms from "./worker/forms";
+import { FormFillingPage } from "@/features/formFilling/pages/FormFillingPage";
 import ReviewerDashboard from "./reviewer/dashboard";
 import OfflineBanner from "../components/sync/OfflineBanner";
 import SyncIndicator from "../components/sync/SyncIndicator";
@@ -51,7 +51,7 @@ export default function AppRoutes() {
           path="/worker/forms"
           element={
             <WorkerRoute>
-              <WorkerForms />
+              <FormFillingPage />
             </WorkerRoute>
           }
         />

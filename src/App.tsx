@@ -1,3 +1,3 @@
 export default function App() {
-  return <div>Nexus - Mobile QC Form Data Entry PWA</div>
+  return <div className="text-red-500">Nexus - Mobile QC Form Data Entry PWA</div>
 }

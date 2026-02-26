@@ -60,6 +60,7 @@ Overall:  [░░░░░░░░░░] 0/24 plans (0%)
 | Agno for LLM field extraction | Flexibility for future multi-agent features |
 | Defer offline voice to v1.1 | Whisper WASM memory (200-300MB) risky on low-end Android |
 | Single org active for MVP | Anchor client first, full multi-tenancy UI deferred |
+| Phase 01-foundation-auth P03 | 29 | 2 tasks | 2 files |
 
 ### Known Risks & Mitigations
 

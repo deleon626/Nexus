@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Offline & Sync
 
-- [ ] **OFFL-01**: User can fill forms offline with data cached locally
-- [ ] **OFFL-02**: User sees real-time sync status (pending/synced/failed)
-- [ ] **OFFL-03**: Form drafts auto-save to prevent data loss
-- [ ] **OFFL-04**: Forms are associated with production batch numbers
+- [x] **OFFL-01**: User can fill forms offline with data cached locally
+- [x] **OFFL-02**: User sees real-time sync status (pending/synced/failed)
+- [x] **OFFL-03**: Form drafts auto-save to prevent data loss
+- [x] **OFFL-04**: Forms are associated with production batch numbers
 
 ### Form Builder
 
@@ -86,10 +86,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OFFL-01 | Phase 1 | Pending |
-| OFFL-02 | Phase 1 | Pending |
-| OFFL-03 | Phase 1 | Pending |
-| OFFL-04 | Phase 1 | Pending |
+| OFFL-01 | Phase 1 | Complete |
+| OFFL-02 | Phase 1 | Complete |
+| OFFL-03 | Phase 1 | Complete |
+| OFFL-04 | Phase 1 | Complete |
 | FORM-01 | Phase 2 | Pending |
 | FORM-02 | Phase 2 | Pending |
 | FORM-03 | Phase 2 | Pending |

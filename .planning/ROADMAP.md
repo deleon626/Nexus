@@ -111,7 +111,15 @@
 3. Reviewer can approve or reject submissions with optional comments
 4. Worker sees real-time status updates on their submissions (pending/approved/rejected)
 
-**Plans:** TBD
+**Plans:** 5 plans in 4 waves
+
+| Wave | Plan | Description | Status |
+|------|------|-------------|--------|
+| 1 | 04-review-workflow-01-PLAN.md | Convex backend: submissions schema, queries, mutations | PENDING |
+| 2 | 04-review-workflow-02-PLAN.md | UI primitives: Table, Dialog, Badge, @tanstack/react-table | PENDING |
+| 3 | 04-review-workflow-03-PLAN.md | ReviewerDashboard with SubmissionTable | PENDING |
+| 3 | 04-review-workflow-05-PLAN.md | WorkerStatusList for real-time status | PENDING |
+| 4 | 04-review-workflow-04-PLAN.md | ReviewDialog with approve/reject actions | PENDING |
 
 ---
 
@@ -148,8 +156,8 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 7/7 | Complete | 2026-02-27 |
 | 2. Form Builder | 9/9 | Complete | 2026-02-27 |
-| 3. Form Filling | 2/9 | In Progress | - |
-| 4. Review Workflow | 0/4 | Not started | - |
+| 3. Form Filling | 9/9 | Complete | 2026-02-27 |
+| 4. Review Workflow | 0/5 | Ready to plan | - |
 | 5. PWA Polish & Production | 0/5 | Not started | - |
 
 ---
@@ -197,4 +205,4 @@ Phase 5 (PWA Polish)
 **Total:** 18/18 requirements mapped ✓
 
 ---
-*Last updated: 2026-02-27T02:18:00Z*
+*Last updated: 2026-02-27T09:30:00Z*

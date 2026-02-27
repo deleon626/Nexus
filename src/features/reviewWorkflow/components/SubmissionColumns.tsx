@@ -10,6 +10,11 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge, SubmissionStatus } from './StatusBadge';
 
 /**
+ * Form field value type (from Phase 3 form filling)
+ */
+type FormDataValue = string | number | boolean | null;
+
+/**
  * Submission type matching Convex schema
  */
 export interface Submission {
@@ -19,6 +24,7 @@ export interface Submission {
   workerName: string;
   createdAt: number;
   status: SubmissionStatus;
+  data?: Record<string, FormDataValue>; // Form field values (full details for review dialog)
 }
 
 interface ColumnOptions {

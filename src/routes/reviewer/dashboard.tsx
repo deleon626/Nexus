@@ -10,6 +10,7 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useAuth } from '@/context/AuthContext';
 import { SubmissionTable, Submission } from '@/features/reviewWorkflow/components/SubmissionTable';
+import { ReviewDialog } from '@/features/reviewWorkflow/components/ReviewDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ReviewerDashboard() {
@@ -34,8 +35,11 @@ export default function ReviewerDashboard() {
   // Handle review button click
   const handleReview = (submission: Submission) => {
     setSelectedSubmission(submission);
-    // TODO: Open review modal (Plan 04)
-    console.log('Review submission:', submission._id);
+  };
+
+  // Handle dialog close
+  const handleCloseDialog = () => {
+    setSelectedSubmission(null);
   };
 
   return (
@@ -62,6 +66,12 @@ export default function ReviewerDashboard() {
           onReview={handleReview}
         />
       )}
+
+      {/* Review Dialog */}
+      <ReviewDialog
+        submission={selectedSubmission}
+        onClose={handleCloseDialog}
+      />
     </div>
   );
 }

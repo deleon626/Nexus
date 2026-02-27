@@ -10,7 +10,7 @@ See: .planning/PROJECT.md
 **Current Phase:** 04
 **Current Plan:** 5
 **Total Plans in Phase:** 5
-**Status:** Ready to execute
+**Status:** Phase complete — ready for verification
 
 ## Progress
 
@@ -141,6 +141,9 @@ See: .planning/PROJECT.md
 - [Phase 04-03]: Skip pattern (orgId ? ... : 'skip') prevents Convex query before auth ready
 - [Phase 04-review-workflow-05]: Status change detection via useRef + useEffect for pulse animation
 - [Phase 04-review-workflow-05]: WorkerStatusList shown only in 'listing' state to avoid interference with form filling flow
+- [Phase 04-review-workflow-04]: Reject button disabled until comment entered per CONTEXT.md
+- [Phase 04-review-workflow-04]: Photos open in new tab for full-size viewing (simple pattern)
+- [Phase 04-review-workflow-04]: Comment optional for approve, required for reject
 
 ## Blockers
 
@@ -164,6 +167,7 @@ None
 | Phase 04 P02 | 106s | 1 tasks | 5 files |
 | Phase 04 P03 | 2min | 2 tasks | 4 files |
 | Phase 04-review-workflow P05 | 140 | 2 tasks | 2 files |
+| Phase 04-review-workflow P04 | 6min | 2 tasks | 3 files |
 
 ## Requirements Completed
 

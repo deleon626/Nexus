@@ -30,10 +30,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Review Workflow
 
-- [ ] **REVW-01**: Reviewer can view dashboard of pending submissions
+- [x] **REVW-01**: Reviewer can view dashboard of pending submissions
 - [ ] **REVW-02**: Reviewer can view full submission details including photos
-- [ ] **REVW-03**: Reviewer can approve or reject submissions with comments
-- [ ] **REVW-04**: Worker sees real-time status updates on their submissions
+- [x] **REVW-03**: Reviewer can approve or reject submissions with comments
+- [x] **REVW-04**: Worker sees real-time status updates on their submissions
 
 ### Auth & Multi-tenancy
 
@@ -98,10 +98,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILL-02 | Phase 3 | Complete |
 | FILL-03 | Phase 3 | Complete |
 | FILL-04 | Phase 3 | Complete |
-| REVW-01 | Phase 4 | Pending |
+| REVW-01 | Phase 4 | Complete |
 | REVW-02 | Phase 4 | Pending |
-| REVW-03 | Phase 4 | Pending |
-| REVW-04 | Phase 4 | Pending |
+| REVW-03 | Phase 4 | Complete |
+| REVW-04 | Phase 4 | Complete |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | In Progress |

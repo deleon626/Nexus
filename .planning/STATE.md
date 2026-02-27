@@ -8,8 +8,9 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current Phase:** 04
-**Current Plan:** Not started
-**Status:** Ready to plan
+**Current Plan:** 2
+**Total Plans in Phase:** 5
+**Status:** Ready to execute
 
 ## Progress
 
@@ -18,11 +19,19 @@ See: .planning/PROJECT.md
 | 01-foundation-auth | 4 | 4/4 (100%) |
 | 02-form-builder | 9 | 9/9 (100%) |
 | 03-form-filling | 9 | 9/9 (100%) |
-| 04-form-review | 0 | 0/0 |
+| 04-form-review | 5 | 1/5 (20%) |
 | 05-deployment | 0 | 0/0 |
 
 ## Session Log
 
+- 2026-02-27: Completed 04-review-workflow-01 (Review Backend)
+  - Added submissions table to Convex schema with 15 fields and 3 indexes
+  - Created convex/submissions.ts with 3 queries and 2 mutations
+  - listPendingSubmissions query for reviewer dashboard (REVW-01)
+  - getSubmissionDetails query for submission detail view
+  - approveSubmission mutation with optional comment (REVW-03)
+  - rejectSubmission mutation with required comment (REVW-03)
+  - listWorkerSubmissions query for worker status view (REVW-04)
 - 2026-02-27: Completed 03-form-filling-09 (Main Page Flow Orchestration)
   - Created FormFillingPage component with state-based flow orchestration
   - Page states: listing, batchPrompt, draftPicker, filling, confirming, success
@@ -119,6 +128,8 @@ See: .planning/PROJECT.md
 - [Phase 03-form-filling]: Base64 audio data transmission for cross-browser compatibility
 - [Phase 03-form-filling]: Use whisper-1 model for Indonesian and English transcription
 - [Phase 03-form-filling]: Created placeholder useVoiceInput hook with MediaRecorder API — Plan 05 incomplete - Rule 2 auto-fix for missing critical functionality
+- [Phase 04-01]: Photos stored as base64 strings per Phase 3 pattern, not Convex storage IDs
+- [Phase 04-01]: Reject comment required via v.string() validator, approve comment optional
 
 ## Blockers
 
@@ -138,6 +149,7 @@ None
 | 03-01 | 3 | 5 | ~150s | 2026-02-27 |
 | 03-09 | 2 | 2 | 120s | 2026-02-27 |
 | Phase 03-form-filling | 9 | 9/9 (100%) | | |
+| Phase 04 P01 | 5min | 2 tasks | 2 files |
 
 ## Requirements Completed
 
@@ -145,3 +157,6 @@ None
 - FILL-02: Photo capture hook with camera access and compression complete
 - FILL-03: Voice input hook with MediaRecorder API complete (placeholder for Whisper)
 - FILL-04: Form validation errors on blur complete
+- REVW-01: Reviewer dashboard query for pending submissions complete
+- REVW-03: Approve/reject mutations with comments complete
+- REVW-04: Worker status query for their own submissions complete

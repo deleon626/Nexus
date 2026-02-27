@@ -123,6 +123,17 @@
 
 ---
 
+### Phase 04.1: navbar navigation between sections (INSERTED)
+
+**Goal:** Users can navigate between app sections (Builder, Fill Forms, Reviews) via a persistent responsive navbar — desktop sidebar + mobile bottom tabs — filtered to their role.
+
+**Depends on:** Phase 4
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04.1-01-PLAN.md — Layout shell components (AppLayout, Sidebar, BottomTabBar, MobileTopBar, NavItem)
+- [ ] 04.1-02-PLAN.md — Route refactor with nested Outlet + human verify checkpoint
+
 ### Phase 5: PWA Polish & Production
 
 **Goal:** App is installable, production-ready, and handles PWA-specific lifecycle events properly.

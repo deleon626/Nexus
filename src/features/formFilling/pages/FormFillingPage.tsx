@@ -26,6 +26,7 @@ import { DraftPickerModal } from '../components/DraftPickerModal';
 import { FormFiller } from '../components/FormFiller';
 import { SubmissionSummary } from '../components/SubmissionSummary';
 import { SuccessScreen } from '../components/SuccessScreen';
+import { WorkerStatusList } from '@/features/reviewWorkflow/components/WorkerStatusList';
 
 // ============================================================================
 // Page State Enum
@@ -323,9 +324,16 @@ export function FormFillingPage() {
   // Render
   // ==========================================================================
 
-  // Show form list
+  // Show form list with worker status at top
   if (pageState === 'listing') {
-    return <FormList onFormSelect={handleFormSelect} />;
+    return (
+      <div className="space-y-6">
+        {userId && orgId && (
+          <WorkerStatusList orgId={orgId} userId={userId} />
+        )}
+        <FormList onFormSelect={handleFormSelect} />
+      </div>
+    );
   }
 
   // Show batch number prompt

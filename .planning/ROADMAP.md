@@ -132,7 +132,7 @@
 
 Plans:
 - [x] 04.1-01-PLAN.md — Layout shell components (AppLayout, Sidebar, BottomTabBar, MobileTopBar, NavItem) | COMPLETE
-- [ ] 04.1-02-PLAN.md — Route refactor with nested Outlet + human verify checkpoint | PENDING
+- [x] 04.1-02-PLAN.md — Route refactor with nested Outlet + human verify checkpoint | COMPLETE
 
 ### Phase 5: PWA Polish & Production
 
@@ -169,7 +169,7 @@ Plans:
 | 2. Form Builder | 9/9 | Complete | 2026-02-27 |
 | 3. Form Filling | 9/9 | Complete | 2026-02-27 |
 | 4. Review Workflow | 5/5 | Complete | 2026-02-27 |
-| 4.1. Navbar Navigation | 1/2 | In Progress | 2026-02-27 |
+| 4.1. Navbar Navigation | 2/2 | Complete | 2026-02-27 |
 | 5. PWA Polish & Production | 0/5 | Not started | - |
 
 ---
@@ -217,4 +217,4 @@ Phase 5 (PWA Polish)
 **Total:** 18/18 requirements mapped ✓
 
 ---
-*Last updated: 2026-02-27T09:30:00Z*
+*Last updated: 2026-02-27T22:05:00Z*

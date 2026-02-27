@@ -8,7 +8,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current Phase:** 04
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 5
 **Status:** Ready to execute
 
@@ -130,6 +130,8 @@ See: .planning/PROJECT.md
 - [Phase 03-form-filling]: Created placeholder useVoiceInput hook with MediaRecorder API — Plan 05 incomplete - Rule 2 auto-fix for missing critical functionality
 - [Phase 04-01]: Photos stored as base64 strings per Phase 3 pattern, not Convex storage IDs
 - [Phase 04-01]: Reject comment required via v.string() validator, approve comment optional
+- [Phase 04-02]: Added status-specific badge variants (pending/approved/rejected) with yellow/green/red colors per CONTEXT.md
+- [Phase 04-02]: Dialog includes close button with X icon from lucide-react for consistent UX
 
 ## Blockers
 
@@ -150,6 +152,7 @@ None
 | 03-09 | 2 | 2 | 120s | 2026-02-27 |
 | Phase 03-form-filling | 9 | 9/9 (100%) | | |
 | Phase 04 P01 | 5min | 2 tasks | 2 files |
+| Phase 04 P02 | 106s | 1 tasks | 5 files |
 
 ## Requirements Completed
 

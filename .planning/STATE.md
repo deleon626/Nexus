@@ -145,6 +145,12 @@ See: .planning/PROJECT.md
 - [Phase 04-review-workflow-04]: Photos open in new tab for full-size viewing (simple pattern)
 - [Phase 04-review-workflow-04]: Comment optional for approve, required for reject
 
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 4.1 inserted after Phase 4: navbar navigation between sections (URGENT)
+
 ## Blockers
 
 None

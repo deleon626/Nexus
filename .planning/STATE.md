@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.0 milestone
-**Current Phase:** 05
-**Current Plan:** Not started
-**Total Plans in Phase:** 5
-**Status:** Ready to plan
+**Current Phase:** 04.1-navbar-navigation-between-sections
+**Current Plan:** 02
+**Total Plans in Phase:** 2
+**Status:** In Progress
 
 ## Progress
 
@@ -19,11 +19,21 @@ See: .planning/PROJECT.md
 | 01-foundation-auth | 4 | 4/4 (100%) |
 | 02-form-builder | 9 | 9/9 (100%) |
 | 03-form-filling | 9 | 9/9 (100%) |
-| 04-form-review | 5 | 4/5 (80%) |
+| 04-form-review | 5 | 5/5 (100%) |
+| 04.1-navbar-navigation-between-sections | 2 | 1/2 (50%) |
 | 05-deployment | 0 | 0/0 |
 
 ## Session Log
 
+- 2026-02-27: Completed 04.1-01 (Layout Shell Components)
+  - Created NavItem component with icon + label, active state via useLocation
+  - Created useNavItems() hook for role-based nav filtering
+  - Created useUserIdentity() hook with dev mode guard for Clerk useUser()
+  - Created UserAvatar component with image/initials fallback
+  - Created Sidebar: desktop always-expanded with nav items and user identity footer
+  - Created BottomTabBar: mobile fixed bottom tabs with icon + label
+  - Created MobileTopBar: mobile slim top bar with page title and user avatar
+  - Created AppLayout: main shell with Outlet, responsive layout, SafeSyncIndicator wrapper
 - 2026-02-27: Completed 04-review-workflow-05 (Worker Status View)
   - Created WorkerStatusList component with real-time Convex query
   - StatusBadge integration for status display
@@ -149,7 +159,8 @@ See: .planning/PROJECT.md
 
 ### Roadmap Evolution
 
-- Phase 4.1 inserted after Phase 4: navbar navigation between sections (URGENT)
+- Phase 4.1 navbar navigation inserted between Phase 4 and Phase 5: responsive nav shell (sidebar + bottom tabs)
+- Phase 4.1 Plan 01 completed: layout shell components created, ready for Plan 02 (routing integration)
 
 ## Blockers
 
@@ -174,6 +185,7 @@ None
 | Phase 04 P03 | 2min | 2 tasks | 4 files |
 | Phase 04-review-workflow P05 | 140 | 2 tasks | 2 files |
 | Phase 04-review-workflow P04 | 6min | 2 tasks | 3 files |
+| Phase 04.1 P01 | 120s | 2 tasks | 5 files |
 
 ## Requirements Completed
 

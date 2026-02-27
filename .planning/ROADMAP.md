@@ -111,15 +111,15 @@
 3. Reviewer can approve or reject submissions with optional comments
 4. Worker sees real-time status updates on their submissions (pending/approved/rejected)
 
-**Plans:** 5 plans in 4 waves
+**Plans:** 5/5 plans complete
 
 | Wave | Plan | Description | Status |
 |------|------|-------------|--------|
-| 1 | 04-review-workflow-01-PLAN.md | Convex backend: submissions schema, queries, mutations | PENDING |
-| 2 | 04-review-workflow-02-PLAN.md | UI primitives: Table, Dialog, Badge, @tanstack/react-table | PENDING |
-| 3 | 04-review-workflow-03-PLAN.md | ReviewerDashboard with SubmissionTable | PENDING |
-| 3 | 04-review-workflow-05-PLAN.md | WorkerStatusList for real-time status | PENDING |
-| 4 | 04-review-workflow-04-PLAN.md | ReviewDialog with approve/reject actions | PENDING |
+| 1 | 04-review-workflow-01-PLAN.md | Convex backend: submissions schema, queries, mutations | COMPLETE |
+| 2 | 04-review-workflow-02-PLAN.md | UI primitives: Table, Dialog, Badge, @tanstack/react-table | COMPLETE |
+| 3 | 04-review-workflow-03-PLAN.md | ReviewerDashboard with SubmissionTable | COMPLETE |
+| 3 | 04-review-workflow-05-PLAN.md | WorkerStatusList for real-time status | COMPLETE |
+| 4 | 04-review-workflow-04-PLAN.md | ReviewDialog with approve/reject actions | COMPLETE |
 
 ---
 
@@ -131,8 +131,8 @@
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04.1-01-PLAN.md — Layout shell components (AppLayout, Sidebar, BottomTabBar, MobileTopBar, NavItem)
-- [ ] 04.1-02-PLAN.md — Route refactor with nested Outlet + human verify checkpoint
+- [x] 04.1-01-PLAN.md — Layout shell components (AppLayout, Sidebar, BottomTabBar, MobileTopBar, NavItem) | COMPLETE
+- [ ] 04.1-02-PLAN.md — Route refactor with nested Outlet + human verify checkpoint | PENDING
 
 ### Phase 5: PWA Polish & Production
 
@@ -168,7 +168,8 @@ Plans:
 | 1. Foundation & Auth | 7/7 | Complete | 2026-02-27 |
 | 2. Form Builder | 9/9 | Complete | 2026-02-27 |
 | 3. Form Filling | 9/9 | Complete | 2026-02-27 |
-| 4. Review Workflow | 0/5 | Ready to plan | - |
+| 4. Review Workflow | 5/5 | Complete | 2026-02-27 |
+| 4.1. Navbar Navigation | 1/2 | In Progress | 2026-02-27 |
 | 5. PWA Polish & Production | 0/5 | Not started | - |
 
 ---

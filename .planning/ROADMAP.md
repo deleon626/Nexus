@@ -123,6 +123,18 @@
 
 ---
 
+### Phase 04.2: Deploy Convex on Coolify (INSERTED)
+
+**Goal:** Convex backend and dashboard running on Coolify infrastructure with frontend connected to self-hosted instance.
+
+**Depends on:** Phase 4
+**Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04.2-01-PLAN.md — Docker Compose creation + Coolify deployment + admin key generation
+- [ ] 04.2-02-PLAN.md — Frontend Convex client config + function deployment + end-to-end verify
+
 ### Phase 04.1: navbar navigation between sections (INSERTED)
 
 **Goal:** Users can navigate between app sections (Builder, Fill Forms, Reviews) via a persistent responsive navbar — desktop sidebar + mobile bottom tabs — filtered to their role.
@@ -170,6 +182,7 @@ Plans:
 | 3. Form Filling | 9/9 | Complete | 2026-02-27 |
 | 4. Review Workflow | 5/5 | Complete | 2026-02-27 |
 | 4.1. Navbar Navigation | 2/2 | Complete | 2026-02-27 |
+| 4.2. Deploy Convex on Coolify | 0/2 | Not started | - |
 | 5. PWA Polish & Production | 0/5 | Not started | - |
 
 ---
@@ -213,8 +226,11 @@ Phase 5 (PWA Polish)
 | REVW-02 | Phase 4 | Full submission details view |
 | REVW-03 | Phase 4 | Approve/reject with comments |
 | REVW-04 | Phase 4 | Real-time status updates |
+| DEPLOY-01 | Phase 4.2 | Convex backend on Coolify |
+| DEPLOY-02 | Phase 4.2 | Frontend connected to self-hosted |
+| DEPLOY-03 | Phase 4.2 | Convex functions deployed |
 
-**Total:** 18/18 requirements mapped ✓
+**Total:** 21/21 requirements mapped
 
 ---
-*Last updated: 2026-02-27T22:05:00Z*
+*Last updated: 2026-02-27T23:00:00Z*

@@ -9,8 +9,8 @@
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { format } from 'date-fns';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { api } from '@convex/_generated/api';
+import { Id } from '@convex/_generated/dataModel';
 import {
   Dialog,
   DialogContent,

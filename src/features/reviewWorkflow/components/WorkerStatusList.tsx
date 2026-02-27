@@ -9,7 +9,7 @@
 import { useRef, useEffect } from 'react';
 import { useQuery } from 'convex/react';
 import { formatDistanceToNow } from 'date-fns';
-import { api } from '@/convex/_generated/api';
+import { api } from '@convex/_generated/api';
 import { StatusBadge, SubmissionStatus } from './StatusBadge';
 
 interface WorkerStatusListProps {

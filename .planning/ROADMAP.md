@@ -128,7 +128,7 @@
 **Goal:** Users can navigate between app sections (Builder, Fill Forms, Reviews) via a persistent responsive navbar — desktop sidebar + mobile bottom tabs — filtered to their role.
 
 **Depends on:** Phase 4
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 04.1-01-PLAN.md — Layout shell components (AppLayout, Sidebar, BottomTabBar, MobileTopBar, NavItem) | COMPLETE

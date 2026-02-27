@@ -22,17 +22,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       return;
     }
 
-    const currentPath = window.location.pathname;
-    if (currentPath === "/") {
-      if (isAdmin) {
-        navigate("/admin/builder", { replace: true });
-      } else if (isWorker && !isAdmin) {
-        navigate("/worker/forms", { replace: true });
-      } else if (isReviewer && !isAdmin) {
-        navigate("/reviewer/dashboard", { replace: true });
-      }
-    }
-  }, [isAuthenticated, isLoading, role, isAdmin, isWorker, isReviewer, navigate]);
+    // Role-based redirect logic is now handled by RoleBasedHome component in index.tsx
+  }, [isAuthenticated, isLoading, navigate]);
 
   // In dev mode, always show children
   if (isDevModeWithoutCredentials) {

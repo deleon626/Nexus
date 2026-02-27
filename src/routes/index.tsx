@@ -1,69 +1,70 @@
 import { Routes, Route, Navigate } from "react-router";
+import { useRole, isDevModeWithoutCredentials } from "../context/AuthContext";
 import ProtectedRoute, { AdminRoute, WorkerRoute, ReviewerRoute } from "./protected";
 import SignInPage from "./sign-in";
 import AdminBuilder from "./admin/builder";
 import { FormFillingPage } from "@/features/formFilling/pages/FormFillingPage";
 import ReviewerDashboard from "./reviewer/dashboard";
 import OfflineBanner from "../components/sync/OfflineBanner";
-import SyncIndicator from "../components/sync/SyncIndicator";
+import AppLayout from "../components/layout/AppLayout";
 
-// Error boundary for sync components
-function SyncComponents() {
-  try {
-    return (
-      <>
-        <OfflineBanner />
-        <header className="border-b bg-background">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <h1 className="text-xl font-bold">Nexus QC Forms</h1>
-            <SyncIndicator />
-          </div>
-        </header>
-      </>
-    );
-  } catch (error) {
-    return (
-      <header className="border-b bg-background">
-        <div className="container mx-auto px-4 py-3">
-          <h1 className="text-xl font-bold">Nexus QC Forms</h1>
-        </div>
-      </header>
-    );
+// Role-based home component that redirects users to their appropriate default route
+function RoleBasedHome() {
+  const { isAdmin, isWorker, isReviewer } = useRole();
+
+  if (isDevModeWithoutCredentials || isAdmin) {
+    return <Navigate to="/admin/builder" replace />;
   }
+  if (isWorker) {
+    return <Navigate to="/worker/forms" replace />;
+  }
+  if (isReviewer) {
+    return <Navigate to="/reviewer/dashboard" replace />;
+  }
+
+  // No role — show within the AppLayout (sidebar shows "Contact your admin")
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <p className="text-lg font-medium mb-2">No access assigned</p>
+      <p className="text-muted-foreground text-sm">Contact your admin to get access to this application.</p>
+    </div>
+  );
 }
 
 export default function AppRoutes() {
   return (
     <ProtectedRoute>
-      <SyncComponents />
+      <OfflineBanner />
       <Routes>
         <Route path="/sign-in" element={<SignInPage />} />
-        <Route path="/" element={<Navigate to="/admin/builder" replace />} />
-        <Route
-          path="/admin/builder"
-          element={
-            <AdminRoute>
-              <AdminBuilder />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/worker/forms"
-          element={
-            <WorkerRoute>
-              <FormFillingPage />
-            </WorkerRoute>
-          }
-        />
-        <Route
-          path="/reviewer/dashboard"
-          element={
-            <ReviewerRoute>
-              <ReviewerDashboard />
-            </ReviewerRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/admin/builder" replace />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<RoleBasedHome />} />
+          <Route
+            path="/admin/builder"
+            element={
+              <AdminRoute>
+                <AdminBuilder />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/worker/forms"
+            element={
+              <WorkerRoute>
+                <FormFillingPage />
+              </WorkerRoute>
+            }
+          />
+          <Route
+            path="/reviewer/dashboard"
+            element={
+              <ReviewerRoute>
+                <ReviewerDashboard />
+              </ReviewerRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
       </Routes>
     </ProtectedRoute>
   );

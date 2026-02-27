@@ -8,7 +8,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.0 milestone
 **Current Phase:** 04
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 5
 **Status:** Ready to execute
 
@@ -132,6 +132,7 @@ See: .planning/PROJECT.md
 - [Phase 04-01]: Reject comment required via v.string() validator, approve comment optional
 - [Phase 04-02]: Added status-specific badge variants (pending/approved/rejected) with yellow/green/red colors per CONTEXT.md
 - [Phase 04-02]: Dialog includes close button with X icon from lucide-react for consistent UX
+- [Phase 04-03]: Skip pattern (orgId ? ... : 'skip') prevents Convex query before auth ready
 
 ## Blockers
 
@@ -153,6 +154,7 @@ None
 | Phase 03-form-filling | 9 | 9/9 (100%) | | |
 | Phase 04 P01 | 5min | 2 tasks | 2 files |
 | Phase 04 P02 | 106s | 1 tasks | 5 files |
+| Phase 04 P03 | 2min | 2 tasks | 4 files |
 
 ## Requirements Completed
 

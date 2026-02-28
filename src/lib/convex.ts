@@ -10,4 +10,7 @@ if (!convexUrl && !import.meta.env.DEV) {
   console.warn("VITE_CONVEX_URL not set - backend will not work");
 }
 
-export const convex = new ConvexReactClient(url);
+// skipConvexDeploymentUrlCheck required for self-hosted Convex with custom domains
+export const convex = new ConvexReactClient(url, {
+  skipConvexDeploymentUrlCheck: true,
+});

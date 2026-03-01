@@ -103,6 +103,64 @@ export const listWorkerSubmissions = query({
 // ============================================================================
 
 /**
+ * Create a new submission from worker sync
+ *
+ * Called by the sync worker when pushing IndexedDB submissions to Convex.
+ * Idempotent via localId — rejects duplicates silently (returns existing ID).
+ * Phase 6: Closes P1 gap — enables data flow to reviewer dashboard and worker status.
+ */
+export const createSubmission = mutation({
+  args: {
+    localId: v.string(),
+    batchNumber: v.string(),
+    templateId: v.string(),
+    templateName: v.string(),
+    orgId: v.string(),
+    userId: v.string(),
+    workerName: v.string(),
+    data: v.any(),
+    photos: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Verify auth
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Unauthorized: User must be authenticated');
+    }
+
+    // Idempotency check: reject duplicate submissions by localId
+    const existing = await ctx.db
+      .query('submissions')
+      .withIndex('by_localId', (q) => q.eq('localId', args.localId))
+      .first();
+
+    if (existing) {
+      return { success: true, id: existing._id, duplicate: true };
+    }
+
+    const now = Date.now();
+
+    // Insert new submission
+    const id = await ctx.db.insert('submissions', {
+      localId: args.localId,
+      batchNumber: args.batchNumber,
+      templateId: args.templateId,
+      templateName: args.templateName,
+      orgId: args.orgId,
+      userId: args.userId,
+      workerName: args.workerName,
+      data: args.data,
+      photos: args.photos,
+      status: 'pending',
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return { success: true, id, duplicate: false };
+  },
+});
+
+/**
  * Approve a submission
  *
  * Updates submission status to 'approved' with optional reviewer comment.

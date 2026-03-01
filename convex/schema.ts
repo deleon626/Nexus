@@ -78,6 +78,9 @@ export default defineSchema({
    * - by_org: General org queries
    */
   submissions: defineTable({
+    // Idempotency key from client (Phase 6: prevents duplicate submissions)
+    localId: v.string(),
+
     // Submission metadata
     batchNumber: v.string(), // Production batch association (OFFL-04)
     templateId: v.string(), // Reference to form template
@@ -104,5 +107,6 @@ export default defineSchema({
   })
     .index('by_org_status', ['orgId', 'status'])
     .index('by_org_user', ['orgId', 'userId'])
-    .index('by_org', ['orgId']),
+    .index('by_org', ['orgId'])
+    .index('by_localId', ['localId']),
 });

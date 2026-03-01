@@ -4,9 +4,30 @@ import {
   markCompleted,
   markFailed,
 } from './queue';
+import { convexHttpClient } from '@/lib/convexHttpClient';
+import { api } from '@convex/_generated/api';
 
 // In-flight request tracking (prevent race conditions)
 const inFlightRequests = new Set<string>();
+
+/**
+ * Get Clerk auth token for Convex.
+ * Uses Clerk's global session (available after sign-in via ClerkProvider).
+ */
+async function getAuthToken(): Promise<string> {
+  // Access Clerk's global instance (set by ClerkProvider)
+  const clerk = (window as any).Clerk;
+  if (!clerk?.session) {
+    throw new Error('No Clerk session — user not authenticated');
+  }
+
+  const token = await clerk.session.getToken({ template: 'convex' });
+  if (!token) {
+    throw new Error('Failed to get Convex token from Clerk');
+  }
+
+  return token;
+}
 
 // Process a single queue item
 async function processItem(item: any): Promise<boolean> {
@@ -27,9 +48,23 @@ async function processItem(item: any): Promise<boolean> {
   inFlightRequests.add(inFlightKey);
 
   try {
-    // TODO: Make actual API call to Convex
-    // For now, simulate success
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Get auth token and set on HTTP client
+    const token = await getAuthToken();
+    convexHttpClient.setAuth(token);
+
+    // Call Convex createSubmission mutation
+    const payload = item.payload;
+    await convexHttpClient.mutation(api.submissions.createSubmission, {
+      localId: payload.localId,
+      batchNumber: payload.batchNumber,
+      templateId: payload.templateId,
+      templateName: payload.templateName || 'Unknown Form',
+      orgId: payload.orgId,
+      userId: payload.userId,
+      workerName: payload.workerName || 'Unknown Worker',
+      data: payload.data,
+      photos: payload.photos || [],
+    });
 
     // Mark as completed (removes from queue)
     await markCompleted(item.localId);

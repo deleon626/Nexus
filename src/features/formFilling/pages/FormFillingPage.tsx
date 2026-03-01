@@ -18,7 +18,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '@/db/dexie';
 import type { Draft, Template } from '@/db/types';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, isDevModeWithoutCredentials } from '@/context/AuthContext';
+import { triggerSync } from '@/db/sync';
 import type { FormTemplate, FormDataRecord } from '@/features/formBuilder/types';
 import { FormList } from '../components/FormList';
 import { BatchNumberPrompt } from '../components/BatchNumberPrompt';
@@ -27,6 +28,7 @@ import { FormFiller } from '../components/FormFiller';
 import { SubmissionSummary } from '../components/SubmissionSummary';
 import { SuccessScreen } from '../components/SuccessScreen';
 import { WorkerStatusList } from '@/features/reviewWorkflow/components/WorkerStatusList';
+import { useUserIdentity } from '@/components/layout/NavItem';
 
 // ============================================================================
 // Page State Enum
@@ -50,6 +52,8 @@ type PageState =
 
 export function FormFillingPage() {
   const { userId, orgId } = useAuth();
+  const userIdentity = useUserIdentity();
+  const workerName = userIdentity.name || 'Worker';
 
   // Page state
   const [pageState, setPageState] = useState<PageState>('listing');
@@ -223,14 +227,18 @@ export function FormFillingPage() {
       // Save to db.submissions
       await db.submissions.add(submission);
 
-      // Add to sync queue
+      // Add to sync queue with templateName and workerName for Convex
       await db.syncQueue.add({
         localId: uuidv4(),
         operation: 'create' as const,
         endpoint: '/submissions',
         recordId: localId,
         recordType: 'submission',
-        payload: submission,
+        payload: {
+          ...submission,
+          templateName: selectedForm.name,
+          workerName,
+        },
         status: 'pending' as const,
         attemptCount: 0,
         createdAt: now,
@@ -241,12 +249,15 @@ export function FormFillingPage() {
         await db.drafts.delete(selectedDraft.localId);
       }
 
+      // Trigger immediate sync (don't wait for 30s interval)
+      triggerSync().catch(console.error);
+
       // Transition to success screen
       setPageState('success');
     } catch (error) {
       console.error('Failed to submit form:', error);
     }
-  }, [selectedForm, batchNumber, userId, orgId, formData, selectedDraft]);
+  }, [selectedForm, batchNumber, userId, orgId, formData, selectedDraft, workerName]);
 
   /**
    * Handle "Submit & Start New"
@@ -279,14 +290,18 @@ export function FormFillingPage() {
       // Save to db.submissions
       await db.submissions.add(submission);
 
-      // Add to sync queue
+      // Add to sync queue with templateName and workerName for Convex
       await db.syncQueue.add({
         localId: uuidv4(),
         operation: 'create' as const,
         endpoint: '/submissions',
         recordId: localId,
         recordType: 'submission',
-        payload: submission,
+        payload: {
+          ...submission,
+          templateName: selectedForm.name,
+          workerName,
+        },
         status: 'pending' as const,
         attemptCount: 0,
         createdAt: now,
@@ -297,6 +312,9 @@ export function FormFillingPage() {
         await db.drafts.delete(selectedDraft.localId);
       }
 
+      // Trigger immediate sync (don't wait for 30s interval)
+      triggerSync().catch(console.error);
+
       // Clear form state and show batch prompt for new batch
       setFormData({});
       setSelectedDraft(null);
@@ -305,7 +323,7 @@ export function FormFillingPage() {
     } catch (error) {
       console.error('Failed to submit form:', error);
     }
-  }, [selectedForm, batchNumber, userId, orgId, formData, selectedDraft]);
+  }, [selectedForm, batchNumber, userId, orgId, formData, selectedDraft, workerName]);
 
   /**
    * Handle done from success screen

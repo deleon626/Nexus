@@ -193,6 +193,7 @@ None
 | Phase 04.1 P01 | 120s | 2 tasks | 5 files |
 | Phase 04.1 P02 | 60 | 2 tasks | 2 files |
 | Phase 05-pwa-polish-production P01 | 133s | 3 tasks | 6 files |
+| Phase 05-pwa-polish-production P02 | 105 | 2 tasks | 3 files |
 
 ## Requirements Completed
 

@@ -16,8 +16,8 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { STORAGE_WARNING_PERCENT, STORAGE_BLOCKING_PERCENT, STORAGE_CHECK_INTERVAL_MS } from '../../constants';
-import { runAutoCleanup } from '../../utils/storageCleanup';
+import { STORAGE_WARNING_PERCENT, STORAGE_BLOCKING_PERCENT, STORAGE_CHECK_INTERVAL_MS } from '../constants';
+import { runAutoCleanup } from '../utils/storageCleanup';
 
 export type StorageStatus = 'idle' | 'ok' | 'warning' | 'blocking';
 

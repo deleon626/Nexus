@@ -146,6 +146,42 @@ Plans:
 - [x] 04.1-01-PLAN.md — Layout shell components (AppLayout, Sidebar, BottomTabBar, MobileTopBar, NavItem) | COMPLETE
 - [x] 04.1-02-PLAN.md — Route refactor with nested Outlet + human verify checkpoint | COMPLETE
 
+### Phase 6: Fix Submission Pipeline (Gap Closure)
+
+**Goal:** Submissions sync from IndexedDB to Convex so reviewer dashboards show pending submissions and workers see status updates.
+
+**Depends on:** Phase 4 (review workflow UI exists but is empty)
+**Requirements:** REVW-01, REVW-02, REVW-03, REVW-04
+**Gap Closure:** Closes gaps from audit — P1 critical path
+
+**Success Criteria** (what must be TRUE):
+1. `createSubmission` mutation exists in `convex/submissions.ts`
+2. Sync worker calls `createSubmission` instead of TODO stub
+3. Reviewer dashboard shows submissions after worker sync
+4. Worker status list shows real-time updates on their submissions
+
+**Plans:** 0/1 plans
+
+---
+
+### Phase 7: Fix Voice Input, OrgId & Template Sync (Gap Closure)
+
+**Goal:** Voice input works end-to-end, admin org isolation is correct, and workers on separate devices see published forms.
+
+**Depends on:** Phase 4 (existing implementations need bug fixes)
+**Requirements:** FILL-03, AUTH-03, OFFL-01
+**Gap Closure:** Closes gaps from audit — P2/P3
+
+**Success Criteria** (what must be TRUE):
+1. Voice input records, transcribes via Whisper, and populates form field when online
+2. Builder.tsx reads orgId correctly from AuthState (not undefined)
+3. Workers on separate devices see published form templates (Convex→Dexie sync)
+4. NAV-SHELL and NAV-ROUTING registered in REQUIREMENTS.md
+
+**Plans:** 0/1 plans
+
+---
+
 ### Phase 5: PWA Polish & Production
 
 **Goal:** App is installable, production-ready, and handles PWA-specific lifecycle events properly.
@@ -184,6 +220,8 @@ Plans:
 | 4.1. Navbar Navigation | 2/2 | Complete | 2026-02-27 |
 | 4.2. Deploy Convex on Coolify | 0/2 | Not started | - |
 | 5. PWA Polish & Production | 0/5 | Not started | - |
+| 6. Fix Submission Pipeline | 0/1 | Not started | - |
+| 7. Fix Voice, OrgId & Template Sync | 0/1 | Not started | - |
 
 ---
 
@@ -230,7 +268,17 @@ Phase 5 (PWA Polish)
 | DEPLOY-02 | Phase 4.2 | Frontend connected to self-hosted |
 | DEPLOY-03 | Phase 4.2 | Convex functions deployed |
 
-**Total:** 21/21 requirements mapped
+| REVW-01 | Phase 6 | Pending (gap closure) |
+| REVW-02 | Phase 6 | Pending (gap closure) |
+| REVW-03 | Phase 6 | Pending (gap closure) |
+| REVW-04 | Phase 6 | Pending (gap closure) |
+| FILL-03 | Phase 7 | Pending (gap closure) |
+| AUTH-03 | Phase 7 | Pending (gap closure) |
+| OFFL-01 | Phase 7 | Pending (gap closure) |
+| NAV-SHELL | Phase 4.1 | Complete (orphaned — needs REQUIREMENTS.md registration) |
+| NAV-ROUTING | Phase 4.1 | Complete (orphaned — needs REQUIREMENTS.md registration) |
+
+**Total:** 23/23 requirements mapped
 
 ---
 *Last updated: 2026-02-27T23:00:00Z*

@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Offline & Sync
 
-- [x] **OFFL-01**: User can fill forms offline with data cached locally
+- [ ] **OFFL-01**: User can fill forms offline with data cached locally
 - [x] **OFFL-02**: User sees real-time sync status (pending/synced/failed)
 - [x] **OFFL-03**: Form drafts auto-save to prevent data loss
 - [x] **OFFL-04**: Forms are associated with production batch numbers
@@ -25,21 +25,26 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **FILL-01**: Worker can fill forms with manual data entry
 - [x] **FILL-02**: Worker can capture photos via device camera
-- [x] **FILL-03**: Worker can fill forms using voice input (online-only via Whisper API + Agno LLM)
+- [ ] **FILL-03**: Worker can fill forms using voice input (online-only via Whisper API + Agno LLM)
 - [x] **FILL-04**: Worker sees form validation errors before submission
 
 ### Review Workflow
 
-- [x] **REVW-01**: Reviewer can view dashboard of pending submissions
-- [x] **REVW-02**: Reviewer can view full submission details including photos
-- [x] **REVW-03**: Reviewer can approve or reject submissions with comments
-- [x] **REVW-04**: Worker sees real-time status updates on their submissions
+- [ ] **REVW-01**: Reviewer can view dashboard of pending submissions
+- [ ] **REVW-02**: Reviewer can view full submission details including photos
+- [ ] **REVW-03**: Reviewer can approve or reject submissions with comments
+- [ ] **REVW-04**: Worker sees real-time status updates on their submissions
 
 ### Auth & Multi-tenancy
 
 - [x] **AUTH-01**: User can sign in via Clerk authentication
 - [x] **AUTH-02**: User has role-based access (Admin, Worker, Reviewer, Viewer)
-- [x] **AUTH-03**: Organization data is isolated per tenant
+- [ ] **AUTH-03**: Organization data is isolated per tenant
+
+### Navigation
+
+- [x] **NAV-SHELL**: Persistent responsive navbar (desktop sidebar + mobile bottom tabs) filtered by role
+- [x] **NAV-ROUTING**: Nested route structure with role-based section access
 
 ## v2 Requirements
 
@@ -86,7 +91,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OFFL-01 | Phase 1 | Complete |
+| OFFL-01 | Phase 7 | Pending |
 | OFFL-02 | Phase 1 | Complete |
 | OFFL-03 | Phase 1 | Complete |
 | OFFL-04 | Phase 1 | Complete |
@@ -96,19 +101,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FORM-04 | Phase 2 | Complete |
 | FILL-01 | Phase 3 | Complete |
 | FILL-02 | Phase 3 | Complete |
-| FILL-03 | Phase 3 | Complete |
+| FILL-03 | Phase 7 | Pending |
 | FILL-04 | Phase 3 | Complete |
-| REVW-01 | Phase 4 | Complete |
-| REVW-02 | Phase 4 | Complete |
-| REVW-03 | Phase 4 | Complete |
-| REVW-04 | Phase 4 | Complete |
+| REVW-01 | Phase 6 | Pending |
+| REVW-02 | Phase 6 | Pending |
+| REVW-03 | Phase 6 | Pending |
+| REVW-04 | Phase 6 | Pending |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
-| AUTH-03 | Phase 1 | In Progress |
+| AUTH-03 | Phase 7 | Pending |
+| NAV-SHELL | Phase 4.1 | Complete |
+| NAV-ROUTING | Phase 4.1 | Complete |
 
 **Coverage:**
-- v1 requirements: 18 total
-- Mapped to phases: 18
+- v1 requirements: 20 total
+- Mapped to phases: 20
+- Satisfied: 14
+- Pending (gap closure): 6
 - Unmapped: 0 ✓
 
 ---

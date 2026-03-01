@@ -1,7 +1,8 @@
-import { Download, Info } from 'lucide-react';
+import { Download, HardDrive, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePWAInstall } from '@/features/pwa/hooks/usePWAInstall';
+import { StorageIndicator } from '@/features/pwa/components/StorageIndicator';
 
 /**
  * Settings Page
@@ -89,18 +90,19 @@ export default function SettingsPage() {
           </Card>
         )}
 
-        {/* Storage Management Card - placeholder for Plan 04 */}
+        {/* Storage Management Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Storage</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <HardDrive className="w-5 h-5" />
+              Storage
+            </CardTitle>
             <CardDescription>
-              Manage offline data and cached content
+              Automatic cleanup keeps storage optimized
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Storage management features coming soon.
-            </p>
+            <StorageIndicator />
           </CardContent>
         </Card>
       </section>

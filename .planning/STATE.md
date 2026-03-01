@@ -154,6 +154,10 @@ See: .planning/PROJECT.md
 - [Phase 04-review-workflow-04]: Reject button disabled until comment entered per CONTEXT.md
 - [Phase 04-review-workflow-04]: Photos open in new tab for full-size viewing (simple pattern)
 - [Phase 04-review-workflow-04]: Comment optional for approve, required for reject
+- [Phase 05]: Install prompt only shows on manual trigger from Settings (per CONTEXT: never auto-prompt)
+- [Phase 05]: Dismissal stored in localStorage to prevent re-prompting (per CONTEXT: never re-prompt)
+- [Phase 05]: Settings page accessible to all roles (no role gating)
+- [Phase 05]: Install button triggers banner, banner triggers native browser prompt
 
 ## Accumulated Context
 
@@ -161,6 +165,7 @@ See: .planning/PROJECT.md
 
 - Phase 4.1 navbar navigation inserted between Phase 4 and Phase 5: responsive nav shell (sidebar + bottom tabs)
 - Phase 4.1 Plan 01 completed: layout shell components created, ready for Plan 02 (routing integration)
+- Phase 4.2 deploy convex in /coolify instance for this project inserted after Phase 4.1: deploy convex in /coolify instance for this project (URGENT)
 
 ## Blockers
 
@@ -187,6 +192,7 @@ None
 | Phase 04-review-workflow P04 | 6min | 2 tasks | 3 files |
 | Phase 04.1 P01 | 120s | 2 tasks | 5 files |
 | Phase 04.1 P02 | 60 | 2 tasks | 2 files |
+| Phase 05-pwa-polish-production P01 | 133s | 3 tasks | 6 files |
 
 ## Requirements Completed
 

@@ -5,6 +5,7 @@ import SignInPage from "./sign-in";
 import AdminBuilder from "./admin/builder";
 import { FormFillingPage } from "@/features/formFilling/pages/FormFillingPage";
 import ReviewerDashboard from "./reviewer/dashboard";
+import SettingsPage from "./settings";
 import OfflineBanner from "../components/sync/OfflineBanner";
 import AppLayout from "../components/layout/AppLayout";
 
@@ -63,6 +64,7 @@ export default function AppRoutes() {
               </ReviewerRoute>
             }
           />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

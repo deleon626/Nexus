@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { LayoutGrid, ClipboardList, CheckSquare, LucideIcon } from "lucide-react";
+import { LayoutGrid, ClipboardList, CheckSquare, Settings, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole, isDevModeWithoutCredentials } from "@/context/AuthContext";
 import { useUser } from "@clerk/clerk-react";
@@ -18,6 +18,7 @@ const NAV_CONFIG: NavItemConfig[] = [
   { label: "Builder", path: "/admin/builder", icon: LayoutGrid, requiresAdmin: true },
   { label: "Fill Forms", path: "/worker/forms", icon: ClipboardList, requiresWorker: true },
   { label: "Reviews", path: "/reviewer/dashboard", icon: CheckSquare, requiresReviewer: true },
+  { label: "Settings", path: "/settings", icon: Settings }, // All roles can access
 ];
 
 // NavItem component

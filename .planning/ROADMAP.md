@@ -181,7 +181,10 @@ Plans:
 3. Workers on separate devices see published form templates (Convex→Dexie sync)
 4. NAV-SHELL and NAV-ROUTING registered in REQUIREMENTS.md
 
-**Plans:** 0/1 plans
+**Plans:** 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md — Fix voice input pipeline, orgId access, and template sync
 
 ---
 

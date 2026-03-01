@@ -7,10 +7,10 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.0 milestone
-**Current Phase:** 04.1-navbar-navigation-between-sections
-**Current Plan:** 02
-**Total Plans in Phase:** 2
-**Status:** Phase complete — ready for verification
+**Current Phase:** 05-pwa-polish-production
+**Current Plan:** 03
+**Total Plans in Phase:** 5
+**Status:** In progress
 
 ## Progress
 
@@ -25,6 +25,12 @@ See: .planning/PROJECT.md
 
 ## Session Log
 
+- 2026-03-01: Completed 05-03 (PWA Storage Monitoring with Auto-Cleanup)
+  - Created PWA constants: storage thresholds (80/95%), retention periods (7/14 days), check interval (60s)
+  - Created useStorageMonitor hook with navigator.storage.estimate() API
+  - Created storage cleanup utilities: cleanupSyncedSubmissions, runAutoCleanup
+  - Auto-cleanup triggers at warning threshold (80%), resets when status returns to ok
+  - Re-checks storage after 1 second delay following cleanup
 - 2026-02-27: Completed 04.1-01 (Layout Shell Components)
   - Created NavItem component with icon + label, active state via useLocation
   - Created useNavItems() hook for role-based nav filtering
@@ -158,6 +164,9 @@ See: .planning/PROJECT.md
 - [Phase 05]: Dismissal stored in localStorage to prevent re-prompting (per CONTEXT: never re-prompt)
 - [Phase 05]: Settings page accessible to all roles (no role gating)
 - [Phase 05]: Install button triggers banner, banner triggers native browser prompt
+- [Phase 05-pwa-polish-production]: Use navigator.storage.estimate() API for cross-browser quota monitoring
+- [Phase 05-pwa-polish-production]: Format bytes with 1024 base for consistency with storage industry standards
+- [Phase 05-pwa-polish-production]: Track cleanup state with ref to avoid redundant cleanup calls during same warning state
 
 ## Accumulated Context
 
@@ -194,6 +203,7 @@ None
 | Phase 04.1 P02 | 60 | 2 tasks | 2 files |
 | Phase 05-pwa-polish-production P01 | 133s | 3 tasks | 6 files |
 | Phase 05-pwa-polish-production P02 | 105 | 2 tasks | 3 files |
+| Phase 05-pwa-polish-production P03 | 25276 | 4 tasks | 3 files |
 
 ## Requirements Completed
 

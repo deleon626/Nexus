@@ -17,6 +17,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { STORAGE_WARNING_PERCENT, STORAGE_BLOCKING_PERCENT, STORAGE_CHECK_INTERVAL_MS } from '../../constants';
+import { runAutoCleanup } from '../../utils/storageCleanup';
 
 export type StorageStatus = 'idle' | 'ok' | 'warning' | 'blocking';
 
@@ -57,11 +58,18 @@ export function useStorageMonitor(): UseStorageMonitorReturn {
   const [status, setStatus] = useState<StorageStatus>('idle');
   const [lastChecked, setLastChecked] = useState<number | null>(null);
 
-  const checkStorageRef = useRef<(() => void) | null>(null);
+  // Track if cleanup already ran for current warning state to avoid redundant cleanup
+  const cleanupRanRef = useRef<boolean>(false);
+
+  const checkStorageRef = useRef<(() => Promise<void>) | null>(null);
 
   /**
    * Check storage usage via navigator.storage.estimate()
    * Calculates percentage and determines status
+   *
+   * Triggers auto-cleanup when status changes to 'warning' (80% threshold)
+   * Only runs cleanup once per warning state (uses ref to track)
+   * After cleanup, re-checks storage to see if usage dropped
    */
   const checkStorage = async () => {
     try {
@@ -93,6 +101,25 @@ export function useStorageMonitor(): UseStorageMonitorReturn {
         setLastChecked(Date.now());
 
         console.log(`[Storage Monitor] Usage: ${newUsage.percent}%, Status: ${newStatus}`);
+
+        // Trigger auto-cleanup when status changes to 'warning'
+        // Only run once per warning state to avoid redundant cleanup
+        if (newStatus === 'warning' && !cleanupRanRef.current) {
+          console.log('[Storage Monitor] Warning threshold reached, triggering auto-cleanup...');
+          cleanupRanRef.current = true;
+
+          // Run cleanup and re-check storage after 1 second
+          const cleanedCount = await runAutoCleanup();
+          if (cleanedCount > 0) {
+            console.log(`[Storage Monitor] Cleanup complete (${cleanedCount} records), re-checking storage...`);
+            setTimeout(() => checkStorage(), 1000);
+          }
+        }
+
+        // Reset cleanup flag when status returns to 'ok'
+        if (newStatus === 'ok' && cleanupRanRef.current) {
+          cleanupRanRef.current = false;
+        }
       } else {
         console.warn('[Storage Monitor] navigator.storage.estimate() not supported');
       }

@@ -20,8 +20,8 @@ See: .planning/PROJECT.md
 | 02-form-builder | 9 | 9/9 (100%) |
 | 03-form-filling | 9 | 9/9 (100%) |
 | 04-form-review | 5 | 5/5 (100%) |
-| 04.1-navbar-navigation-between-sections | 2 | 1/2 (50%) |
-| 05-deployment | 0 | 0/0 |
+| 04.1-navbar-navigation-between-sections | 2 | 2/2 (100%) |
+| 05-pwa-polish-production | 5 | 1/5 (20%) |
 
 ## Session Log
 

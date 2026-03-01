@@ -7,6 +7,7 @@ import { MockAuthProvider, isDevModeWithoutCredentials } from "./context/AuthCon
 import { ClerkAuthProvider } from "./context/ClerkAuthProvider";
 import AppRoutes from "./routes";
 import { ReloadPrompt } from "./features/pwa/components/ReloadPrompt";
+import { InstallPrompt } from "./features/pwa/components/InstallPrompt";
 
 function App() {
   // TEMP: Force dev mode for self-hosted Convex debugging
@@ -25,6 +26,7 @@ function App() {
             </div>
             <AppRoutes />
             <ReloadPrompt />
+            <InstallPrompt />
           </div>
         </MockAuthProvider>
       </ConvexProvider>
@@ -38,6 +40,7 @@ function App() {
           <div className="min-h-screen bg-background">
             <AppRoutes />
             <ReloadPrompt />
+            <InstallPrompt />
           </div>
         </ClerkAuthProvider>
       </ConvexProviderWithClerk>

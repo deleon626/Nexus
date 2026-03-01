@@ -22,7 +22,7 @@ export function ReloadPrompt() {
         setIsVisible(true);
       }
     },
-    onRegistered(registration) {
+    onRegistered(registration: ServiceWorkerRegistration | undefined) {
       // Check for updates immediately on page load (per CONTEXT.md)
       if (registration) {
         registration.update();
@@ -38,7 +38,7 @@ export function ReloadPrompt() {
         return () => clearInterval(intervalId);
       }
     },
-    onRegisterError(error) {
+    onRegisterError(error: unknown) {
       console.error('Service worker registration error:', error);
     },
   });
@@ -87,7 +87,7 @@ export function ReloadPrompt() {
               </Button>
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 onClick={handleClose}
               >
                 <X className="h-4 w-4" />

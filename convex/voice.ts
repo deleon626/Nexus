@@ -1,4 +1,4 @@
-import { mutation } from './_generated/server';
+import { action } from './_generated/server';
 import { v } from 'convex/values';
 
 /**
@@ -31,7 +31,7 @@ import { v } from 'convex/values';
  * console.log(result.text); // "Hasil transkripsi"
  * ```
  */
-export const transcribeAudio = mutation({
+export const transcribeAudio = action({
   args: {
     audioData: v.string(), // base64-encoded audio with data URL prefix
     language: v.string(), // 'id' for Indonesian, 'en' for English

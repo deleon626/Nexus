@@ -368,7 +368,7 @@ export function FormFiller({
       <form onSubmit={handleFormSubmit} className="space-y-6">
         {template.fields.map((field) => (
           <div key={field.id} id={`field-${field.id}`}>
-            {renderField(field, control, isOnline.isOnline)}
+            {renderField(field, control, isOnline)}
           </div>
         ))}
 

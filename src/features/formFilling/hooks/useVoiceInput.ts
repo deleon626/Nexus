@@ -16,7 +16,8 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { convex } from '@/lib/convex';
+import { convexHttpClient } from '@/lib/convexHttpClient';
+import { api } from '../../../../convex/_generated/api';
 import { useOnline } from '@/hooks/useOnline';
 
 // ============================================================================
@@ -210,8 +211,11 @@ export function useVoiceInput(options: VoiceInputOptions = {}) {
             // Convert blob to base64 for API call
             const audioBase64 = await blobToBase64(blob);
 
-            // Call Convex voice transcription mutation
-            const result = await convex.api.voice.transcribeAudio(audioBase64, language);
+            // Call Convex voice transcription action
+            const result = await convexHttpClient.action(api.voice.transcribeAudio, {
+              audioData: audioBase64,
+              language,
+            });
 
             // Call onTranscript callback if provided (for direct field population)
             if (onTranscript && result.text) {

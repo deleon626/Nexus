@@ -16,7 +16,7 @@ import { FormBuilderCanvas } from '../../features/formBuilder/components/FormBui
 import { FieldEditor } from '../../features/formBuilder/components/FieldEditor';
 import { FormTemplatesList } from '../../features/formBuilder/components/FormTemplatesList';
 import { useTemplatePersistence } from '../../features/formBuilder/hooks/useTemplatePersistence';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Save, Eye, EyeOff, LayoutGrid, FolderOpen } from 'lucide-react';
@@ -34,8 +34,8 @@ function BuilderContent() {
     selectField,
   } = useFormBuilderStore();
 
-  const { user } = useAuth();
-  const orgId = user?.orgId || 'default'; // TODO: Get from user profile
+  const { orgId: authOrgId } = useAuth();
+  const orgId = authOrgId || 'default';
 
   // Template persistence hook
   const {

@@ -28,6 +28,7 @@ import { FormFiller } from '../components/FormFiller';
 import { SubmissionSummary } from '../components/SubmissionSummary';
 import { SuccessScreen } from '../components/SuccessScreen';
 import { WorkerStatusList } from '@/features/reviewWorkflow/components/WorkerStatusList';
+import { useTemplateSync } from '../hooks/useTemplateSync';
 import { useUserIdentity } from '@/components/layout/NavItem';
 
 // ============================================================================
@@ -52,6 +53,7 @@ type PageState =
 
 export function FormFillingPage() {
   const { userId, orgId } = useAuth();
+  useTemplateSync(); // Sync published templates from Convex to Dexie when online
   const userIdentity = useUserIdentity();
   const workerName = userIdentity.name || 'Worker';
 

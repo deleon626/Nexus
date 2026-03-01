@@ -17,9 +17,7 @@ import {
   SYNCED_SUBMISSION_RETENTION_DAYS,
   MS_PER_DAY,
 } from '../constants';
-
-// Re-export existing draft cleanup utility for DRY principle
-export { cleanupExpiredDrafts } from '@/features/formFilling/utils/cleanupExpiredDrafts';
+import { cleanupExpiredDrafts } from '@/features/formFilling/utils/cleanupExpiredDrafts';
 
 /**
  * Delete synced submissions older than retention period

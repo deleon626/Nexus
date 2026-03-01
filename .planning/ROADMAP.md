@@ -160,7 +160,10 @@ Plans:
 3. Reviewer dashboard shows submissions after worker sync
 4. Worker status list shows real-time updates on their submissions
 
-**Plans:** 0/1 plans
+**Plans:** 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — Wire sync pipeline (createSubmission mutation + sync worker + immediate sync)
 
 ---
 

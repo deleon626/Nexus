@@ -1,0 +1,82 @@
+{
+  "name": "nexus-qc-forms",
+  "description": "Mobile QC Form Data Entry PWA - Factory floor quality control data collection",
+  "version": "1.0.0",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/dennyleonardo/nexus"
+  },
+  "build": {
+    "command": "npm run build",
+    "directory": "dist",
+    "dockerfile_path": "Dockerfile"
+  },
+  "container": {
+    "port": 80,
+    "health_check_path": "/health",
+    "health_check_interval": 30
+  },
+  "environments": {
+    "staging": {
+      "name": "Staging",
+      "branch": "main",
+      "description": "Staging environment for testing before production",
+      "environment_variables": {
+        "VITE_CLERK_PUBLISHABLE_KEY": {
+          "description": "Clerk test publishable key (pk_test_...)",
+          "source": "Clerk Dashboard -> API Keys -> Publishable Key",
+          "required": true
+        },
+        "VITE_CONVEX_DEPLOYMENT_URL": {
+          "description": "Convex staging deployment URL",
+          "source": "Convex Dashboard -> Deployments -> Staging Deployment",
+          "required": true
+        },
+        "OPENAI_API_KEY": {
+          "description": "OpenAI API key for Whisper transcription (server-side only)",
+          "source": "OpenAI Dashboard -> API Keys",
+          "required": true
+        }
+      }
+    },
+    "production": {
+      "name": "Production",
+      "branch": "main",
+      "description": "Production environment for live factory floor usage",
+      "environment_variables": {
+        "VITE_CLERK_PUBLISHABLE_KEY": {
+          "description": "Clerk production publishable key (pk_live_...)",
+          "source": "Clerk Dashboard -> API Keys -> Publishable Key",
+          "required": true
+        },
+        "VITE_CONVEX_DEPLOYMENT_URL": {
+          "description": "Convex production deployment URL (different from staging)",
+          "source": "Convex Dashboard -> Deployments -> Production Deployment",
+          "required": true
+        },
+        "OPENAI_API_KEY": {
+          "description": "OpenAI API key for Whisper transcription (server-side only)",
+          "source": "OpenAI Dashboard -> API Keys",
+          "required": true
+        }
+      }
+    }
+  },
+  "deployment": {
+    "type": "dockerfile",
+    "domain_type": "coolify_subdomain",
+    "domain_format": "*.sslip.io"
+  },
+  "monitoring": {
+    "health_endpoint": "/health",
+    "expected_response": "{\"status\":\"healthy\"}"
+  },
+  "notes": [
+    "Uses Coolify subdomain (*.sslip.io) - no custom domain required",
+    "Health check endpoint returns JSON for monitoring integration",
+    "Static assets served by nginx with long-term caching",
+    "SPA routing configured - all routes fall back to index.html",
+    "PWA service worker configured with no-cache headers",
+    "Two separate Convex deployments required (staging vs production)"
+  ]
+}

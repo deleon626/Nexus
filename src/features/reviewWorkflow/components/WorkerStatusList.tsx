@@ -23,7 +23,7 @@ interface Submission {
   batchNumber: string;
   templateId: string;
   templateName?: string;
-  status: SubmissionStatus;
+  status: string; // Accept string from Convex, cast when used
   reviewerComment?: string;
   createdAt: number;
   reviewedAt?: number;
@@ -146,7 +146,7 @@ export function WorkerStatusList({ orgId, userId }: WorkerStatusListProps) {
                 )}
               </div>
 
-              <StatusBadge status={submission.status} />
+              <StatusBadge status={submission.status as SubmissionStatus} />
             </div>
           );
         })}

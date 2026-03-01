@@ -49,15 +49,11 @@ type FormDataValue = string | number | boolean | null;
 export function ReviewDialog({ submission, onClose }: ReviewDialogProps) {
   const [comment, setComment] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mutations for approve/reject
   const approveMutation = useMutation(api.submissions.approveSubmission);
   const rejectMutation = useMutation(api.submissions.rejectSubmission);
-
-  // Loading states
-  const isApproving = approveMutation.status === 'loading';
-  const isRejecting = rejectMutation.status === 'loading';
-  const isLoading = isApproving || isRejecting;
 
   // Check if reject should be disabled
   const isRejectDisabled = comment.trim() === '' || isLoading;
@@ -67,6 +63,7 @@ export function ReviewDialog({ submission, onClose }: ReviewDialogProps) {
     if (!submission) return;
 
     setError(null);
+    setIsLoading(true);
     try {
       await approveMutation({
         id: submission._id as Id<'submissions'>,
@@ -75,6 +72,8 @@ export function ReviewDialog({ submission, onClose }: ReviewDialogProps) {
       handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to approve submission');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,6 +82,7 @@ export function ReviewDialog({ submission, onClose }: ReviewDialogProps) {
     if (!submission || comment.trim() === '') return;
 
     setError(null);
+    setIsLoading(true);
     try {
       await rejectMutation({
         id: submission._id as Id<'submissions'>,
@@ -91,6 +91,8 @@ export function ReviewDialog({ submission, onClose }: ReviewDialogProps) {
       handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reject submission');
+    } finally {
+      setIsLoading(false);
     }
   };
 

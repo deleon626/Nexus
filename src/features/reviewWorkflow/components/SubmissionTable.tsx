@@ -24,6 +24,9 @@ import {
   Submission,
 } from './SubmissionColumns';
 
+// Re-export Submission type for consumers
+export type { Submission } from './SubmissionColumns';
+
 interface SubmissionTableProps {
   data: Submission[];
   onReview: (submission: Submission) => void;

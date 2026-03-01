@@ -350,3 +350,13 @@ export function fieldHasValidation(
 export function isFieldRequired(field: FormField): boolean {
   return field.required;
 }
+
+// ============================================================================
+// Form Data Record
+// ============================================================================
+
+/**
+ * Record type for storing form field values.
+ * Maps field IDs to their values (string, number, boolean, or array for multi-select).
+ */
+export type FormDataRecord = Record<string, string | number | boolean | string[] | null>;

@@ -266,10 +266,10 @@ export function ReviewDialog({ submission, onClose }: ReviewDialogProps) {
             onClick={handleReject}
             disabled={isRejectDisabled}
           >
-            {isRejecting ? 'Rejecting...' : 'Reject'}
+            {isLoading ? 'Rejecting...' : 'Reject'}
           </Button>
           <Button onClick={handleApprove} disabled={isLoading}>
-            {isApproving ? 'Approving...' : 'Approve'}
+            {isLoading ? 'Approving...' : 'Approve'}
           </Button>
         </DialogFooter>
       </DialogContent>

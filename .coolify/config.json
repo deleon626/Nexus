@@ -19,7 +19,7 @@
   "environments": {
     "staging": {
       "name": "Staging",
-      "branch": "main",
+      "branch": "master",
       "description": "Staging environment for testing before production",
       "environment_variables": {
         "VITE_CLERK_PUBLISHABLE_KEY": {
@@ -41,7 +41,7 @@
     },
     "production": {
       "name": "Production",
-      "branch": "main",
+      "branch": "master",
       "description": "Production environment for live factory floor usage",
       "environment_variables": {
         "VITE_CLERK_PUBLISHABLE_KEY": {

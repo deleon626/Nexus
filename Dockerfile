@@ -3,6 +3,15 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
+# Declare build arguments for Vite environment variables
+# These must be passed during docker build with --build-arg
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ARG VITE_CONVEX_URL
+
+# Set environment variables for build time
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_CONVEX_URL=$VITE_CONVEX_URL
+
 # Copy package files for dependency installation
 COPY package.json package-lock.json ./
 

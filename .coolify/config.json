@@ -27,7 +27,7 @@
           "source": "Clerk Dashboard -> API Keys -> Publishable Key",
           "required": true
         },
-        "VITE_CONVEX_DEPLOYMENT_URL": {
+        "VITE_CONVEX_URL": {
           "description": "Convex staging deployment URL",
           "source": "Convex Dashboard -> Deployments -> Staging Deployment",
           "required": true
@@ -49,7 +49,7 @@
           "source": "Clerk Dashboard -> API Keys -> Publishable Key",
           "required": true
         },
-        "VITE_CONVEX_DEPLOYMENT_URL": {
+        "VITE_CONVEX_URL": {
           "description": "Convex production deployment URL (different from staging)",
           "source": "Convex Dashboard -> Deployments -> Production Deployment",
           "required": true

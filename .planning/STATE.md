@@ -21,10 +21,18 @@ See: .planning/PROJECT.md
 | 03-form-filling | 9 | 9/9 (100%) |
 | 04-form-review | 5 | 5/5 (100%) |
 | 04.1-navbar-navigation-between-sections | 2 | 2/2 (100%) |
-| 05-pwa-polish-production | 5 | 1/5 (20%) |
+| 05-pwa-polish-production | 5 | 5/5 (100%) |
 
 ## Session Log
 
+- 2026-03-03: Completed 05-05 (PWA Deployment to Coolify)
+  - Created Dockerfile with multi-stage build (node build + nginx serve)
+  - Created nginx.conf with SPA routing, health endpoint, CSP/Permissions-Policy headers
+  - Updated .env.example with deployment documentation
+  - Created .coolify/config.json for deployment reference
+  - Deployed Staging to Coolify: https://fggck0ssc0www8osc0o0480c.217.15.164.63.sslip.io
+  - Health endpoint verified: {"status":"healthy"}
+  - Production deployment requires manual Coolify dashboard setup
 - 2026-03-01: Completed 05-03 (PWA Storage Monitoring with Auto-Cleanup)
   - Created PWA constants: storage thresholds (80/95%), retention periods (7/14 days), check interval (60s)
   - Created useStorageMonitor hook with navigator.storage.estimate() API
@@ -167,6 +175,12 @@ See: .planning/PROJECT.md
 - [Phase 05-pwa-polish-production]: Use navigator.storage.estimate() API for cross-browser quota monitoring
 - [Phase 05-pwa-polish-production]: Format bytes with 1024 base for consistency with storage industry standards
 - [Phase 05-pwa-polish-production]: Track cleanup state with ref to avoid redundant cleanup calls during same warning state
+- [Phase 05-pwa-polish-production P05]: Multi-stage Docker build for minimal final image (nginx:alpine ~10MB)
+- [Phase 05-pwa-polish-production P05]: Health endpoint at /health returns JSON for Coolify monitoring
+- [Phase 05-pwa-polish-production P05]: SPA routing via nginx try_files with index.html fallback
+- [Phase 05-pwa-polish-production P05]: Coolify API limitation - production app requires manual dashboard creation
+- [Phase 05-pwa-polish-production P05]: Branch name is master (not main) per actual repository state
+- [Phase 05-pwa-polish-production P05]: CSP header allows Convex (*.convex.cloud) and Clerk (*.clerk.accounts.dev) domains
 
 ## Accumulated Context
 
@@ -175,6 +189,12 @@ See: .planning/PROJECT.md
 - Phase 4.1 navbar navigation inserted between Phase 4 and Phase 5: responsive nav shell (sidebar + bottom tabs)
 - Phase 4.1 Plan 01 completed: layout shell components created, ready for Plan 02 (routing integration)
 - Phase 4.2 deploy convex in /coolify instance for this project inserted after Phase 4.1: deploy convex in /coolify instance for this project (URGENT)
+
+### Deployment URLs
+
+- Staging: https://fggck0ssc0www8osc0o0480c.217.15.164.63.sslip.io
+- Health: https://fggck0ssc0www8osc0o0480c.217.15.164.63.sslip.io/health (returns {"status":"healthy"})
+- Production: TBD (requires manual Coolify dashboard setup - duplicate staging app with production env vars)
 
 ## Blockers
 
@@ -199,6 +219,7 @@ None
 | Phase 04 P03 | 2min | 2 tasks | 4 files |
 | Phase 04-review-workflow P05 | 140 | 2 tasks | 2 files |
 | Phase 04-review-workflow P04 | 6min | 2 tasks | 3 files |
+| Phase 05-pwa-polish-production P05 | 90min | 6 tasks | 4 files |
 | Phase 04.1 P01 | 120s | 2 tasks | 5 files |
 | Phase 04.1 P02 | 60 | 2 tasks | 2 files |
 | Phase 05-pwa-polish-production P01 | 133s | 3 tasks | 6 files |

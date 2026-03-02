@@ -14,7 +14,10 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ PWA install prompt with manual trigger — Phase 05
+- ✓ Service worker update notification — Phase 05
+- ✓ Storage monitoring with quota warnings — Phase 05
+- ✓ Production deployment infrastructure — Phase 05
 
 ### Active
 
@@ -95,4 +98,4 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 | Single org active for MVP | Anchor client first, full multi-tenancy UI deferred | — Pending |
 
 ---
-*Last updated: 2026-02-26 after initialization*
+*Last updated: 2026-03-03 after Phase 05*

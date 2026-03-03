@@ -10,11 +10,8 @@ import { ReloadPrompt } from "./features/pwa/components/ReloadPrompt";
 import { InstallPrompt } from "./features/pwa/components/InstallPrompt";
 
 function App() {
-  // TEMP: Force dev mode for self-hosted Convex debugging
-  const forceDevMode = import.meta.env.DEV;
-
   // In dev mode without credentials, use mock auth
-  if (forceDevMode || isDevModeWithoutCredentials) {
+  if (isDevModeWithoutCredentials) {
     return (
       <ConvexProvider client={convex}>
         <MockAuthProvider>

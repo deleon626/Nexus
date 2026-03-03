@@ -1,8 +1,7 @@
 import { Link, useLocation } from "react-router";
 import { LayoutGrid, ClipboardList, CheckSquare, Settings, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRole, isDevModeWithoutCredentials } from "@/context/AuthContext";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth, useRole, isDevModeWithoutCredentials } from "@/context/AuthContext";
 
 // Nav configuration
 interface NavItemConfig {
@@ -73,17 +72,11 @@ export interface UserIdentity {
 }
 
 export function useUserIdentity(): UserIdentity {
-  // In dev mode without credentials, return mock identity
-  if (isDevModeWithoutCredentials) {
-    return { name: "Dev User", imageUrl: null };
-  }
-
-  // Use Clerk's useUser hook
-  const { user } = useUser();
+  const { userName, userImageUrl } = useAuth();
 
   return {
-    name: [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User",
-    imageUrl: user?.imageUrl ?? null,
+    name: userName || 'User',
+    imageUrl: userImageUrl,
   };
 }
 

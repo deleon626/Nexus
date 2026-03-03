@@ -34,40 +34,27 @@ function RoleBasedHome() {
 
 export default function AppRoutes() {
   return (
-    <ProtectedRoute>
+    <>
       <OfflineBanner />
       <Routes>
         <Route path="/sign-in" element={<SignInPage />} />
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<RoleBasedHome />} />
-          <Route
-            path="/admin/builder"
-            element={
-              <AdminRoute>
-                <AdminBuilder />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/worker/forms"
-            element={
-              <WorkerRoute>
-                <FormFillingPage />
-              </WorkerRoute>
-            }
-          />
-          <Route
-            path="/reviewer/dashboard"
-            element={
-              <ReviewerRoute>
-                <ReviewerDashboard />
-              </ReviewerRoute>
-            }
-          />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<RoleBasedHome />} />
+            <Route path="/admin/builder" element={<AdminRoute />}>
+              <Route index element={<AdminBuilder />} />
+            </Route>
+            <Route path="/worker/forms" element={<WorkerRoute />}>
+              <Route index element={<FormFillingPage />} />
+            </Route>
+            <Route path="/reviewer/dashboard" element={<ReviewerRoute />}>
+              <Route index element={<ReviewerDashboard />} />
+            </Route>
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
         </Route>
       </Routes>
-    </ProtectedRoute>
+    </>
   );
 }

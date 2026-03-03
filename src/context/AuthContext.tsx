@@ -8,6 +8,8 @@ export interface AuthState {
   userId: string | null;
   role: UserRole | null;
   orgId: string | null;
+  userName: string | null;
+  userImageUrl: string | null;
 }
 
 interface RoleState {
@@ -24,6 +26,8 @@ const AuthContext = createContext<AuthState>({
   userId: null,
   role: null,
   orgId: null,
+  userName: null,
+  userImageUrl: null,
 });
 
 export function useAuth(): AuthState {
@@ -54,6 +58,8 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     userId: 'dev-user-123',
     role: 'admin',
     orgId: 'dev-org-123',
+    userName: 'Dev User',
+    userImageUrl: null,
   };
 
   return (

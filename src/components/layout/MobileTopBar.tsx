@@ -1,9 +1,12 @@
 import { useLocation } from "react-router";
 import { useUserIdentity, UserAvatar } from "./NavItem";
+import { useClerk } from "@clerk/clerk-react";
+import { isDevModeWithoutCredentials } from "@/context/AuthContext";
 
 export default function MobileTopBar() {
   const { pathname } = useLocation();
   const user = useUserIdentity();
+  const { signOut } = useClerk();
 
   // Derive section name from pathname
   const getSectionName = (path: string): string => {
@@ -18,7 +21,16 @@ export default function MobileTopBar() {
   return (
     <header className="md:hidden border-b bg-background px-4 h-12 flex items-center justify-between shrink-0">
       <span className="font-semibold text-sm">{sectionName}</span>
-      <UserAvatar imageUrl={user.imageUrl} name={user.name} size="sm" />
+      {!isDevModeWithoutCredentials ? (
+        <button
+          onClick={() => signOut({ redirectUrl: "/sign-in" })}
+          title="Sign out"
+        >
+          <UserAvatar imageUrl={user.imageUrl} name={user.name} size="sm" />
+        </button>
+      ) : (
+        <UserAvatar imageUrl={user.imageUrl} name={user.name} size="sm" />
+      )}
     </header>
   );
 }

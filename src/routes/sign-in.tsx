@@ -1,17 +1,22 @@
-import { SignIn, useUser } from "@clerk/clerk-react";
+import { SignIn } from "@clerk/clerk-react";
 import { useEffect } from "react";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
+import { useAuth, isDevModeWithoutCredentials } from "@/context/AuthContext";
 
 export default function SignInPage() {
-  const { isSignedIn } = useUser();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to role-based dashboard if already signed in
-    if (isSignedIn) {
+    if (isAuthenticated) {
       navigate("/", { replace: true });
     }
-  }, [isSignedIn, navigate]);
+  }, [isAuthenticated, navigate]);
+
+  // In dev mode, redirect immediately (mock is always authenticated)
+  if (isDevModeWithoutCredentials) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -21,8 +26,7 @@ export default function SignInPage() {
           <p className="text-muted-foreground mt-2">Sign in to continue</p>
         </div>
         <SignIn
-          afterSignInUrl="/"
-          signUpUrl="/sign-up"
+          fallbackRedirectUrl="/"
           routing="path"
           path="/sign-in"
         />

@@ -43,11 +43,11 @@ export function WorkerStatusList({ orgId, userId }: WorkerStatusListProps) {
   const prevSubmissionsRef = useRef<Submission[] | undefined>(undefined);
   const animationTriggerRef = useRef<string | null>(null);
 
-  // Query worker's submissions - Convex provides real-time updates
-  const submissions = useQuery(api.submissions.listWorkerSubmissions, {
-    orgId,
-    userId,
-  });
+  // Query worker's submissions - skip if missing args
+  const submissions = useQuery(
+    api.submissions.listWorkerSubmissions,
+    (orgId && userId) ? { orgId, userId } : 'skip'
+  );
 
   // Detect status changes and trigger animation
   useEffect(() => {

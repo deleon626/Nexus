@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { useAuth as useClerkAuth } from '@clerk/clerk-react';
+import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
 import { AuthContext, UserRole, AuthState } from './AuthContext';
 
 const initialAuthState: AuthState = {
@@ -8,10 +8,13 @@ const initialAuthState: AuthState = {
   userId: null,
   role: null,
   orgId: null,
+  userName: null,
+  userImageUrl: null,
 };
 
 export function ClerkAuthProvider({ children }: { children: ReactNode }) {
   const { isLoaded, userId, sessionClaims } = useClerkAuth();
+  const { user } = useUser();
   const [authState, setAuthState] = useState<AuthState>(initialAuthState);
 
   useEffect(() => {
@@ -22,19 +25,16 @@ export function ClerkAuthProvider({ children }: { children: ReactNode }) {
 
     if (!userId) {
       setAuthState({
-        isAuthenticated: false,
+        ...initialAuthState,
         isLoading: false,
-        userId: null,
-        role: null,
-        orgId: null,
       });
       return;
     }
 
-    // Extract role and orgId from Clerk session claims
-    const claims = sessionClaims as { unsafeMetadata?: { role?: UserRole }; orgId?: string };
-    const role = claims?.unsafeMetadata?.role;
-    const orgId = claims?.orgId;
+    // Extract role from user's unsafeMetadata and orgId from session claims
+    const metadata = user?.unsafeMetadata as { role?: UserRole } | undefined;
+    const role = metadata?.role;
+    const orgId = (sessionClaims as { orgId?: string })?.orgId;
 
     setAuthState({
       isAuthenticated: true,
@@ -42,8 +42,10 @@ export function ClerkAuthProvider({ children }: { children: ReactNode }) {
       userId,
       role: role || null,
       orgId: orgId || null,
+      userName: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || null,
+      userImageUrl: user?.imageUrl ?? null,
     });
-  }, [isLoaded, userId, sessionClaims]);
+  }, [isLoaded, userId, sessionClaims, user?.firstName, user?.lastName, user?.imageUrl]);
 
   return (
     <AuthContext.Provider value={authState}>

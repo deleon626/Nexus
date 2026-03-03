@@ -27,7 +27,7 @@ export function useTemplateSync() {
 
   const published = useQuery(
     api.formTemplates.listPublishedTemplates,
-    isOnline && orgId ? { orgId } : 'skip'
+    (isOnline && orgId) ? { orgId } : 'skip'
   );
 
   useEffect(() => {

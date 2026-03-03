@@ -1,12 +1,12 @@
 # Roadmap: Nexus
 
-**Current Milestone:** Planning v1.1
+**Current Milestone:** v1.1 Fix & Polish QC Forms Builder
 **Last Shipped:** v1.0 MVP (2026-03-03)
 
 ## Milestones
 
 - ✅ **v1.0 MVP** — 9 phases, 36 plans (shipped 2026-03-03) — [Archive](./milestones/v1.0-ROADMAP.md)
-- 📋 **v1.1** — TBD (planning not started)
+- 📋 **v1.1** — 1 phase (planning complete, not started)
 
 ## v1.0 MVP Summary
 
@@ -43,9 +43,34 @@ See [v1.0-ROADMAP.md](./milestones/v1.0-ROADMAP.md) for full details.
 
 ---
 
-## v1.1 Planning
+## v1.1 Fix & Polish QC Forms Builder
 
-Run `/gsd:new-milestone` to start planning the next milestone.
+**Goal:** Polish the form builder and app navigation to production-ready quality for the anchor client demo.
+
+**Requirements covered:** BILD-01, BILD-02, BILD-03, NAV-01
+
+### Phases
+
+- [ ] **Phase 08: Form Builder & Nav Polish** - Inline field editing, auto-focus on add, quick delete, and visible sign-out on mobile
+
+### Phase Details
+
+### Phase 08: Form Builder & Nav Polish
+**Goal**: The form builder canvas is fast and self-evident to use, and all users can sign out from mobile without hunting for it
+**Depends on**: v1.0 complete (phases 01-07)
+**Requirements**: BILD-01, BILD-02, BILD-03, NAV-01
+**Success Criteria** (what must be TRUE):
+  1. Admin can click any field label in the canvas to edit it inline without opening the sidebar
+  2. After dragging a field type onto the canvas, the new field is selected and its label input is focused so the admin can type the name immediately
+  3. Admin can delete a field directly from its canvas row using a visible trash/delete icon — no sidebar needed
+  4. On mobile, a clearly labeled "Sign out" option is visible in the navigation without requiring the user to tap an avatar or discover a hidden menu
+**Plans**: TBD
+
+### Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 08. Form Builder & Nav Polish | 0/TBD | Not started | - |
 
 ---
 *Last updated: 2026-03-03*

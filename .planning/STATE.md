@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Fix & Polish QC Forms Builder
-current_phase: —
+current_phase: 08
 current_plan: —
-status: defining requirements
+status: roadmap complete, ready to plan phase
 last_updated: "2026-03-03T00:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -24,20 +24,32 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-03 — Milestone v1.1 started
+Phase: 08 — Form Builder & Nav Polish
+Plan: Not started
+Status: Roadmap complete — ready to plan phase
+Last activity: 2026-03-03 — v1.1 roadmap created (1 phase, 4 requirements)
 
-## Position
+## Progress Bar
 
-**Milestone:** v1.0 milestone
-**Current Phase:** 07
-**Current Plan:** Not started
-**Total Plans in Phase:** 5
-**Status:** v1.0 milestone complete
+```
+v1.1 Progress: [░░░░░░░░░░] 0/1 phases complete
+Phase 08:      [░░░░░░░░░░] 0/TBD plans complete
+```
 
-## Progress
+## v1.1 Phase Map
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 08 | Form Builder & Nav Polish | BILD-01, BILD-02, BILD-03, NAV-01 | Not started |
+
+## v1.0 Position (Reference)
+
+**Milestone:** v1.0 milestone — SHIPPED 2026-03-03
+**Phases completed:** 9 phases (01-07 including 04.1 and 04.2)
+**Plans completed:** 36 plans
+**Commits:** 198
+
+### v1.0 Progress
 
 | Phase | Plans | Complete |
 | ----- | ----- | -------- |
@@ -46,10 +58,14 @@ Last activity: 2026-03-03 — Milestone v1.1 started
 | 03-form-filling | 9 | 9/9 (100%) |
 | 04-form-review | 5 | 5/5 (100%) |
 | 04.1-navbar-navigation-between-sections | 2 | 2/2 (100%) |
+| 04.2-deploy-convex | 2 | 2/2 (100%) |
 | 05-pwa-polish-production | 5 | 5/5 (100%) |
+| 06-fix-submission-pipeline | 1 | 1/1 (100%) |
+| 07-fix-voice-orgid-template-sync | 1 | 1/1 (100%) |
 
 ## Session Log
 
+- 2026-03-03: v1.1 roadmap created — Phase 08 (Form Builder & Nav Polish) covering BILD-01, BILD-02, BILD-03, NAV-01
 - 2026-03-03: Completed 05-05 (PWA Deployment to Coolify)
   - Created Dockerfile with multi-stage build (node build + nginx serve)
   - Created nginx.conf with SPA routing, health endpoint, CSP/Permissions-Policy headers
@@ -73,99 +89,10 @@ Last activity: 2026-03-03 — Milestone v1.1 started
   - Created BottomTabBar: mobile fixed bottom tabs with icon + label
   - Created MobileTopBar: mobile slim top bar with page title and user avatar
   - Created AppLayout: main shell with Outlet, responsive layout, SafeSyncIndicator wrapper
-- 2026-02-27: Completed 04-review-workflow-05 (Worker Status View)
-  - Created WorkerStatusList component with real-time Convex query
-  - StatusBadge integration for status display
-  - Rejection reason display for rejected submissions
-  - Pulse animation on status change via useRef + useEffect
-  - Integrated into FormFillingPage above form list
-- 2026-02-27: Completed 04-review-workflow-01 (Review Backend)
-  - Added submissions table to Convex schema with 15 fields and 3 indexes
-  - Created convex/submissions.ts with 3 queries and 2 mutations
-  - listPendingSubmissions query for reviewer dashboard (REVW-01)
-  - getSubmissionDetails query for submission detail view
-  - approveSubmission mutation with optional comment (REVW-03)
-  - rejectSubmission mutation with required comment (REVW-03)
-  - listWorkerSubmissions query for worker status view (REVW-04)
-- 2026-02-27: Completed 03-form-filling-09 (Main Page Flow Orchestration)
-  - Created FormFillingPage component with state-based flow orchestration
-  - Page states: listing, batchPrompt, draftPicker, filling, confirming, success
-  - Flow handlers manage transitions between all stages
-  - Submission handling: saves to db.submissions, adds to sync queue, deletes drafts
-  - "Submit & Start New" enables rapid batch processing
-  - Integrates all form filling components (FormList, BatchNumberPrompt, etc.)
-  - Updated /worker/forms route to use FormFillingPage
-- 2026-02-27: Completed 03-form-filling-08 (Form Selection UX)
-  - Created FormList component with real-time search filtering
-  - Recent forms (3 most recent) shown at top, sorted by last filled
-  - Draft badge indicator on forms with in-progress drafts
-  - Offline indicator when showing cached forms only
-  - Empty state with "No forms published yet" message
-  - localStorage integration for tracking recent forms
-  - Dexie queries for templates and drafts
-  - Created BatchNumberPrompt modal for batch entry before form filling
-  - Created DraftPickerModal for resume or start new selection
-  - Created SuccessScreen with animated checkmark
-  - Created SubmissionSummary for pre-submit confirmation
-- 2026-02-26: Completed 03-form-filling-07 (Form Filling Container)
-  - Created ProgressBar component with X/Y fields display and visual bar
-  - Created FormFiller main container with React Hook Form integration
-  - Dynamic Zod schema builder handles all field types with validation rules
-  - Field rendering uses existing component registry from Phase 2
-  - Progress bar tracks required-field completion percentage
-  - Error summary shows field labels with scroll-to-first-error behavior
-  - Submit and Submit & Start New buttons with validation gating
-  - Single page scrolling layout per CONTEXT.md
-  - Voice input gated by online status for text/number/decimal/textarea fields
-- 2026-02-26: Completed 03-form-filling-06 (Form Field Components)
-  - Created FormFieldWrapper component with label, asterisk, help text, error display
-  - Created VoiceInputButton component with mic icon, recording state, online gating
-  - Created useVoiceInput hook with MediaRecorder API for audio capture
-  - Created TextFieldFill, NumberFieldFill, DecimalFieldFill with voice input
-  - Created PhotoFieldFill with camera capture and thumbnail display
-  - Created PassFailFieldFill with green/red side-by-side buttons
-  - Created SelectFieldFill, CheckboxFieldFill, DateFieldFill, TimeFieldFill, TextareaFieldFill
-  - All components use useController for React Hook Form integration
-  - Validation errors appear on blur (mode: 'onBlur')
-  - Barrel export index for easy importing
-- 2026-02-27: Completed 03-form-filling-05 (Voice Input Hook)
-  - Created useVoiceInput hook with MediaRecorder API for audio capture
-  - Integrated useOnline hook for online-only gating
-  - Added Convex voice transcription API call (transcribeAudio mutation)
-  - Supports Indonesian (id) and English (en) language options
-  - Error handling for microphone permission, offline state, and transcription failures
-  - Auto-stop after 30 seconds max duration
-  - onTranscript callback for direct field population per CONTEXT.md
-  - Cleanup effect stops recording on unmount
-- 2026-02-27: Completed 03-form-filling-02 (Auto-Save and Progress Hooks)
-  - Created useFormDraft hook with 30-second auto-save interval
-  - Draft names: "Form Name - Batch 123 - Feb 27" using date-fns format
-  - Draft management: saveDraft(), deleteDraft(), getDraftsByForm()
-  - Created useFormProgress hook with required-field completion calculation
-  - Progress display: "X/Y fields filled" format
-- 2026-02-27: Completed 03-form-filling-03 (Photo Capture Hook)
-  - Added compressorjs v1.2.1 dependency
-  - Created usePhotoCapture hook with getUserMedia camera access
-  - Compressor.js integration: quality 0.6, maxWidth 1920, maxHeight 1920
-  - Base64 output for offline storage
-  - Error handling for permission denied, no camera, camera in use
-- 2026-02-27: Completed 03-form-filling-01 (Draft Persistence Layer)
-  - Added Draft type to db/types.ts
-  - Added drafts table to Dexie with version 2 schema
-  - Created formFilling types and constants
-  - Created cleanupExpiredDrafts utility
-- 2026-02-27: Completed 03-form-filling-04 (Whisper Transcription Backend)
-  - Added openai npm package for Whisper API integration
-  - Created transcribeAudio mutation in convex/voice.ts
-  - Accepts base64 audio data and language parameter ('id' or 'en')
-  - Uses OpenAI Whisper API (whisper-1 model) for transcription
-  - Supports Indonesian and English languages
-  - Includes error handling for common API errors
-  - Server-side execution keeps API key secure
-- 2026-02-26: STATE.md regenerated by /gsd:health --repair
 
 ## Decisions
 
+- 2026-03-03: [v1.1 Roadmap] All 4 v1.1 requirements fit in one phase — they are small, cohesive UX fixes to form builder canvas and mobile nav
 - 2026-02-27: [Phase 03-Plan 08] localStorage for recent forms tracking instead of Dexie - simpler API, survives IndexedDB clears
 - 2026-02-27: [Phase 03-Plan 08] Store up to 10 recent forms (display top 3) - balance between utility and storage
 - 2026-02-27: [Phase 03-Plan 08] Relative time formatting for drafts (e.g., "5 minutes ago") - more human-readable than timestamps
@@ -178,28 +105,9 @@ Last activity: 2026-03-03 — Milestone v1.1 started
 - 2026-02-27: [Phase 03-Plan 03] Use facingMode: 'environment' for rear camera default - QC photos require product/equipment capture, not selfies
 - 2026-02-27: Separate drafts table over reusing submissions table for different lifecycle, queries, and retention policy
 - 2026-02-27: Use millisecond timestamp (expiresAt: number) for efficient Dexie where().below() queries
-- [Phase 03-form-filling]: Separate drafts table over reusing submissions table for different lifecycle, queries, and retention policy
-- [Phase 03-form-filling]: Server-side Whisper API via Convex mutations keeps API key secure
-- [Phase 03-form-filling]: Base64 audio data transmission for cross-browser compatibility
-- [Phase 03-form-filling]: Use whisper-1 model for Indonesian and English transcription
-- [Phase 03-form-filling]: Created placeholder useVoiceInput hook with MediaRecorder API — Plan 05 incomplete - Rule 2 auto-fix for missing critical functionality
-- [Phase 04-01]: Photos stored as base64 strings per Phase 3 pattern, not Convex storage IDs
-- [Phase 04-01]: Reject comment required via v.string() validator, approve comment optional
-- [Phase 04-02]: Added status-specific badge variants (pending/approved/rejected) with yellow/green/red colors per CONTEXT.md
-- [Phase 04-02]: Dialog includes close button with X icon from lucide-react for consistent UX
-- [Phase 04-03]: Skip pattern (orgId ? ... : 'skip') prevents Convex query before auth ready
-- [Phase 04-review-workflow-05]: Status change detection via useRef + useEffect for pulse animation
-- [Phase 04-review-workflow-05]: WorkerStatusList shown only in 'listing' state to avoid interference with form filling flow
-- [Phase 04-review-workflow-04]: Reject button disabled until comment entered per CONTEXT.md
-- [Phase 04-review-workflow-04]: Photos open in new tab for full-size viewing (simple pattern)
-- [Phase 04-review-workflow-04]: Comment optional for approve, required for reject
 - [Phase 05]: Install prompt only shows on manual trigger from Settings (per CONTEXT: never auto-prompt)
 - [Phase 05]: Dismissal stored in localStorage to prevent re-prompting (per CONTEXT: never re-prompt)
 - [Phase 05]: Settings page accessible to all roles (no role gating)
-- [Phase 05]: Install button triggers banner, banner triggers native browser prompt
-- [Phase 05-pwa-polish-production]: Use navigator.storage.estimate() API for cross-browser quota monitoring
-- [Phase 05-pwa-polish-production]: Format bytes with 1024 base for consistency with storage industry standards
-- [Phase 05-pwa-polish-production]: Track cleanup state with ref to avoid redundant cleanup calls during same warning state
 - [Phase 05-pwa-polish-production P05]: Multi-stage Docker build for minimal final image (nginx:alpine ~10MB)
 - [Phase 05-pwa-polish-production P05]: Health endpoint at /health returns JSON for Coolify monitoring
 - [Phase 05-pwa-polish-production P05]: SPA routing via nginx try_files with index.html fallback
@@ -214,6 +122,7 @@ Last activity: 2026-03-03 — Milestone v1.1 started
 - Phase 4.1 navbar navigation inserted between Phase 4 and Phase 5: responsive nav shell (sidebar + bottom tabs)
 - Phase 4.1 Plan 01 completed: layout shell components created, ready for Plan 02 (routing integration)
 - Phase 4.2 deploy convex in /coolify instance for this project inserted after Phase 4.1: deploy convex in /coolify instance for this project (URGENT)
+- v1.1 Phase 08 added: Form Builder & Nav Polish (4 requirements: BILD-01, BILD-02, BILD-03, NAV-01)
 
 ### Deployment URLs
 
@@ -238,7 +147,6 @@ None
 | 03-02 | 2 | 4 | ~180s | 2026-02-27 |
 | 03-01 | 3 | 5 | ~150s | 2026-02-27 |
 | 03-09 | 2 | 2 | 120s | 2026-02-27 |
-| Phase 03-form-filling | 9 | 9/9 (100%) | | |
 | Phase 04 P01 | 5min | 2 tasks | 2 files |
 | Phase 04 P02 | 106s | 1 tasks | 5 files |
 | Phase 04 P03 | 2min | 2 tasks | 4 files |

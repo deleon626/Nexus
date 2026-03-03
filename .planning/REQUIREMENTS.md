@@ -64,10 +64,10 @@ Fix & Polish QC Forms Builder — anchor client readiness.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BILD-01 | Phase 8 | Pending |
-| BILD-02 | Phase 8 | Pending |
-| BILD-03 | Phase 8 | Pending |
-| NAV-01 | Phase 8 | Pending |
+| BILD-01 | Phase 08 — Form Builder & Nav Polish | Pending |
+| BILD-02 | Phase 08 — Form Builder & Nav Polish | Pending |
+| BILD-03 | Phase 08 — Form Builder & Nav Polish | Pending |
+| NAV-01 | Phase 08 — Form Builder & Nav Polish | Pending |
 
 **Coverage:**
 - v1.1 requirements: 4 total
@@ -152,4 +152,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-03-03 after v1.1 milestone started*
+*Last updated: 2026-03-03 after v1.1 roadmap created*

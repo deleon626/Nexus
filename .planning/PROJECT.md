@@ -6,7 +6,7 @@ A mobile-first PWA that replaces paper-based QC forms with digital forms filled 
 
 Multi-tenant SaaS — multiple companies share the same deployment with data isolation.
 
-**Current State:** v1.0 MVP shipped (Mar 2026). 9 phases, 36 plans, 198 commits. Deployed to Coolify staging.
+**Current State:** v1.1 in progress (Mar 2026). v1.0 MVP shipped — 9 phases, 36 plans, 198 commits. Deployed to Coolify staging.
 
 ## Core Value
 
@@ -57,7 +57,13 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 
 ### Active
 
-(None — all v1.0 requirements shipped)
+<!-- v1.1: Fix & Polish QC Forms Builder -->
+
+- [ ] Admin can rename field labels inline in the form builder
+- [ ] Admin can preview the form (worker view) before publishing
+- [ ] User can access logout from any authenticated page
+- [ ] Form builder field editing is clear and discoverable
+- [ ] App-wide UX is consistent and polished for anchor client demo
 
 ### Out of Scope
 
@@ -105,5 +111,16 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 | Multi-stage Docker build | Minimal final image (nginx:alpine ~10MB) | ✓ Working — deployed to Coolify |
 | CSP headers for Convex/Clerk | Security headers allow necessary domains | ✓ Working — staging verified |
 
+## Current Milestone: v1.1 Fix & Polish QC Forms Builder
+
+**Goal:** Polish the form builder and app UX to production-ready quality for the anchor client demo.
+
+**Target features:**
+- Inline field rename in form builder
+- Form preview (worker perspective) before publishing
+- Logout button accessible from all authenticated pages
+- Form builder UX improvements (discoverability, editing, validation feedback)
+- App-wide polish pass
+
 ---
-*Last updated: 2026-03-03 after v1.0 milestone*
+*Last updated: 2026-03-03 after v1.1 milestone started*

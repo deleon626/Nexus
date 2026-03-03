@@ -20,7 +20,7 @@ interface FormBuilderState {
   isDirty: boolean;
 
   // Actions
-  addField: (type: FormField['type']) => void;
+  addField: (type: FormField['type']) => string;
   removeField: (id: string) => void;
   updateField: (id: string, updates: Partial<FormField>) => void;
   selectField: (id: string | null) => void;
@@ -41,10 +41,11 @@ export const useFormBuilderStore = create<FormBuilderState>()(
       templateName: '',
       isDirty: false,
 
-      // Add a new field of the specified type
-      addField: (type) => set((state) => {
+      // Add a new field of the specified type; returns the new field ID
+      addField: (type) => {
+        const id = uuidv4();
         const baseField = {
-          id: uuidv4(),
+          id,
           type,
           label: `New ${type} field`,
           required: false,
@@ -101,11 +102,14 @@ export const useFormBuilderStore = create<FormBuilderState>()(
             newField = baseField;
         }
 
-        return {
+        set((state) => ({
           fields: [...state.fields, newField],
+          selectedFieldId: id,
           isDirty: true,
-        };
-      }),
+        }));
+
+        return id;
+      },
 
       // Remove a field by ID
       removeField: (id) => set((state) => ({

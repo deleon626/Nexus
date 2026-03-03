@@ -14,6 +14,7 @@ import { useFormBuilderStore } from '../../features/formBuilder/store/formBuilde
 import { FieldSidebar } from '../../features/formBuilder/components/FieldSidebar';
 import { FormBuilderCanvas } from '../../features/formBuilder/components/FormBuilderCanvas';
 import { FieldEditor } from '../../features/formBuilder/components/FieldEditor';
+import { FormPreview } from '../../features/formBuilder/components/FormPreview';
 import { FormTemplatesList } from '../../features/formBuilder/components/FormTemplatesList';
 import { useTemplatePersistence } from '../../features/formBuilder/hooks/useTemplatePersistence';
 import { useAuth } from '../../context/AuthContext';
@@ -52,6 +53,7 @@ function BuilderContent() {
 
   const [showPreview, setShowPreview] = React.useState(false);
   const [showTemplates, setShowTemplates] = React.useState(false);
+  const [previewValues, setPreviewValues] = React.useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
@@ -243,16 +245,17 @@ function BuilderContent() {
       {/* Main Content */}
       <main className="flex-1 overflow-hidden">
         {showPreview ? (
-          // Preview mode - simple placeholder for now
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold mb-2">Form Preview</h2>
-              <p className="text-muted-foreground mb-4">
-                Preview mode will render the actual form for workers to fill out.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                (Implemented in Phase 3)
-              </p>
+          // Preview mode - renders actual form fields
+          <div className="h-full overflow-y-auto p-6">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-lg font-semibold mb-4">{templateName || 'Untitled Form'}</h2>
+              <FormPreview
+                fields={fields}
+                values={previewValues}
+                onChange={(fieldId, value) =>
+                  setPreviewValues((prev) => ({ ...prev, [fieldId]: value }))
+                }
+              />
             </div>
           </div>
         ) : showTemplates ? (

@@ -8,7 +8,7 @@
  * for proper rendering (per research Pitfall 1).
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -21,14 +21,12 @@ import {
   DragStartEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useFormBuilderStore } from '../store/formBuilderStore';
 import { SortableField } from './SortableField';
-import type { FormField } from '../types';
 
 interface FormBuilderCanvasProps {
   /** Optional callback when a field is selected */
@@ -36,8 +34,17 @@ interface FormBuilderCanvasProps {
 }
 
 export function FormBuilderCanvas({ onFieldSelect }: FormBuilderCanvasProps) {
-  const { fields, reorderFields, selectField, selectedFieldId } = useFormBuilderStore();
+  const { fields, reorderFields, selectField, selectedFieldId, removeField, updateField } =
+    useFormBuilderStore();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+
+  // Map of fieldId → DOM node for scroll targeting
+  const fieldRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Track previous field count to detect newly-added fields
+  const prevFieldsLength = useRef(fields.length);
 
   // Configure sensors for drag-and-drop
   const sensors = useSensors(
@@ -52,6 +59,27 @@ export function FormBuilderCanvas({ onFieldSelect }: FormBuilderCanvasProps) {
     () => fields.find((f) => f.id === activeId) || null,
     [fields, activeId]
   );
+
+  // Detect newly added fields (length increased by 1)
+  useEffect(() => {
+    if (fields.length > prevFieldsLength.current) {
+      const newField = fields[fields.length - 1];
+      setLastAddedId(newField.id);
+    }
+    prevFieldsLength.current = fields.length;
+  }, [fields]);
+
+  // Auto-scroll and auto-enter edit mode for newly added field
+  useEffect(() => {
+    if (!lastAddedId) return;
+    const node = fieldRefs.current.get(lastAddedId);
+    if (node) {
+      node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    // Enter inline edit mode for the new field label
+    setEditingFieldId(lastAddedId);
+    setLastAddedId(null);
+  }, [lastAddedId, fields]);
 
   // Handle drag start - set active ID
   const handleDragStart = (event: DragStartEvent) => {
@@ -76,6 +104,15 @@ export function FormBuilderCanvas({ onFieldSelect }: FormBuilderCanvasProps) {
     selectField(id);
     onFieldSelect?.(id);
   };
+
+  // Inline edit callbacks
+  const handleStartEdit = (id: string) => setEditingFieldId(id);
+  const handleCancelEdit = () => setEditingFieldId(null);
+  const handleLabelChange = (id: string, label: string) => {
+    updateField(id, { label });
+    setEditingFieldId(null);
+  };
+  const handleDelete = (id: string) => removeField(id);
 
   // Empty state when no fields
   if (fields.length === 0) {
@@ -106,6 +143,15 @@ export function FormBuilderCanvas({ onFieldSelect }: FormBuilderCanvasProps) {
               field={field}
               onSelect={handleFieldSelect}
               isSelected={selectedFieldId === field.id}
+              isEditing={editingFieldId === field.id}
+              onStartEdit={handleStartEdit}
+              onCancelEdit={handleCancelEdit}
+              onLabelChange={handleLabelChange}
+              onDelete={handleDelete}
+              fieldRef={(node) => {
+                if (node) fieldRefs.current.set(field.id, node);
+                else fieldRefs.current.delete(field.id);
+              }}
             />
           ))}
         </div>

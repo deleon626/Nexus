@@ -46,6 +46,36 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **NAV-SHELL**: Persistent responsive navbar (desktop sidebar + mobile bottom tabs) filtered by role
 - [x] **NAV-ROUTING**: Nested route structure with role-based section access
 
+## v1.1 Requirements
+
+Fix & Polish QC Forms Builder — anchor client readiness.
+
+### Form Builder (BILD)
+
+- [ ] **BILD-01**: Admin can edit a field label by clicking on it directly in the canvas (inline edit)
+- [ ] **BILD-02**: When a field is added, it is auto-selected and the label input is focused for immediate naming
+- [ ] **BILD-03**: Admin can delete a field from the canvas row via a visible icon (no need to open sidebar)
+
+### Navigation (NAV)
+
+- [ ] **NAV-01**: User can find a clearly labeled "Sign out" action on mobile (not hidden behind avatar tap)
+
+## Traceability — v1.1
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| BILD-01 | Phase 8 | Pending |
+| BILD-02 | Phase 8 | Pending |
+| BILD-03 | Phase 8 | Pending |
+| NAV-01 | Phase 8 | Pending |
+
+**Coverage:**
+- v1.1 requirements: 4 total
+- Mapped to phases: 4
+- Unmapped: 0 ✓
+
+---
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -122,4 +152,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after roadmap creation*
+*Last updated: 2026-03-03 after v1.1 milestone started*

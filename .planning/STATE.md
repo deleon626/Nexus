@@ -23,22 +23,22 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 08 — Form Builder & Nav Polish
-Plan: 08-01 (next to execute)
-Status: Phase planned — 2 plans in 1 wave, ready to execute
-Last activity: 2026-03-03 — Phase 08 planned (2 plans, wave 1 parallel)
+Plan: 08-02 (next to execute)
+Status: 08-01 complete — 1/2 plans done in phase 08
+Last activity: 2026-03-03 — Completed 08-01 (inline edit, delete icon, auto-focus on add)
 
 ## Progress Bar
 
 ```
 v1.1 Progress: [░░░░░░░░░░] 0/1 phases complete
-Phase 08:      [░░░░░░░░░░] 0/2 plans complete
+Phase 08:      [█████░░░░░] 1/2 plans complete
 ```
 
 ## v1.1 Phase Map
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 08 | Form Builder & Nav Polish | BILD-01, BILD-02, BILD-03, NAV-01 | Not started |
+| 08 | Form Builder & Nav Polish | BILD-01, BILD-02, BILD-03, NAV-01 | In progress (1/2) |
 
 ## v1.0 Position (Reference)
 
@@ -63,6 +63,12 @@ Phase 08:      [░░░░░░░░░░] 0/2 plans complete
 
 ## Session Log
 
+- 2026-03-03: Completed 08-01 (Form Builder UX — Inline Edit, Delete, Auto-Focus)
+  - Inline label editing via double-click with Enter/Escape handling
+  - Trash2 delete icon visible on every field row
+  - Auto-scroll and auto-focus-edit on newly added fields
+  - addField store action now returns new field ID
+  - dnd-kit listeners moved to grip handle only
 - 2026-03-03: v1.1 roadmap created — Phase 08 (Form Builder & Nav Polish) covering BILD-01, BILD-02, BILD-03, NAV-01
 - 2026-03-03: Completed 05-05 (PWA Deployment to Coolify)
   - Created Dockerfile with multi-stage build (node build + nginx serve)
@@ -158,6 +164,7 @@ None
 | Phase 05-pwa-polish-production P02 | 105 | 2 tasks | 3 files |
 | Phase 05-pwa-polish-production P03 | 25276 | 4 tasks | 3 files |
 | Phase 05-pwa-polish-production P04 | 180 | 2 tasks | 2 files |
+| Phase 08 P01 | 106s | 2 tasks | 3 files | 2026-03-03 |
 | Phase 08 P02 | 90 | 1 tasks | 1 files |
 
 ## Requirements Completed
@@ -169,3 +176,6 @@ None
 - REVW-01: Reviewer dashboard query for pending submissions complete
 - REVW-03: Approve/reject mutations with comments complete
 - REVW-04: Worker status query for their own submissions complete
+- BILD-01: Inline label editing on form builder canvas complete
+- BILD-02: Delete icon per field row on form builder canvas complete
+- BILD-03: Auto-focus/scroll on new field add complete

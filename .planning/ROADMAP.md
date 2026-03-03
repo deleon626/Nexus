@@ -51,7 +51,7 @@ See [v1.0-ROADMAP.md](./milestones/v1.0-ROADMAP.md) for full details.
 
 ### Phases
 
-- [ ] **Phase 08: Form Builder & Nav Polish** - Inline field editing, auto-focus on add, quick delete, and visible sign-out on mobile
+- [ ] **Phase 08: Form Builder & Nav Polish** - Inline field editing, auto-focus on add, quick delete, and visible sign-out on mobile (1/2 plans done)
 
 ### Phase Details
 
@@ -70,7 +70,7 @@ See [v1.0-ROADMAP.md](./milestones/v1.0-ROADMAP.md) for full details.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 08. Form Builder & Nav Polish | 0/2 | Planned | - |
+| 08. Form Builder & Nav Polish | 1/2 | In Progress | - |
 
 ---
 *Last updated: 2026-03-03*

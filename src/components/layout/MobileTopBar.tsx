@@ -24,9 +24,10 @@ export default function MobileTopBar() {
       {!isDevModeWithoutCredentials ? (
         <button
           onClick={() => signOut({ redirectUrl: "/sign-in" })}
-          title="Sign out"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <UserAvatar imageUrl={user.imageUrl} name={user.name} size="sm" />
+          <span>Sign out</span>
         </button>
       ) : (
         <UserAvatar imageUrl={user.imageUrl} name={user.name} size="sm" />

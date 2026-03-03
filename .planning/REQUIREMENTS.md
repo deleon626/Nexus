@@ -58,7 +58,7 @@ Fix & Polish QC Forms Builder — anchor client readiness.
 
 ### Navigation (NAV)
 
-- [ ] **NAV-01**: User can find a clearly labeled "Sign out" action on mobile (not hidden behind avatar tap)
+- [x] **NAV-01**: User can find a clearly labeled "Sign out" action on mobile (not hidden behind avatar tap)
 
 ## Traceability — v1.1
 
@@ -67,7 +67,7 @@ Fix & Polish QC Forms Builder — anchor client readiness.
 | BILD-01 | Phase 08 — Form Builder & Nav Polish | Pending |
 | BILD-02 | Phase 08 — Form Builder & Nav Polish | Pending |
 | BILD-03 | Phase 08 — Form Builder & Nav Polish | Pending |
-| NAV-01 | Phase 08 — Form Builder & Nav Polish | Pending |
+| NAV-01 | Phase 08 — Form Builder & Nav Polish | Complete |
 
 **Coverage:**
 - v1.1 requirements: 4 total

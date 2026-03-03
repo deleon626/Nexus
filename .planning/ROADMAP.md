@@ -64,13 +64,13 @@ See [v1.0-ROADMAP.md](./milestones/v1.0-ROADMAP.md) for full details.
   2. After dragging a field type onto the canvas, the new field is selected and its label input is focused so the admin can type the name immediately
   3. Admin can delete a field directly from its canvas row using a visible trash/delete icon — no sidebar needed
   4. On mobile, a clearly labeled "Sign out" option is visible in the navigation without requiring the user to tap an avatar or discover a hidden menu
-**Plans**: TBD
+**Plans**: 2 (wave 1: parallel)
 
 ### Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 08. Form Builder & Nav Polish | 0/TBD | Not started | - |
+| 08. Form Builder & Nav Polish | 0/2 | Planned | - |
 
 ---
 *Last updated: 2026-03-03*

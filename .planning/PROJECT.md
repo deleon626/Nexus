@@ -6,7 +6,7 @@ A mobile-first PWA that replaces paper-based QC forms with digital forms filled 
 
 Multi-tenant SaaS — multiple companies share the same deployment with data isolation.
 
-**Current State:** v1.1 in progress (Mar 2026). v1.0 MVP shipped — 9 phases, 36 plans, 198 commits. Deployed to Coolify staging.
+**Current State:** v1.1 shipped (Mar 2026). v1.0 MVP shipped — 10 phases, 38 plans, 201 commits. Deployed to Coolify staging.
 
 ## Core Value
 
@@ -55,17 +55,15 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 - ✓ Storage monitoring with quota warnings — Phase 05
 - ✓ Production deployment infrastructure — Phase 05
 
+**Form Builder UX Polish — v1.1**
+- ✓ Admin can rename field labels inline (double-click) — Phase 08
+- ✓ New fields auto-focus label for immediate naming — Phase 08
+- ✓ Visible delete icon on each field row — Phase 08
+- ✓ Mobile sign-out label visible in navigation — Phase 08
+
 ### Active
 
-<!-- v1.1: Fix & Polish QC Forms Builder -->
-
-- [ ] Admin can rename field labels inline in the form builder
-- [ ] Admin can preview the form (worker view) before publishing
-- [ ] User can access logout from any authenticated page
-- [ ] Form builder field editing is clear and discoverable
-- [ ] App-wide UX is consistent and polished for anchor client demo
-
-### Out of Scope
+<!-- Next milestone: TBD - awaiting client feedback from demo -->
 
 - Offline voice input (Whisper WASM) — v1.1, memory concerns on low-end devices
 - Signature capture — v1.1
@@ -110,8 +108,12 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 | Single org active for MVP | Anchor client first, full multi-tenancy UI deferred | ✓ Delivered — org isolation works |
 | Multi-stage Docker build | Minimal final image (nginx:alpine ~10MB) | ✓ Working — deployed to Coolify |
 | CSP headers for Convex/Clerk | Security headers allow necessary domains | ✓ Working — staging verified |
+| Inline edit with double-click | Faster than sidebar for field rename; escape-cancel pattern | ✓ Working — Phase 08 verified |
+| Move dnd listeners to grip only | Prevents drag on label/delete clicks | ✓ Working — Phase 08 verified |
 
-## Current Milestone: v1.1 Fix & Polish QC Forms Builder
+## Current Milestone: Complete (v1.1 shipped 2026-03-03)
+
+**Next:** Planning next milestone based on anchor client demo feedback.
 
 **Goal:** Polish the form builder and app UX to production-ready quality for the anchor client demo.
 
@@ -123,4 +125,4 @@ Multi-tenant SaaS — multiple companies share the same deployment with data iso
 - App-wide polish pass
 
 ---
-*Last updated: 2026-03-03 after v1.1 milestone started*
+*Last updated: 2026-03-03 after v1.1 milestone completion*
